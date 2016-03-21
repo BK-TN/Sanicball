@@ -1,0 +1,34 @@
+New features:
+- added host indicator for the chat and in lobby.
+- added ability to cancel stage select (in case you forgot to change some settings)
+- support for multiple player types, including moderator, donator, and developer. None of these do anything yet, they just change your name color.
+- keybinds are now changeable in the options menu
+- camera sensitivity (both mouse and keyboard) can now be changed
+- the sanic speed music playing at above 200 fasts per hour can now be disabled.
+- the finish line sign is now synced between all players (for absolutely no reason at all)
+- I MIGHT have gotten NAT punching to work. Not sure yet.
+- Two new songs:
+	- Ugly Baby - Pronto
+	- Katamari Damacy - Main Theme
+- you can now properly cancel connecting to a server if it takes too long.
+- 'Visit Devblog' link now visible in the web version.
+- when chatting, your message is now stored in a GUI box with copy+paste and other functionality.
+- the lobby camera now zooms at your character when you hover over the 'character select' box.
+
+Changes:
+- settings now need to be applied before they're active. also, all settings (including AI settings) are now visible for other players.
+- race settings are now saved between races.
+- the chat is now always visible when you hover over it.
+
+Bugs fixed:
+- better support for properly kicking out players using older versions of the game.
+- fixed the pause menu not working when some other bugs were active.
+- fixed the chat box being slightly too tall in the lobby
+- fixed player controls still working while chatting
+- fixed changing between balls in spectator mode being inconsistent
+- fixed the race start countdown playing when joining a server in progress
+- messages that were supposed to only be seen by the server are now only seen by the server. (i.e when a player is kicked for using a different version)
+- fixed clicking 'connect' while already trying to connect breaking everything.
+
+Known bugs:
+- destroying the finish line sign still has a chance of causing major fps drops for some players.

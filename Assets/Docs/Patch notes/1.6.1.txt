@@ -1,0 +1,8 @@
+Changes:
+- The "Ready/Not ready" text on the player list now also shows other things (Like "waiting", "racing", "finished" and "spectating")
+- Some improvements to the water texture - no longer has seams
+- Changed the look and feel of the tire smoke particles
+Bugs fixed:
+- Fixed balls not rolling smoothly on screens at >60hz
+- Added credits for the new characters introduced in v0.6
+- Fixed tire smoke sometimes showing up while in the air (Most notable with AI balls)

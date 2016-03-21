@@ -1,0 +1,8 @@
+New features:
+- Balls now spawn just above the terrain when starting a race. The rows of balls also face the finish line now.
+- added Silvur and Chermy as characters; they don't have any unique stats for now, except for Chermy being small.
+Changes:
+- chat colors are now only shown on names (and not on messages)
+- changed the player list to be opened with TAB and contain some more information about each player.
+Bugs fixed:
+- fixed multiple Big da Cats pushing each other out when spawning
