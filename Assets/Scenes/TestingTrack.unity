@@ -55,7 +55,7 @@ LightmapSettings:
   m_LightmapEditorSettings:
     serializedVersion: 3
     m_Resolution: 2
-    m_BakeResolution: 40
+    m_BakeResolution: 0.01
     m_TextureWidth: 1024
     m_TextureHeight: 1024
     m_AOMaxDistance: 1
@@ -66,7 +66,7 @@ LightmapSettings:
     m_FinalGather: 0
     m_FinalGatherRayCount: 1024
     m_ReflectionCompression: 2
-  m_LightingDataAsset: {fileID: 112000001, guid: b97d83022b9ced6439505767f1fca0bf,
+  m_LightingDataAsset: {fileID: 112000001, guid: 7d28f1e498905c8489f475d3db3c683f,
     type: 2}
   m_RuntimeCPUUsage: 25
 --- !u!196 &4
@@ -151,8 +151,8 @@ Light:
   m_Enabled: 1
   serializedVersion: 6
   m_Type: 1
-  m_Color: {r: 1, g: 0.9487088, b: 0.8088235, a: 1}
-  m_Intensity: 0.6
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Intensity: 0.8
   m_Range: 10
   m_SpotAngle: 30
   m_CookieSize: 10
@@ -203,7 +203,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &436314735
 Transform:
@@ -565,6 +565,10 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22483376, guid: 034bad3d6621fb342a42f46f2c211703, type: 2}
       propertyPath: m_Pivot.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 186816, guid: 034bad3d6621fb342a42f46f2c211703, type: 2}
+      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -950,51 +954,55 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22442568, guid: 448b8e41f02717c4994e9e5e4925dc5c, type: 2}
       propertyPath: m_SizeDelta.x
-      value: 196.54976
+      value: 196.92308
       objectReference: {fileID: 0}
     - target: {fileID: 22442568, guid: 448b8e41f02717c4994e9e5e4925dc5c, type: 2}
       propertyPath: m_SizeDelta.y
-      value: -504.1137
+      value: -505.07123
       objectReference: {fileID: 0}
     - target: {fileID: 22439706, guid: 448b8e41f02717c4994e9e5e4925dc5c, type: 2}
       propertyPath: m_SizeDelta.x
-      value: 214.74881
+      value: 215.15671
       objectReference: {fileID: 0}
     - target: {fileID: 22439706, guid: 448b8e41f02717c4994e9e5e4925dc5c, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 76.43602
+      value: 76.5812
       objectReference: {fileID: 0}
     - target: {fileID: 22410882, guid: 448b8e41f02717c4994e9e5e4925dc5c, type: 2}
       propertyPath: m_SizeDelta.x
-      value: 231.12796
+      value: 231.56696
       objectReference: {fileID: 0}
     - target: {fileID: 22410882, guid: 448b8e41f02717c4994e9e5e4925dc5c, type: 2}
       propertyPath: m_SizeDelta.y
-      value: -504.1137
+      value: -505.07123
       objectReference: {fileID: 0}
     - target: {fileID: 22431058, guid: 448b8e41f02717c4994e9e5e4925dc5c, type: 2}
       propertyPath: m_SizeDelta.x
-      value: 65.51659
+      value: 65.64103
       objectReference: {fileID: 0}
     - target: {fileID: 22431058, guid: 448b8e41f02717c4994e9e5e4925dc5c, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 114.65402
+      value: 114.8718
       objectReference: {fileID: 0}
     - target: {fileID: 22469848, guid: 448b8e41f02717c4994e9e5e4925dc5c, type: 2}
       propertyPath: m_SizeDelta.x
-      value: 283.9052
+      value: 284.44446
       objectReference: {fileID: 0}
     - target: {fileID: 22469848, guid: 448b8e41f02717c4994e9e5e4925dc5c, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 114.65402
+      value: 114.8718
       objectReference: {fileID: 0}
     - target: {fileID: 22475952, guid: 448b8e41f02717c4994e9e5e4925dc5c, type: 2}
       propertyPath: m_SizeDelta.x
-      value: 262.06635
+      value: 262.56412
       objectReference: {fileID: 0}
     - target: {fileID: 22475952, guid: 448b8e41f02717c4994e9e5e4925dc5c, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 76.43602
+      value: 76.5812
+      objectReference: {fileID: 0}
+    - target: {fileID: 162428, guid: 448b8e41f02717c4994e9e5e4925dc5c, type: 2}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 448b8e41f02717c4994e9e5e4925dc5c, type: 2}
@@ -1015,7 +1023,7 @@ GameObject:
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
+  m_StaticEditorFlags: 4294967295
   m_IsActive: 1
 --- !u!4 &1873407725
 Transform:
