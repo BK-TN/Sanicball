@@ -14,15 +14,15 @@ namespace Sanicball
         [SerializeField]
         private float orbitDistance = 4.0f;
 
-        private Quaternion orbitDirection = Quaternion.Euler(0, 0, 0);
-        private Quaternion orbitDirectionWithOffset;
+        private Quaternion currentDirection;
+        private Quaternion currentDirectionWithOffset;
         private Vector3 up = Vector3.up;
 
-        private Quaternion orbitDirectionOffset;
+        private Quaternion directionOffset;
 
         public void SetDirection(Quaternion dir)
         {
-            orbitDirection = dir;
+            currentDirection = dir;
         }
 
         private void Update()
@@ -36,18 +36,17 @@ namespace Sanicball
                 Ball bc = target.GetComponent<Ball>();
                 if (bc)
                 {
-                    targetUp = bc.up;
+                    targetUp = bc.Up;
                 }
-                up = Vector3.Lerp(up, targetUp, Time.deltaTime * 10f);
+                up = Vector3.Lerp(up, targetUp, Time.deltaTime * 10);
 
                 //Based on how fast the target is moving, create a rotation bending towards its velocity.
-                Quaternion towardsVelocity = (target.velocity != Vector3.zero) ? Quaternion.LookRotation(target.velocity, up) : Quaternion.Euler(0, 0, 0);
-                const float maxTrans = 40f;
-                Quaternion final = Quaternion.Slerp(orbitDirection, towardsVelocity, Mathf.Max(0, Mathf.Min(target.velocity.magnitude, maxTrans) / maxTrans));
-                //final *= orbitDirectionOffset;
+                Quaternion towardsVelocity = (target.velocity != Vector3.zero) ? Quaternion.LookRotation(target.velocity, up) : Quaternion.identity;
+                const float maxTrans = 20f;
+                Quaternion finalTargetDir = Quaternion.Slerp(currentDirection, towardsVelocity, Mathf.Max(0, Mathf.Min(target.velocity.magnitude, maxTrans) / maxTrans));
 
                 //Lerp towards the final rotation
-                orbitDirection = Quaternion.Slerp(orbitDirection, final, Time.deltaTime * 2);
+                currentDirection = Quaternion.Slerp(currentDirection, finalTargetDir, Time.deltaTime * 2);
 
                 if (controlTarget)
                 {
@@ -55,16 +54,16 @@ namespace Sanicball
                     BallControlInput bci = target.GetComponent<BallControlInput>();
                     if (bci != null)
                     {
-                        bci.lookDirection = orbitDirection;
-                        orbitDirectionOffset = bci.OrbitDirectionOffset;
+                        bci.LookDirection = currentDirection;
+                        directionOffset = bci.CameraDirectionOffset;
                     }
                 }
                 //Set camera FOV to get higher with more velocity
                 GetComponent<Camera>().fieldOfView = Mathf.Lerp(GetComponent<Camera>().fieldOfView, Mathf.Min(60f + (target.velocity.magnitude), 100f), Time.deltaTime * 4);
 
-                orbitDirectionWithOffset = Quaternion.Slerp(orbitDirectionWithOffset, orbitDirection * orbitDirectionOffset, Time.deltaTime * 3);
-                transform.position = target.transform.position + Vector3.up * orbitHeight + orbitDirectionWithOffset * (Vector3.back * orbitDistance);
-                transform.rotation = orbitDirectionWithOffset;
+                currentDirectionWithOffset = Quaternion.Slerp(currentDirectionWithOffset, currentDirection * directionOffset, Time.deltaTime * 3);
+                transform.position = target.transform.position + Vector3.up * orbitHeight + currentDirectionWithOffset * (Vector3.back * orbitDistance);
+                transform.rotation = currentDirectionWithOffset;
             }
         }
     }

@@ -58,6 +58,7 @@ namespace Sanicball
 
             lap = 1;
 
+            ball.CanMove = false;
             ball.CheckpointPassed += Ball_CheckpointPassed;
             ball.RespawnRequested += Ball_RespawnRequested;
             currentCheckpointPos = sr.checkpoints[0].transform.position;
@@ -77,9 +78,9 @@ namespace Sanicball
         public event EventHandler<NextCheckpointPassArgs> NextCheckpointPassed;
         public event EventHandler FinishLinePassed;
 
-        public bool IsLocalPlayer { get { return ball.type == BallType.LobbyPlayer || ball.type == BallType.Player; } }
+        public bool IsLocalPlayer { get { return ball.Type == BallType.LobbyPlayer || ball.Type == BallType.Player; } }
         public string Name { get { return ball.name; } }
-        public int Character { get { return ball.character; } }
+        public int Character { get { return ball.CharacterId; } }
         public int Lap { get { return lap; } }
 
         public int Position
@@ -101,7 +102,7 @@ namespace Sanicball
 
         public ControlType CtrlType
         {
-            get { return ball.controlType; }
+            get { return ball.CtrlType; }
         }
 
         public RaceFinishReport FinishReport
@@ -118,7 +119,7 @@ namespace Sanicball
 
         public void StartRace()
         {
-            ball.canMove = true;
+            ball.CanMove = true;
         }
 
         public void FinishRace(RaceFinishReport report)
@@ -126,7 +127,7 @@ namespace Sanicball
             if (finishReport == null)
             {
                 finishReport = report;
-                ball.canMove = false;
+                ball.CanMove = false;
             }
             else
             {
