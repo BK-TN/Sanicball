@@ -21,12 +21,12 @@ namespace Sanicball
 
     public class CameraCreationArgs : System.EventArgs
     {
-        public CameraCreationArgs(Camera cameraCreated)
+        public CameraCreationArgs(IBallCamera cameraCreated)
         {
             CameraCreated = cameraCreated;
         }
 
-        public Camera CameraCreated { get; private set; }
+        public IBallCamera CameraCreated { get; private set; }
     }
 
     [System.Serializable]
@@ -55,10 +55,13 @@ namespace Sanicball
         [SerializeField]
         private OmniCamera camera;
         [SerializeField]
+        private PivotCamera oldCamera;
+        [SerializeField]
         private AITarget aiTarget;
 
         public DriftySmoke Smoke { get { return smoke; } }
         public OmniCamera Camera { get { return camera; } }
+        public PivotCamera OldCamera { get { return oldCamera; } }
         public AITarget AiTarget { get { return aiTarget; } }
     }
 
@@ -163,11 +166,11 @@ namespace Sanicball
             if (type == BallType.Player)
             {
                 //Create camera
-                OmniCamera camera = Instantiate(prefabs.Camera);
-                camera.target = rb;
+                IBallCamera camera = Instantiate(prefabs.OldCamera);
+                camera.Target = rb;
 
                 if (CameraCreated != null)
-                    CameraCreated(this, new CameraCreationArgs(camera.GetComponent<Camera>()));
+                    CameraCreated(this, new CameraCreationArgs(camera));
             }
             if (type == BallType.LobbyPlayer)
             {

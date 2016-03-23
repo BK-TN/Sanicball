@@ -154,8 +154,8 @@ namespace Sanicball
                 int persistentIndex = i;
                 player.BallObject.CameraCreated += (sender, e) =>
                 {
-                    playerUI.TargetCamera = e.CameraCreated;
-                    var splitter = e.CameraCreated.GetComponent<CameraSplitter>();
+                    playerUI.TargetCamera = e.CameraCreated.Cam;
+                    var splitter = e.CameraCreated.Cam.GetComponent<CameraSplitter>();
                     if (splitter)
                         splitter.SplitscreenIndex = persistentIndex;
                 };

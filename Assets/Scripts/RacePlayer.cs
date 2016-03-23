@@ -41,7 +41,7 @@ namespace Sanicball
         private int position;
 
         private Ball ball;
-        private OmniCamera ballCamera;
+        private IBallCamera ballCamera;
         private int currentCheckpointIndex;
         private Vector3 currentCheckpointPos;
         private Checkpoint nextCheckpoint;
@@ -66,7 +66,7 @@ namespace Sanicball
 
             ball.CameraCreated += (sender, e) =>
             {
-                ballCamera = e.CameraCreated.GetComponent<OmniCamera>();
+                ballCamera = e.CameraCreated;
                 ballCamera.SetDirection(sr.checkpoints[0].transform.rotation);
             };
 
@@ -205,7 +205,7 @@ namespace Sanicball
             ball.transform.position = sr.checkpoints[currentCheckpointIndex].GetRespawnPoint() + Vector3.up * ball.transform.localScale.x * 0.5f;
             ball.GetComponent<Rigidbody>().velocity = Vector3.zero;
             ball.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
-            if (ballCamera)
+            if (ballCamera != null)
             {
                 ballCamera.SetDirection(sr.checkpoints[currentCheckpointIndex].transform.rotation);
             }
