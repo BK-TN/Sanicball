@@ -4,67 +4,83 @@ using UnityEngine;
 namespace Sanicball
 {
     [RequireComponent(typeof(Camera))]
-    public class OmniCamera : MonoBehaviour
+    public class OmniCamera : MonoBehaviour, IBallCamera
     {
-        public Rigidbody target;
-        public bool controlTarget;
+        public Rigidbody Target { get; set; }
+        public Camera AttachedCamera
+        {
+            get
+            {
+                if (!attachedCamera)
+                {
+                    attachedCamera = GetComponent<Camera>();
+                }
+                return attachedCamera;
+            }
+        }
+        public ControlType CtrlType { get; set; }
 
         [SerializeField]
         private float orbitHeight = 0.5f;
         [SerializeField]
         private float orbitDistance = 4.0f;
 
-        private Quaternion orbitDirection = Quaternion.Euler(0, 0, 0);
-        private Quaternion orbitDirectionWithOffset;
+        private Camera attachedCamera;
+        private Quaternion currentDirection = Quaternion.Euler(0, 0, 0);
+        private Quaternion currentDirectionWithOffset = Quaternion.Euler(0, 0, 0);
         private Vector3 up = Vector3.up;
-
-        private Quaternion orbitDirectionOffset;
 
         public void SetDirection(Quaternion dir)
         {
-            orbitDirection = dir;
+            currentDirection = dir;
         }
 
         private void Update()
         {
-            if (target != null)
+            //Input
+            var targetDirectionOffset = Quaternion.identity;
+            Vector2 camVector = GameInput.CameraVector(CtrlType);
+            Vector3 orientedCamVector = new Vector3(camVector.x, 0, camVector.y);
+            if (orientedCamVector != Vector3.zero)
+            {
+                Quaternion camQuaternion = Quaternion.Slerp(Quaternion.identity, Quaternion.LookRotation(orientedCamVector), orientedCamVector.magnitude);
+                targetDirectionOffset = camQuaternion;
+            }
+
+            if (Target != null)
             {
                 //Rotate the camera towards the velocity of the rigidbody
 
                 //Set the up vector, and make it lerp towards the target's up vector if the target has a Ball
                 Vector3 targetUp = Vector3.up;
-                Ball bc = target.GetComponent<Ball>();
+                Ball bc = Target.GetComponent<Ball>();
                 if (bc)
                 {
-                    targetUp = bc.up;
+                    targetUp = bc.Up;
                 }
-                up = Vector3.Lerp(up, targetUp, Time.deltaTime * 10f);
+                up = Vector3.Lerp(up, targetUp, Time.deltaTime * 10);
 
                 //Based on how fast the target is moving, create a rotation bending towards its velocity.
-                Quaternion towardsVelocity = (target.velocity != Vector3.zero) ? Quaternion.LookRotation(target.velocity, up) : Quaternion.Euler(0, 0, 0);
-                const float maxTrans = 40f;
-                Quaternion final = Quaternion.Slerp(orbitDirection, towardsVelocity, Mathf.Max(0, Mathf.Min(target.velocity.magnitude, maxTrans) / maxTrans));
-                //final *= orbitDirectionOffset;
+                Quaternion towardsVelocity = (Target.velocity != Vector3.zero) ? Quaternion.LookRotation(Target.velocity, up) : Quaternion.identity;
+                const float maxTrans = 20f;
+                Quaternion finalTargetDir = Quaternion.Slerp(currentDirection, towardsVelocity, Mathf.Max(0, Mathf.Min(-10 + Target.velocity.magnitude, maxTrans) / maxTrans));
 
                 //Lerp towards the final rotation
-                orbitDirection = Quaternion.Slerp(orbitDirection, final, Time.deltaTime * 2);
+                currentDirection = Quaternion.Slerp(currentDirection, finalTargetDir, Time.deltaTime * 2);
 
-                if (controlTarget)
+                //Look for a BallControlInput and set its look direction
+                BallControlInput bci = Target.GetComponent<BallControlInput>();
+                if (bci != null)
                 {
-                    //Look for a BallControlInput and set its look direction
-                    BallControlInput bci = target.GetComponent<BallControlInput>();
-                    if (bci != null)
-                    {
-                        bci.lookDirection = orbitDirection;
-                        orbitDirectionOffset = bci.OrbitDirectionOffset;
-                    }
+                    bci.LookDirection = currentDirection;
                 }
-                //Set camera FOV to get higher with more velocity
-                GetComponent<Camera>().fieldOfView = Mathf.Lerp(GetComponent<Camera>().fieldOfView, Mathf.Min(60f + (target.velocity.magnitude), 100f), Time.deltaTime * 4);
 
-                orbitDirectionWithOffset = Quaternion.Slerp(orbitDirectionWithOffset, orbitDirection * orbitDirectionOffset, Time.deltaTime * 3);
-                transform.position = target.transform.position + Vector3.up * orbitHeight + orbitDirectionWithOffset * (Vector3.back * orbitDistance);
-                transform.rotation = orbitDirectionWithOffset;
+                //Set camera FOV to get higher with more velocity
+                AttachedCamera.fieldOfView = Mathf.Lerp(AttachedCamera.fieldOfView, Mathf.Min(60f + (Target.velocity.magnitude), 100f), Time.deltaTime * 4);
+
+                currentDirectionWithOffset = Quaternion.Slerp(currentDirectionWithOffset, currentDirection * targetDirectionOffset, Time.deltaTime * 2);
+                transform.position = Target.transform.position + Vector3.up * orbitHeight + currentDirectionWithOffset * (Vector3.back * orbitDistance);
+                transform.rotation = currentDirectionWithOffset;
             }
         }
     }

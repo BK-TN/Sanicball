@@ -18,7 +18,7 @@ namespace Sanicball
                 Debug.LogError("LobbyBallSpawner has no lobby platform assigned");
             }
 
-            return SpawnBall(transform.position, transform.rotation, BallType.LobbyPlayer, playerType, ctrlType, character, nickname);
+            return SpawnBall(transform.position, transform.rotation, BallType.LobbyPlayer, ctrlType, character, nickname);
         }
 
         private void OnDrawGizmos()

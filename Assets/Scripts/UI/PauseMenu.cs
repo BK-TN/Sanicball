@@ -16,7 +16,20 @@ namespace Sanicball.UI
         [SerializeField]
         private Text contextSensitiveButtonLabel;
 
+        private bool mouseWasLocked;
+
         public static bool GamePaused { get { return GameObject.FindWithTag(pauseTag); } }
+
+        private void Awake()
+        {
+            Debug.Log(Cursor.lockState);
+            if (Cursor.lockState == CursorLockMode.Locked)
+            {
+                mouseWasLocked = true;
+                Cursor.lockState = CursorLockMode.None;
+                Cursor.visible = true;
+            }
+        }
 
         private void Start()
         {
@@ -38,6 +51,11 @@ namespace Sanicball.UI
 
         public void Close()
         {
+            if (mouseWasLocked)
+            {
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
             Destroy(gameObject);
         }
 

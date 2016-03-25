@@ -17,11 +17,11 @@ namespace Sanicball
         [SerializeField]
         private LayerMask ballSpawningMask = new LayerMask();
 
-        public Ball SpawnBall(int position, BallType ballType, Data.PlayerType playerType, ControlType ctrlType, int character, string nickname)
+        public Ball SpawnBall(int position, BallType ballType, ControlType ctrlType, int character, string nickname)
         {
             float characterSize = Data.ActiveData.Characters[character].ballSize;
 
-            return SpawnBall(GetSpawnPoint(position, characterSize / 2f), transform.rotation, ballType, playerType, ctrlType, character, nickname);
+            return SpawnBall(GetSpawnPoint(position, characterSize / 2f), transform.rotation, ballType, ctrlType, character, nickname);
         }
 
         public Vector3 GetSpawnPoint(int position, float offsetY)

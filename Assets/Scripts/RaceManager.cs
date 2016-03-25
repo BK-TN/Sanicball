@@ -137,8 +137,8 @@ namespace Sanicball
             {
                 var player = matchManager.Players[i];
 
-                player.BallObject = FindObjectOfType<RaceBallSpawner>().SpawnBall(nextPos, BallType.Player, Data.PlayerType.Normal, player.CtrlType, player.CharacterId, "Player - " + Utils.CtrlTypeStr(player.CtrlType));
-                player.BallObject.canMove = false;
+                player.BallObject = FindObjectOfType<RaceBallSpawner>().SpawnBall(nextPos, BallType.Player, player.CtrlType, player.CharacterId, "Player - " + Utils.CtrlTypeStr(player.CtrlType));
+                player.BallObject.CanMove = false;
 
                 var racePlayer = new RacePlayer(player.BallObject);
                 players.Add(racePlayer);
@@ -154,8 +154,8 @@ namespace Sanicball
                 int persistentIndex = i;
                 player.BallObject.CameraCreated += (sender, e) =>
                 {
-                    playerUI.TargetCamera = e.CameraCreated;
-                    var splitter = e.CameraCreated.GetComponent<CameraSplitter>();
+                    playerUI.TargetCamera = e.CameraCreated.AttachedCamera;
+                    var splitter = e.CameraCreated.AttachedCamera.GetComponent<CameraSplitter>();
                     if (splitter)
                         splitter.SplitscreenIndex = persistentIndex;
                 };
@@ -165,8 +165,8 @@ namespace Sanicball
 
             for (int i = 0; i < settings.AICount; i++)
             {
-                var aiBall = FindObjectOfType<RaceBallSpawner>().SpawnBall(nextPos, BallType.AI, Data.PlayerType.Normal, ControlType.None, settings.GetAICharacter(i), "AI #" + i);
-                aiBall.canMove = false;
+                var aiBall = FindObjectOfType<RaceBallSpawner>().SpawnBall(nextPos, BallType.AI, ControlType.None, settings.GetAICharacter(i), "AI #" + i);
+                aiBall.CanMove = false;
 
                 var racePlayer = new RacePlayer(aiBall);
                 players.Add(racePlayer);

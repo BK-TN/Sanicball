@@ -28,7 +28,7 @@ namespace Sanicball.Data
         public bool useOldControls = false;
 
         public float oldControlsMouseSpeed = 3f;
-        public float oldControlsKbSpeed = 3f;
+        public float oldControlsKbSpeed = 10f;
 
         [Header("Audio")]
         public float soundVolume = 1f;
