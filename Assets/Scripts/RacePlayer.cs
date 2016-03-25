@@ -127,7 +127,10 @@ namespace Sanicball
             if (finishReport == null)
             {
                 finishReport = report;
-                ball.CanMove = false;
+                if (ball.Type == BallType.AI)
+                    ball.CanMove = false;
+                //Set layer to Racer Ghost to block collision with racing players
+                ball.gameObject.layer = LayerMask.NameToLayer("Racer Ghost");
             }
             else
             {
