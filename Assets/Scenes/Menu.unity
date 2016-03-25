@@ -1149,6 +1149,7 @@ Canvas:
   m_ReceivesEvents: 1
   m_OverrideSorting: 0
   m_OverridePixelPerfect: 0
+  m_SortingBucketNormalizedSize: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0
   m_TargetDisplay: 0
@@ -6153,7 +6154,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 478268, guid: 2d986dc6adff9184a8b6f493d24b850a, type: 2}
       propertyPath: m_RootOrder
-      value: 10
+      value: 8
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 2d986dc6adff9184a8b6f493d24b850a, type: 2}
@@ -11801,8 +11802,8 @@ Prefab:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 11452216, guid: 7a1320b5449ace84db564be1a1ddd206, type: 2}
-      propertyPath: UnetAppId
-      value: f860580c-f6cf-40ab-bca8-8a6281f17439
+      propertyPath: characters.Array.data[13].stats.airSpeed
+      value: 15
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 7a1320b5449ace84db564be1a1ddd206, type: 2}
@@ -12527,7 +12528,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 401328, guid: ceb67d3ed990bc34bbbac27fe9ceb383, type: 2}
       propertyPath: m_RootOrder
-      value: 8
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 11442220, guid: ceb67d3ed990bc34bbbac27fe9ceb383, type: 2}
       propertyPath: mainMenuPanel
@@ -15119,7 +15120,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 447756, guid: bca34864aae62f44c991af3204f2ce46, type: 2}
       propertyPath: m_RootOrder
-      value: 8
+      value: 6
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: bca34864aae62f44c991af3204f2ce46, type: 2}
