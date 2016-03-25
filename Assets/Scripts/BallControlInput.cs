@@ -59,7 +59,7 @@ namespace Sanicball
             }
 
             //RESPAWN FAST
-            if (GameInput.IsRespawning(ball.CtrlType))
+            if (GameInput.IsRespawning(ball.CtrlType) && ball.CanMove)
             {
                 ball.RequestRespawn();
             }

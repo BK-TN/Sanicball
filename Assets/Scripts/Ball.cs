@@ -127,7 +127,7 @@ namespace Sanicball
 
         public void RequestRespawn()
         {
-            if (CanMove && RespawnRequested != null)
+            if (RespawnRequested != null)
                 RespawnRequested(this, System.EventArgs.Empty);
         }
 
