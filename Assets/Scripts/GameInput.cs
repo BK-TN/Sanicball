@@ -8,33 +8,33 @@ namespace Sanicball
     {
         #region Joystick axis names
 
-        private const string joystick1LeftX =   "joy1-lx";
-        private const string joystick1LeftY =   "joy1-ly";
-        private const string joystick1RightX =  "joy1-rx";
-        private const string joystick1RightY =  "joy1-ry";
-        private const string joystick1DpadX =   "joy1-dx";
-        private const string joystick1DpadY =   "joy1-dy";
+        private const string joystick1LeftX = "joy1-lx";
+        private const string joystick1LeftY = "joy1-ly";
+        private const string joystick1RightX = "joy1-rx";
+        private const string joystick1RightY = "joy1-ry";
+        private const string joystick1DpadX = "joy1-dx";
+        private const string joystick1DpadY = "joy1-dy";
 
-        private const string joystick2LeftX =   "joy2-lx";
-        private const string joystick2LeftY =   "joy2-ly";
-        private const string joystick2RightX =  "joy2-rx";
-        private const string joystick2RightY =  "joy2-ry";
-        private const string joystick2DpadX =   "joy2-dx";
-        private const string joystick2DpadY =   "joy2-dy";
+        private const string joystick2LeftX = "joy2-lx";
+        private const string joystick2LeftY = "joy2-ly";
+        private const string joystick2RightX = "joy2-rx";
+        private const string joystick2RightY = "joy2-ry";
+        private const string joystick2DpadX = "joy2-dx";
+        private const string joystick2DpadY = "joy2-dy";
 
-        private const string joystick3LeftX =   "joy3-lx";
-        private const string joystick3LeftY =   "joy3-ly";
-        private const string joystick3RightX =  "joy3-rx";
-        private const string joystick3RightY =  "joy3-ry";
-        private const string joystick3DpadX =   "joy3-dx";
-        private const string joystick3DpadY =   "joy3-dy";
+        private const string joystick3LeftX = "joy3-lx";
+        private const string joystick3LeftY = "joy3-ly";
+        private const string joystick3RightX = "joy3-rx";
+        private const string joystick3RightY = "joy3-ry";
+        private const string joystick3DpadX = "joy3-dx";
+        private const string joystick3DpadY = "joy3-dy";
 
-        private const string joystick4LeftX =   "joy4-lx";
-        private const string joystick4LeftY =   "joy4-ly";
-        private const string joystick4RightX =  "joy4-rx";
-        private const string joystick4RightY =  "joy4-ry";
-        private const string joystick4DpadX =   "joy4-dx";
-        private const string joystick4DpadY =   "joy4-dy";
+        private const string joystick4LeftX = "joy4-lx";
+        private const string joystick4LeftY = "joy4-ly";
+        private const string joystick4RightX = "joy4-rx";
+        private const string joystick4RightY = "joy4-ry";
+        private const string joystick4DpadX = "joy4-dx";
+        private const string joystick4DpadY = "joy4-dy";
 
         #endregion Joystick axis names
 
@@ -79,20 +79,20 @@ namespace Sanicball
             return null;
         }
 
-        private static Vector2 KeysToVector(bool up, bool left, bool down, bool right)
+        private static Vector2 KeysToVector2(bool right, bool left, bool up, bool down)
         {
             Vector2 output = Vector2.zero;
-            if (left && !right)
-            {
-                output = new Vector3(-1, output.y);
-            }
             if (right && !left)
             {
                 output = new Vector3(+1, output.y);
             }
+            if (left && !right)
+            {
+                output = new Vector3(-1, output.y);
+            }
             if (up && !down)
             {
-                output = new Vector3(output.x, 1);
+                output = new Vector3(output.x, +1);
             }
             if (down && !up)
             {
@@ -101,9 +101,39 @@ namespace Sanicball
             return output;
         }
 
+        private static Vector3 KeysToVector3(bool right, bool left, bool up, bool down, bool forward, bool back)
+        {
+            Vector3 output = Vector3.zero;
+            if (right && !left)
+            {
+                output = new Vector3(+1, output.y, output.z);
+            }
+            if (left && !right)
+            {
+                output = new Vector3(-1, output.y, output.z);
+            }
+            if (up && !down)
+            {
+                output = new Vector3(output.x, +1, output.z);
+            }
+            if (down && !up)
+            {
+                output = new Vector3(output.x, -1, output.z);
+            }
+            if (forward && !back)
+            {
+                output = new Vector3(output.x, output.y, +1);
+            }
+            if (back && !forward)
+            {
+                output = new Vector3(output.x, output.y, -1);
+            }
+            return output;
+        }
+
         #region Controller specific input
 
-        public static Vector2 MovementVector(ControlType ctrlType)
+        public static Vector3 MovementVector(ControlType ctrlType)
         {
             switch (ctrlType)
             {
@@ -112,19 +142,21 @@ namespace Sanicball
                     bool left = Input.GetKey(ActiveData.Keybinds[Keybind.Left]) && !KeyboardDisabled;
                     bool back = Input.GetKey(ActiveData.Keybinds[Keybind.Back]) && !KeyboardDisabled;
                     bool right = Input.GetKey(ActiveData.Keybinds[Keybind.Right]) && !KeyboardDisabled;
-                    return KeysToVector(forward, left, back, right);
+                    //bool up = Input.GetKey(KeyCode.E) && !KeyboardDisabled;
+                    //bool down = Input.GetKey(KeyCode.Q) && !KeyboardDisabled;
+                    return KeysToVector3(right, left, false, false, forward, back);
 
                 case ControlType.Joystick1:
-                    return new Vector2(Input.GetAxis(joystick1LeftX), Input.GetAxis(joystick1LeftY));
+                    return new Vector3(Input.GetAxis(joystick1LeftX), 0, Input.GetAxis(joystick1LeftY));
 
                 case ControlType.Joystick2:
-                    return new Vector2(Input.GetAxis(joystick2LeftX), Input.GetAxis(joystick2LeftY));
+                    return new Vector3(Input.GetAxis(joystick2LeftX), 0, Input.GetAxis(joystick2LeftY));
 
                 case ControlType.Joystick3:
-                    return new Vector2(Input.GetAxis(joystick3LeftX), Input.GetAxis(joystick3LeftY));
+                    return new Vector3(Input.GetAxis(joystick3LeftX), 0, Input.GetAxis(joystick3LeftY));
 
                 case ControlType.Joystick4:
-                    return new Vector2(Input.GetAxis(joystick4LeftX), Input.GetAxis(joystick4LeftY));
+                    return new Vector3(Input.GetAxis(joystick4LeftX), 0, Input.GetAxis(joystick4LeftY));
             }
             return Vector2.zero;
         }
@@ -138,7 +170,7 @@ namespace Sanicball
                     bool left = Input.GetKey(ActiveData.Keybinds[Keybind.CameraLeft]) && !KeyboardDisabled;
                     bool down = Input.GetKey(ActiveData.Keybinds[Keybind.CameraDown]) && !KeyboardDisabled;
                     bool right = Input.GetKey(ActiveData.Keybinds[Keybind.CameraRight]) && !KeyboardDisabled;
-                    return KeysToVector(up, left, down, right);
+                    return KeysToVector2(right, left, up, down);
 
                 case ControlType.Joystick1:
                     return new Vector2(Input.GetAxis(joystick1RightX), Input.GetAxis(joystick1RightY));

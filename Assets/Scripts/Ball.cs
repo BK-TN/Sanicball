@@ -21,80 +21,105 @@ namespace Sanicball
 
     public class CameraCreationArgs : System.EventArgs
     {
-        public CameraCreationArgs(Camera cameraCreated)
+        public CameraCreationArgs(IBallCamera cameraCreated)
         {
             CameraCreated = cameraCreated;
         }
 
-        public Camera CameraCreated { get; private set; }
+        public IBallCamera CameraCreated { get; private set; }
     }
 
     [System.Serializable]
     public class BallMotionSounds
     {
-        public AudioSource jump;
-        public AudioSource roll;
-        public AudioSource speedNoise;
-        public AudioSource brake;
+        [SerializeField]
+        private AudioSource jump;
+        [SerializeField]
+        private AudioSource roll;
+        [SerializeField]
+        private AudioSource speedNoise;
+        [SerializeField]
+        private AudioSource brake;
+
+        public AudioSource Jump { get { return jump; } }
+        public AudioSource Roll { get { return roll; } }
+        public AudioSource SpeedNoise { get { return speedNoise; } }
+        public AudioSource Brake { get { return brake; } }
     }
 
     [System.Serializable]
     public class BallPrefabs
     {
-        public DriftySmoke smoke;
-        public OmniCamera camera;
-        public AITarget aiTarget;
-        public Material minimapIconMaterial;
+        [SerializeField]
+        private DriftySmoke smoke;
+        [SerializeField]
+        private OmniCamera camera;
+        [SerializeField]
+        private PivotCamera oldCamera;
+        [SerializeField]
+        private AITarget aiTarget;
+
+        public DriftySmoke Smoke { get { return smoke; } }
+        public OmniCamera Camera { get { return camera; } }
+        public PivotCamera OldCamera { get { return oldCamera; } }
+        public AITarget AiTarget { get { return aiTarget; } }
     }
 
     [RequireComponent(typeof(Rigidbody))]
     public class Ball : MonoBehaviour
     {
-        //Set before Start()
-        public BallType type;
+        //These are set using Init() when balls are instantiated
+        //But you can set them from the editor to quickly test out a track
+        [Header("Initial stats")]
+        [SerializeField]
+        private BallType type;
+        [SerializeField]
+        private ControlType ctrlType;
+        [SerializeField]
+        private int characterId;
+        [SerializeField]
+        private string nickname;
 
-        public Data.PlayerType playerType;
-        public int character;
-        public string nickname;
-        public ControlType controlType;
-        public bool canMove;
+        public BallType Type { get { return type; } }
+        public ControlType CtrlType { get { return ctrlType; } }
+        public int CharacterId { get { return characterId; } }
 
-        public BallPrefabs prefabs;
-        public BallStats stats;
-        public BallMotionSounds sounds;
+        [Header("Subcategories")]
+        [SerializeField]
+        private BallPrefabs prefabs;
+        [SerializeField]
+        private BallMotionSounds sounds;
 
-        public bool brake;
-        public Vector3 directionVector;
-
-        public Vector3 up = Vector3.up;
-
-        //Cache of input component
-        [HideInInspector]
-        public BallControlInput input;
-
+        //State
+        private BallStats characterStats;
+        private bool canMove = true;
+        private BallControlInput input;
         private bool grounded = false;
         private float groundedTimer = 0;
         private DriftySmoke smoke;
-        //Vector3 forward = Vector3.forward;
 
+        public bool CanMove { get { return canMove; } set { canMove = value; } }
+        public Vector3 DirectionVector { get; set; }
+        public Vector3 Up { get; set; }
+        public bool Brake { get; set; }
+
+        //Component caches
         private Rigidbody rb;
+        public BallControlInput Input { get { return input; } }
 
+        //Events
         public event System.EventHandler<CheckpointPassArgs> CheckpointPassed;
         public event System.EventHandler RespawnRequested;
         public event System.EventHandler<CameraCreationArgs> CameraCreated;
 
-        public void Init()
-        {
-        }
-
         public void Jump()
         {
-            if (grounded && canMove)
+            if (grounded && CanMove)
             {
-                rb.AddForce(up * stats.jumpHeight, ForceMode.Impulse);
-                if (sounds.jump != null)
+                rb.AddForce(Up * characterStats.jumpHeight, ForceMode.Impulse);
+                if (sounds.Jump != null)
                 {
-                    sounds.jump.Play();
+                    sounds.Jump.Play();
                 }
                 grounded = false;
             }
@@ -102,15 +127,26 @@ namespace Sanicball
 
         public void RequestRespawn()
         {
-            if (canMove && RespawnRequested != null)
+            if (RespawnRequested != null)
                 RespawnRequested(this, System.EventArgs.Empty);
+        }
+
+        public void Init(BallType type, ControlType ctrlType, int characterId, string nickname)
+        {
+            this.type = type;
+            this.ctrlType = ctrlType;
+            this.characterId = characterId;
+            this.nickname = nickname;
         }
 
         private void Start()
         {
+            Up = Vector3.up;
+
             //Set up drifty smoke
-            smoke = Instantiate(prefabs.smoke);
+            smoke = Instantiate(prefabs.Smoke);
             smoke.target = this;
+            smoke.DriftAudio = sounds.Brake;
 
             //Grab reference to Rigidbody
             rb = GetComponent<Rigidbody>();
@@ -121,24 +157,34 @@ namespace Sanicball
             gameObject.name = type.ToString() + " - " + nickname;
 
             //Set character
-            if (character >= 0 && character < Data.ActiveData.Characters.Length)
+            if (CharacterId >= 0 && CharacterId < Data.ActiveData.Characters.Length)
             {
-                SetCharacter(Data.ActiveData.Characters[character]);
-                prefabs.minimapIconMaterial = Data.ActiveData.Characters[character].minimapIcon;
+                SetCharacter(Data.ActiveData.Characters[CharacterId]);
             }
 
             //Create objects and components based on ball type
             if (type == BallType.Player)
             {
+                IBallCamera camera;
                 //Create camera
-                OmniCamera camera = Instantiate(prefabs.camera);
-                camera.target = rb;
+                if (Data.ActiveData.GameSettings.useOldControls)
+                {
+                    camera = Instantiate(prefabs.OldCamera);
+                    ((PivotCamera)camera).UseMouse = ctrlType == ControlType.Keyboard;
+                }
+                else
+                {
+                    camera = Instantiate(prefabs.Camera);
+                }
+                camera.Target = rb;
+                camera.CtrlType = ctrlType;
 
                 if (CameraCreated != null)
-                    CameraCreated(this, new CameraCreationArgs(camera.GetComponent<Camera>()));
+                    CameraCreated(this, new CameraCreationArgs(camera));
             }
             if (type == BallType.LobbyPlayer)
             {
+                //Make the lobby camera follow this ball
                 var cam = FindObjectOfType<LobbyCamera>();
                 if (cam)
                 {
@@ -157,7 +203,7 @@ namespace Sanicball
                 ai.pathToFollow = FindObjectOfType<Path>();
 
                 //Create target for the AI
-                AITarget pFollower = Instantiate(prefabs.aiTarget);
+                AITarget pFollower = Instantiate(prefabs.AiTarget);
                 pFollower.GetComponent<PathFollower>().path = ai.pathToFollow;
                 pFollower.stupidness = ai.stupidness;
                 pFollower.GetComponent<Patroller>().target = gameObject;
@@ -191,32 +237,32 @@ namespace Sanicball
             }
             Ball motion = GetComponent<Ball>();
             if (motion != null)
-                motion.stats = c.stats;
+                motion.characterStats = c.stats;
         }
 
         private void FixedUpdate()
         {
-            if (canMove)
+            if (CanMove)
             {
                 //If grounded use torque
-                if (directionVector != Vector3.zero)
+                if (DirectionVector != Vector3.zero)
                 {
-                    rb.AddTorque(directionVector * stats.rollSpeed);
+                    rb.AddTorque(DirectionVector * characterStats.rollSpeed);
                 }
                 //If not use both
                 if (!grounded)
                 {
-                    rb.AddForce((Quaternion.Euler(0, -90, 0) * directionVector) * stats.airSpeed);
+                    rb.AddForce((Quaternion.Euler(0, -90, 0) * DirectionVector) * characterStats.airSpeed);
                 }
             }
             else
             {
                 //Always brake when canControl is off
-                brake = true;
+                Brake = true;
             }
 
             //Braking
-            if (brake)
+            if (Brake)
             {
                 //Force ball to brake by resetting angular velocity every update
                 rb.angularVelocity = Vector3.zero;
@@ -238,30 +284,28 @@ namespace Sanicball
                 float rollSpd = Mathf.Clamp(rb.angularVelocity.magnitude / 230, 0, 16);
                 float vel = (-128f + rb.velocity.magnitude) / 256; //Start at 128 fph, end at 256
 
-                //if (GetComponent<BallControlInput>() != null) Debug.Log(rb.velocity.magnitude + " = " + vel);
-
                 vel = Mathf.Clamp(vel, 0, 1);
-                if (sounds.roll != null)
+                if (sounds.Roll != null)
                 {
-                    sounds.roll.pitch = Mathf.Max(rollSpd, 0.8f);
-                    sounds.roll.volume = Mathf.Min(rollSpd, 1);
+                    sounds.Roll.pitch = Mathf.Max(rollSpd, 0.8f);
+                    sounds.Roll.volume = Mathf.Min(rollSpd, 1);
                 }
-                if (sounds.speedNoise != null)
+                if (sounds.SpeedNoise != null)
                 {
-                    sounds.speedNoise.pitch = 0.8f + vel;
-                    sounds.speedNoise.volume = vel;//Mathf.Clamp(-0.5f + vel, 0f, 1f);
+                    sounds.SpeedNoise.pitch = 0.8f + vel;
+                    sounds.SpeedNoise.volume = vel;
                 }
             }
             else
             {
                 //Fade sounds out when in the air
-                if (sounds.roll != null && sounds.roll.volume > 0)
+                if (sounds.Roll != null && sounds.Roll.volume > 0)
                 {
-                    sounds.roll.volume = Mathf.Max(0, sounds.roll.volume - 0.2f);
+                    sounds.Roll.volume = Mathf.Max(0, sounds.Roll.volume - 0.2f);
                 }
-                if (sounds.speedNoise != null && sounds.speedNoise.volume > 0)
+                if (sounds.SpeedNoise != null && sounds.SpeedNoise.volume > 0)
                 {
-                    sounds.speedNoise.volume = Mathf.Max(0, sounds.speedNoise.volume - 0.01f);
+                    sounds.SpeedNoise.volume = Mathf.Max(0, sounds.SpeedNoise.volume - 0.01f);
                 }
             }
 
@@ -272,7 +316,7 @@ namespace Sanicball
                 if (groundedTimer <= 0)
                 {
                     grounded = false;
-                    up = Vector3.up;
+                    Up = Vector3.up;
                 }
             }
 
@@ -302,7 +346,7 @@ namespace Sanicball
             //Enable grounded and reset timer
             grounded = true;
             groundedTimer = 0;
-            up = c.contacts[0].normal;
+            Up = c.contacts[0].normal;
         }
 
         private void OnCollisionExit(Collision c)
@@ -314,7 +358,7 @@ namespace Sanicball
         private void OnDrawGizmos()
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawRay(transform.position, up);
+            Gizmos.DrawRay(transform.position, Up);
         }
     }
 }

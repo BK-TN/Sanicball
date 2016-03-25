@@ -5,7 +5,8 @@ namespace Sanicball
     public class DriftySmoke : MonoBehaviour
     {
         public bool grounded = false;
-        public Sanicball.Ball target;
+        public AudioSource DriftAudio { get; set; }
+        public Ball target;
 
         private ParticleSystem pSystem;
 
@@ -23,7 +24,7 @@ namespace Sanicball
             }
 
             Rigidbody rBody = target.GetComponent<Rigidbody>();
-            AudioSource aSource = target.sounds.brake;
+            AudioSource aSource = DriftAudio;
 
             float speed = rBody.velocity.magnitude;
             float rot = rBody.angularVelocity.magnitude / 2;

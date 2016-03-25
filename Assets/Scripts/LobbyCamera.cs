@@ -42,9 +42,9 @@ namespace Sanicball
                     //Add position to sum
                     sum += b.transform.position;
 
-                    if (b.input)
+                    if (b.Input)
                     {
-                        b.input.lookDirection = transform.rotation;
+                        b.Input.LookDirection = transform.rotation;
                     }
                 }
                 //Divide sum by number of balls to get the average position (<3 you vector math)

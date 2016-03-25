@@ -553,30 +553,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: 0
-  playerType: -1
-  character: 1
+  ctrlType: 0
+  characterId: 0
   nickname: Unknown ball
-  controlType: 0
-  canMove: 1
   prefabs:
     smoke: {fileID: 11400002, guid: 83f9c6324dcbb7042a24b3478b9efcbe, type: 2}
     camera: {fileID: 11443186, guid: 1f3ec1af904b6b54b9cfc2b288854f02, type: 2}
+    oldCamera: {fileID: 11400000, guid: 395e30509a198fc4fb2aac437f95e4c0, type: 2}
     aiTarget: {fileID: 11400006, guid: 97eba7661fd1a27439ece48ef79ce6d0, type: 2}
-    minimapIconMaterial: {fileID: 0}
-  stats:
-    rollSpeed: 100
-    airSpeed: 15
-    jumpHeight: 14
-    grip: 0
   sounds:
     jump: {fileID: 8245922}
     roll: {fileID: 8294728}
     speedNoise: {fileID: 8295400}
     brake: {fileID: 8236126}
-  brake: 0
-  directionVector: {x: 0, y: 0, z: 0}
-  up: {x: 0, y: 1, z: 0}
-  input: {fileID: 0}
 --- !u!114 &11460104
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -657,6 +646,11 @@ Prefab:
       propertyPath: panLevelCustomCurve.m_Curve.Array.data[0].value
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: prefabs.oldCamera
+      value: 
+      objectReference: {fileID: 11400000, guid: 395e30509a198fc4fb2aac437f95e4c0,
+        type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 178192}
