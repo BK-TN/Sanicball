@@ -62,7 +62,7 @@ namespace Sanicball
             //Mouse look
             if (UseMouse)
             {
-                if (Input.GetMouseButtonDown(0) && !GameInput.KeyboardDisabled)
+                if (Input.GetMouseButtonDown(0) && !GameInput.KeyboardDisabled && !UI.PauseMenu.GamePaused)
                 {
                     Cursor.lockState = CursorLockMode.Locked;
                     Cursor.visible = false;
@@ -129,6 +129,7 @@ namespace Sanicball
 
         private void OnDestroy()
         {
+            //Debug.Log("fuuuuuck");
             if (UseMouse)
             {
                 Cursor.lockState = CursorLockMode.None;
