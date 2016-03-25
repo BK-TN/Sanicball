@@ -4,7 +4,7 @@ using UnityEngine;
 public interface IBallCamera
 {
     Rigidbody Target { get; set; }
-    Camera Cam { get; }
+    Camera AttachedCamera { get; }
 
     void SetDirection(Quaternion dir);
 }

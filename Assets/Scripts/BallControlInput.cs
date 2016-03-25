@@ -38,7 +38,7 @@ namespace Sanicball
                 directionLength = directionLength * directionLength;
                 directionVector = directionVector * directionLength;
             }
-            directionVector = LookDirection * Quaternion.Euler(0f, 90f, 0f) * directionVector; //Multiply vector by camera rotation
+            directionVector = LookDirection * Quaternion.Euler(0f, 90f, 0) * directionVector; //Multiply vector by camera rotation
             ball.DirectionVector = directionVector;
 
             //BRAKE FAST

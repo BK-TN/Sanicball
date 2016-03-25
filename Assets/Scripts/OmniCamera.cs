@@ -7,7 +7,18 @@ namespace Sanicball
     public class OmniCamera : MonoBehaviour, IBallCamera
     {
         public Rigidbody Target { get; set; }
-        public Camera Cam { get; private set; }
+        public Camera AttachedCamera
+        {
+            get
+            {
+                if (!attachedCamera)
+                {
+                    attachedCamera = GetComponent<Camera>();
+                }
+                return attachedCamera;
+            }
+        }
+        private Camera attachedCamera;
 
         [SerializeField]
         private float orbitHeight = 0.5f;
@@ -22,11 +33,6 @@ namespace Sanicball
         public void SetDirection(Quaternion dir)
         {
             currentDirection = dir;
-        }
-
-        private void Start()
-        {
-            Cam = GetComponent<Camera>();
         }
 
         private void Update()
@@ -61,7 +67,7 @@ namespace Sanicball
                 }
 
                 //Set camera FOV to get higher with more velocity
-                Cam.fieldOfView = Mathf.Lerp(Cam.fieldOfView, Mathf.Min(60f + (Target.velocity.magnitude), 100f), Time.deltaTime * 4);
+                AttachedCamera.fieldOfView = Mathf.Lerp(AttachedCamera.fieldOfView, Mathf.Min(60f + (Target.velocity.magnitude), 100f), Time.deltaTime * 4);
 
                 currentDirectionWithOffset = Quaternion.Slerp(currentDirectionWithOffset, currentDirection * directionOffset, Time.deltaTime * 3);
                 transform.position = Target.transform.position + Vector3.up * orbitHeight + currentDirectionWithOffset * (Vector3.back * orbitDistance);
