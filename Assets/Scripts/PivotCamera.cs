@@ -9,6 +9,7 @@ namespace Sanicball
     {
         public Rigidbody Target { get; set; }
         public Camera AttachedCamera { get { return attachedCamera; } }
+        public ControlType CtrlType { get; set; }
         public bool UseMouse { get; set; }
 
         [SerializeField]
@@ -39,16 +40,15 @@ namespace Sanicball
             ytargetRotation = eulerAngles.z;
         }
 
-        private void Awake()
-        {
-        }
-
         private void Start()
         {
-            sensitivityMouse = ActiveData.GameSettings.oldControlsMouseSpeed;
-            sensitivityKeyboard = ActiveData.GameSettings.oldControlsKbSpeed;
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            if (UseMouse)
+            {
+                sensitivityMouse = ActiveData.GameSettings.oldControlsMouseSpeed;
+                sensitivityKeyboard = ActiveData.GameSettings.oldControlsKbSpeed;
+                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.visible = false;
+            }
         }
 
         private void Update()
@@ -59,6 +59,7 @@ namespace Sanicball
                 bci.LookDirection = transform.rotation * Quaternion.Euler(0, -90, 0);
             }
 
+            //Mouse look
             if (UseMouse)
             {
                 if (Input.GetMouseButtonDown(0) && !GameInput.KeyboardDisabled)
@@ -82,17 +83,21 @@ namespace Sanicball
                     xtargetRotation += xAxisMove;
                 }
             }
-            //Mouse look
 
             //Keyboard controls
-            if (Input.GetKey(ActiveData.Keybinds[Keybind.CameraLeft]))
+            var cameraVector = GameInput.CameraVector(CtrlType);
+
+            /*if (cameraVector.x < 0)
                 xtargetRotation -= 20 * sensitivityKeyboard * Time.deltaTime;
-            if (Input.GetKey(ActiveData.Keybinds[Keybind.CameraRight]))
+            if (cameraVector.x > 0)
                 xtargetRotation += 20 * sensitivityKeyboard * Time.deltaTime;
-            if (Input.GetKey(ActiveData.Keybinds[Keybind.CameraUp]))
+            if (cameraVector.y > 0)
                 ytargetRotation -= 20 * sensitivityKeyboard * Time.deltaTime;
-            if (Input.GetKey(ActiveData.Keybinds[Keybind.CameraDown]))
-                ytargetRotation += 20 * sensitivityKeyboard * Time.deltaTime;
+            if (cameraVector.y < 0)
+                ytargetRotation += 20 * sensitivityKeyboard * Time.deltaTime;*/
+
+            xtargetRotation += cameraVector.x * 20 * sensitivityKeyboard * Time.deltaTime;
+            ytargetRotation -= cameraVector.y * 20 * sensitivityKeyboard * Time.deltaTime;
 
             ytargetRotation = Mathf.Clamp(ytargetRotation, yMin, yMax);
             xtargetRotation = xtargetRotation % 360;
@@ -117,6 +122,9 @@ namespace Sanicball
             //Positioning the camera
             Vector3 targetPoint = defaultCameraPosition * cameraDistance;
             attachedCamera.transform.position = transform.TransformPoint(targetPoint);
+
+            //Set camera FOV to get higher with more velocity
+            AttachedCamera.fieldOfView = Mathf.Lerp(AttachedCamera.fieldOfView, Mathf.Min(60f + (Target.velocity.magnitude), 100f), Time.deltaTime * 4);
         }
 
         private void OnDestroy()

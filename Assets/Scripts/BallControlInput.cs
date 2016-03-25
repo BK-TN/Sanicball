@@ -9,7 +9,6 @@ namespace Sanicball
         private Vector3 rawDirection;
         private bool hasJumped = false;
 
-        public Quaternion CameraDirectionOffset { get; private set; }
         public Quaternion LookDirection { get; set; }
 
         private void Start()
@@ -57,19 +56,6 @@ namespace Sanicball
             {
                 if (hasJumped)
                     hasJumped = false;
-            }
-
-            //ROTATE CAMERA FAST
-            Vector2 camVector = GameInput.CameraVector(ball.CtrlType);
-            Vector3 orientedCamVector = new Vector3(camVector.x, 0, camVector.y);
-            if (orientedCamVector != Vector3.zero)
-            {
-                Quaternion camQuaternion = Quaternion.Slerp(Quaternion.identity, Quaternion.LookRotation(orientedCamVector), orientedCamVector.magnitude);
-                CameraDirectionOffset = camQuaternion;
-            }
-            else
-            {
-                CameraDirectionOffset = Quaternion.identity;
             }
 
             //RESPAWN FAST

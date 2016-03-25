@@ -177,6 +177,7 @@ namespace Sanicball
                     camera = Instantiate(prefabs.Camera);
                 }
                 camera.Target = rb;
+                camera.CtrlType = ctrlType;
 
                 if (CameraCreated != null)
                     CameraCreated(this, new CameraCreationArgs(camera));

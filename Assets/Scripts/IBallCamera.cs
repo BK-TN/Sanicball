@@ -1,10 +1,14 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public interface IBallCamera
+namespace Sanicball
 {
-    Rigidbody Target { get; set; }
-    Camera AttachedCamera { get; }
+    public interface IBallCamera
+    {
+        Rigidbody Target { get; set; }
+        Camera AttachedCamera { get; }
+        ControlType CtrlType { get; set; }
 
-    void SetDirection(Quaternion dir);
+        void SetDirection(Quaternion dir);
+    }
 }

@@ -18,16 +18,16 @@ namespace Sanicball
                 return attachedCamera;
             }
         }
-        private Camera attachedCamera;
+        public ControlType CtrlType { get; set; }
 
         [SerializeField]
         private float orbitHeight = 0.5f;
         [SerializeField]
         private float orbitDistance = 4.0f;
 
+        private Camera attachedCamera;
         private Quaternion currentDirection = Quaternion.Euler(0, 0, 0);
         private Quaternion currentDirectionWithOffset = Quaternion.Euler(0, 0, 0);
-        private Quaternion directionOffset;
         private Vector3 up = Vector3.up;
 
         public void SetDirection(Quaternion dir)
@@ -37,6 +37,16 @@ namespace Sanicball
 
         private void Update()
         {
+            //Input
+            var targetDirectionOffset = Quaternion.identity;
+            Vector2 camVector = GameInput.CameraVector(CtrlType);
+            Vector3 orientedCamVector = new Vector3(camVector.x, 0, camVector.y);
+            if (orientedCamVector != Vector3.zero)
+            {
+                Quaternion camQuaternion = Quaternion.Slerp(Quaternion.identity, Quaternion.LookRotation(orientedCamVector), orientedCamVector.magnitude);
+                targetDirectionOffset = camQuaternion;
+            }
+
             if (Target != null)
             {
                 //Rotate the camera towards the velocity of the rigidbody
@@ -63,13 +73,12 @@ namespace Sanicball
                 if (bci != null)
                 {
                     bci.LookDirection = currentDirection;
-                    directionOffset = bci.CameraDirectionOffset;
                 }
 
                 //Set camera FOV to get higher with more velocity
                 AttachedCamera.fieldOfView = Mathf.Lerp(AttachedCamera.fieldOfView, Mathf.Min(60f + (Target.velocity.magnitude), 100f), Time.deltaTime * 4);
 
-                currentDirectionWithOffset = Quaternion.Slerp(currentDirectionWithOffset, currentDirection * directionOffset, Time.deltaTime * 3);
+                currentDirectionWithOffset = Quaternion.Slerp(currentDirectionWithOffset, currentDirection * targetDirectionOffset, Time.deltaTime * 3);
                 transform.position = Target.transform.position + Vector3.up * orbitHeight + currentDirectionWithOffset * (Vector3.back * orbitDistance);
                 transform.rotation = currentDirectionWithOffset;
             }

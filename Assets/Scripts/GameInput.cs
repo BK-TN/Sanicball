@@ -147,16 +147,16 @@ namespace Sanicball
                     return KeysToVector3(right, left, false, false, forward, back);
 
                 case ControlType.Joystick1:
-                    return new Vector2(Input.GetAxis(joystick1LeftX), Input.GetAxis(joystick1LeftY));
+                    return new Vector3(Input.GetAxis(joystick1LeftX), 0, Input.GetAxis(joystick1LeftY));
 
                 case ControlType.Joystick2:
-                    return new Vector2(Input.GetAxis(joystick2LeftX), Input.GetAxis(joystick2LeftY));
+                    return new Vector3(Input.GetAxis(joystick2LeftX), 0, Input.GetAxis(joystick2LeftY));
 
                 case ControlType.Joystick3:
-                    return new Vector2(Input.GetAxis(joystick3LeftX), Input.GetAxis(joystick3LeftY));
+                    return new Vector3(Input.GetAxis(joystick3LeftX), 0, Input.GetAxis(joystick3LeftY));
 
                 case ControlType.Joystick4:
-                    return new Vector2(Input.GetAxis(joystick4LeftX), Input.GetAxis(joystick4LeftY));
+                    return new Vector3(Input.GetAxis(joystick4LeftX), 0, Input.GetAxis(joystick4LeftY));
             }
             return Vector2.zero;
         }
