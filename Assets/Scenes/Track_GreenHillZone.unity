@@ -25,7 +25,7 @@ RenderSettings:
   m_AmbientGroundColor: {r: 0.53676474, g: 0.525877, b: 0.43809476, a: 1}
   m_AmbientIntensity: 1
   m_AmbientMode: 3
-  m_SkyboxMaterial: {fileID: 2100000, guid: 2ae4a31e09ba0ca40985b0701dd2b23d, type: 2}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 75d60b3818a1da24d8c5b38e24922055, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -36,7 +36,7 @@ RenderSettings:
   m_ReflectionBounces: 1
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
-  m_Sun: {fileID: 0}
+  m_Sun: {fileID: 1715752704}
 --- !u!157 &4
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -10793,7 +10793,7 @@ Light:
     m_NearPlane: 0.2
   m_Cookie: {fileID: 0}
   m_DrawHalo: 0
-  m_Flare: {fileID: 0}
+  m_Flare: {fileID: 12100000, guid: 51e9e94bd0b2a4b96a5d00f9441133a7, type: 2}
   m_RenderMode: 0
   m_CullingMask:
     serializedVersion: 2
