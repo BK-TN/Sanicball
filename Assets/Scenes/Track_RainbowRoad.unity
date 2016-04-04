@@ -683,7 +683,7 @@ Light:
     m_NearPlane: 0.2
   m_Cookie: {fileID: 0}
   m_DrawHalo: 0
-  m_Flare: {fileID: 0}
+  m_Flare: {fileID: 12100000, guid: 8541d94808d5849d8bfa480259334205, type: 2}
   m_RenderMode: 0
   m_CullingMask:
     serializedVersion: 2

@@ -15,9 +15,9 @@ RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 6
   m_Fog: 1
-  m_FogColor: {r: 0.8666667, g: 0.96862745, b: 0.9882353, a: 1}
+  m_FogColor: {r: 0.9921569, g: 0.60784316, b: 0.37647063, a: 1}
   m_FogMode: 3
-  m_FogDensity: 0.0002
+  m_FogDensity: 0.0005
   m_LinearFogStart: 0
   m_LinearFogEnd: 300
   m_AmbientSkyColor: {r: 0.2794118, g: 0.2794118, b: 0.2794118, a: 1}
@@ -25,7 +25,7 @@ RenderSettings:
   m_AmbientGroundColor: {r: 0.2794118, g: 0.2794118, b: 0.2794118, a: 1}
   m_AmbientIntensity: 1
   m_AmbientMode: 3
-  m_SkyboxMaterial: {fileID: 2100000, guid: 2ae4a31e09ba0ca40985b0701dd2b23d, type: 2}
+  m_SkyboxMaterial: {fileID: 2100000, guid: 75d60b3818a1da24d8c5b38e24922055, type: 2}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -36,7 +36,7 @@ RenderSettings:
   m_ReflectionBounces: 1
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
-  m_Sun: {fileID: 0}
+  m_Sun: {fileID: 831546228}
 --- !u!157 &4
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -545,7 +545,7 @@ AudioSource:
       tangentMode: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
-    m_RotationOrder: 4
+    m_RotationOrder: 0
   spreadCustomCurve:
     serializedVersion: 2
     m_Curve:
@@ -567,7 +567,7 @@ AudioSource:
       tangentMode: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
-    m_RotationOrder: 4
+    m_RotationOrder: 0
 --- !u!4 &86463045
 Transform:
   m_ObjectHideFlags: 0
@@ -5131,7 +5131,7 @@ Light:
     m_NearPlane: 0.2
   m_Cookie: {fileID: 0}
   m_DrawHalo: 0
-  m_Flare: {fileID: 0}
+  m_Flare: {fileID: 12100000, guid: 51e9e94bd0b2a4b96a5d00f9441133a7, type: 2}
   m_RenderMode: 0
   m_CullingMask:
     serializedVersion: 2

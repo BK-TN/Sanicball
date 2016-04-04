@@ -291,6 +291,22 @@ MonoBehaviour:
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
     hyperspeed: 1
+  - name: Metal Sanic
+    title: Meme steel-er
+    artBy: Deviantart user franz888
+    stats:
+      rollSpeed: 100
+      airSpeed: 15
+      jumpHeight: 14
+      grip: 20
+    material: {fileID: 2100000, guid: 2c3ba655008b52e42992ab8cc6c354ca, type: 2}
+    icon: {fileID: 21300000, guid: c1be4fb07e7e12e409aad5b7f78785f3, type: 3}
+    minimapIcon: {fileID: 2100000, guid: 6d6fc2becdad49744b2537d691a9e969, type: 2}
+    trail: {fileID: 2100000, guid: 9ce71dd0ced43204d80391225a2d06fa, type: 2}
+    ballSize: 1
+    alternativeMesh: {fileID: 0}
+    collisionMesh: {fileID: 0}
+    hyperspeed: 0
   gameJoltInfo:
     gameID: 0
     privateKey: 
