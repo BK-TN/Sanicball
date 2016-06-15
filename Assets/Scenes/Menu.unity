@@ -6186,7 +6186,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 478268, guid: 2d986dc6adff9184a8b6f493d24b850a, type: 2}
       propertyPath: m_RootOrder
-      value: 8
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 8287262, guid: 2d986dc6adff9184a8b6f493d24b850a, type: 2}
       propertyPath: spreadCustomCurve.m_RotationOrder
@@ -8754,7 +8754,7 @@ Transform:
   - {fileID: 471717396}
   - {fileID: 1769039317}
   m_Father: {fileID: 0}
-  m_RootOrder: 7
+  m_RootOrder: 8
 --- !u!114 &989644965 stripped
 MonoBehaviour:
   m_PrefabParentObject: {fileID: 11480510, guid: 77af82ed99a824045a652fbca65e44a3,
@@ -10294,6 +10294,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   matchManagerPrefab: {fileID: 11456720, guid: fdb6e26d3a9dcac42af827fefb1aa46f, type: 2}
+  netManagerPrefab: {fileID: 11435352, guid: e6069862e41cff543b1ebc4ee4c7a634, type: 2}
 --- !u!4 &1114309121
 Transform:
   m_ObjectHideFlags: 0

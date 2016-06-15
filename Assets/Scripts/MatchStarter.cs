@@ -1,19 +1,17 @@
-﻿using UnityEngine;
+﻿using Sanicball.Net;
+using UnityEngine;
 
 namespace Sanicball
 {
     public class MatchStarter : MonoBehaviour
     {
-        public MatchManager matchManagerPrefab;
+        [SerializeField]
+        private MatchManager matchManagerPrefab = null;
+        [SerializeField]
+        private NetManager netManagerPrefab = null;
 
         private void Update()
         {
-            //H for HOST
-            if (Input.GetKeyDown(KeyCode.H))
-            {
-                BeginOnlineGame();
-            }
-
             //J for JOIN
             if (Input.GetKeyDown(KeyCode.J))
             {
@@ -27,17 +25,15 @@ namespace Sanicball
             manager.InitMatch();
         }
 
-        public void BeginOnlineGame()
-        {
-            //TODO: Create network mananger and link it to the match manager
-
-            MatchManager manager = Instantiate(matchManagerPrefab);
-            manager.InitMatch();
-        }
-
         public void JoinOnlineGame()
         {
             //TODO: Create network manager, join server, and wait for response
+            NetManager netManager = Instantiate(netManagerPrefab);
+            MatchManager matchManager = Instantiate(matchManagerPrefab);
+
+            netManager.MatchManager = matchManager;
+            if (netManager.Connect())
+                matchManager.InitMatch();
         }
     }
 }
