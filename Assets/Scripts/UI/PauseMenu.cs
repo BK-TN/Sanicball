@@ -22,7 +22,6 @@ namespace Sanicball.UI
 
         private void Awake()
         {
-            Debug.Log(Cursor.lockState);
             if (Cursor.lockState == CursorLockMode.Locked)
             {
                 mouseWasLocked = true;

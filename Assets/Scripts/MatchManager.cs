@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using UnityEngine;
 
 namespace Sanicball
@@ -29,6 +30,7 @@ namespace Sanicball
         private RaceManager raceManagerPrefab;
 
         //Match state
+        private List<MatchPlayer> players = new List<MatchPlayer>();
         private Data.MatchSettings currentSettings = new Data.MatchSettings();
         private bool inLobby = false;
         private bool lobbyTimerOn = false;
@@ -47,13 +49,68 @@ namespace Sanicball
         /// <summary>
         /// Contains all players in the game, even ones from other clients in online races
         /// </summary>
-        public List<MatchPlayer> Players { get; private set; }
+        public ReadOnlyCollection<MatchPlayer> Players { get { return players.AsReadOnly(); } }
+        /// <summary>
+        /// Current settings for this match. On remote clients, this is only used for showing settings on the UI.
+        /// </summary>
         public Data.MatchSettings CurrentSettings { get { return currentSettings; } }
+
+        private void Start()
+        {
+            DontDestroyOnLoad(gameObject);
+        }
+
+        public void InitMatch()
+        {
+            currentSettings.CopyValues(Data.ActiveData.MatchSettings);
+
+            firstTimeLoadingLobby = true;
+            GoToLobby();
+        }
+
+        public void JoinMatch()
+        {
+            //TODO: Recieve match status and sync up
+        }
+
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.JoystickButton7))
+            {
+                if (!UI.PauseMenu.GamePaused)
+                {
+                    Instantiate(pauseMenuPrefab);
+                }
+                else
+                {
+                    var menu = FindObjectOfType<UI.PauseMenu>();
+                    if (menu)
+                        Destroy(menu.gameObject);
+                }
+            }
+
+            if (inLobby && Input.GetKeyDown(KeyCode.O))
+            {
+                LobbyReferences.Active.MatchSettingsPanel.Show();
+            }
+
+            if (lobbyTimerOn && inLobby)
+            {
+                lobbyTimer -= Time.deltaTime;
+                LobbyReferences.Active.CountdownField.text = "Match starts in " + Mathf.Ceil(lobbyTimer);
+
+                if (lobbyTimer <= 0)
+                {
+                    GoToStage();
+                    StopLobbyTimer();
+                }
+            }
+        }
 
         public MatchPlayer CreatePlayer(string name, ControlType ctrlType, int characterId)
         {
             var p = new MatchPlayer(name, ctrlType, characterId);
-            Players.Add(p);
+            players.Add(p);
             if (inLobby)
             {
                 SpawnLobbyBall(p);
@@ -73,7 +130,7 @@ namespace Sanicball
         {
             if (Players.Contains(player))
             {
-                Players.Remove(player);
+                players.Remove(player);
 
                 if (player.BallObject)
                 {
@@ -98,7 +155,7 @@ namespace Sanicball
 
         private void AnyPlayerChangedReadyHandler(object sender, EventArgs e)
         {
-            var allReady = Players.TrueForAll(a => a.ReadyToRace);
+            var allReady = players.TrueForAll(a => a.ReadyToRace);
             if (allReady && !lobbyTimerOn)
             {
                 StartLobbyTimer();
@@ -171,12 +228,6 @@ namespace Sanicball
             }
         }
 
-        private void InitMatch()
-        {
-            firstTimeLoadingLobby = true;
-            GoToLobby();
-        }
-
         //Initiate the lobby after loading lobby scene
         private void InitLobby()
         {
@@ -202,48 +253,6 @@ namespace Sanicball
         }
 
         #endregion Scene changing / race loading
-
-        private void Start()
-        {
-            currentSettings.CopyValues(Data.ActiveData.MatchSettings);
-            Players = new List<MatchPlayer>();
-            DontDestroyOnLoad(gameObject);
-            InitMatch();
-        }
-
-        private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.JoystickButton7))
-            {
-                if (!UI.PauseMenu.GamePaused)
-                {
-                    Instantiate(pauseMenuPrefab);
-                }
-                else
-                {
-                    var menu = FindObjectOfType<UI.PauseMenu>();
-                    if (menu)
-                        Destroy(menu.gameObject);
-                }
-            }
-
-            if (inLobby && Input.GetKeyDown(KeyCode.O))
-            {
-                LobbyReferences.Active.MatchSettingsPanel.Show();
-            }
-
-            if (lobbyTimerOn && inLobby)
-            {
-                lobbyTimer -= Time.deltaTime;
-                LobbyReferences.Active.CountdownField.text = "Match starts in " + Mathf.Ceil(lobbyTimer);
-
-                if (lobbyTimer <= 0)
-                {
-                    GoToStage();
-                    StopLobbyTimer();
-                }
-            }
-        }
 
         private void SpawnLobbyBall(MatchPlayer player)
         {
@@ -274,6 +283,7 @@ namespace Sanicball
         }
 
         public event EventHandler LeftMatch;
+
         public event EventHandler ChangedReady;
 
         public string Name { get { return name; } }
