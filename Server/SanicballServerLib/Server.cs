@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Lidgren.Network;
+using Sanicball.Data;
 
 namespace SanicballServerLib
 {
@@ -37,6 +38,7 @@ namespace SanicballServerLib
         private List<LogEntry> log = new List<LogEntry>();
         private NetServer netServer;
         private bool running;
+        private MatchSettings matchSettings;
 
         public Server()
         {
