@@ -37,7 +37,9 @@ namespace Sanicball.Net
         {
             client = new NetClient(conf);
             client.Start();
-            conn = client.Connect("127.0.0.1", 25000);
+            NetOutgoingMessage approval = client.CreateMessage();
+            approval.Write("Approve me please");
+            conn = client.Connect("127.0.0.1", 25000, approval);
             return false;
         }
 
@@ -56,7 +58,31 @@ namespace Sanicball.Net
             NetIncomingMessage msg;
             while ((msg = client.ReadMessage()) != null)
             {
-                Debug.Log(msg.MessageType);
+                switch (msg.MessageType)
+                {
+                    case NetIncomingMessageType.DebugMessage:
+                    case NetIncomingMessageType.VerboseDebugMessage:
+                        Debug.Log(msg.ReadString());
+                        break;
+
+                    case NetIncomingMessageType.WarningMessage:
+                        Debug.LogWarning(msg.ReadString());
+                        break;
+
+                    case NetIncomingMessageType.ErrorMessage:
+                        Debug.LogError(msg.ReadString());
+                        break;
+
+                    case NetIncomingMessageType.StatusChanged:
+                        byte status = msg.ReadByte();
+                        string statusMsg = msg.ReadString();
+                        Debug.Log("Status change recieved: " + (NetConnectionStatus)status + " - Message: " + statusMsg);
+                        break;
+
+                    default:
+                        Debug.Log("Recieved unhandled message of type " + msg.MessageType);
+                        break;
+                }
             }
         }
     }

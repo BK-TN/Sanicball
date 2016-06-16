@@ -15,12 +15,30 @@ namespace SanicballServer
             {
                 serv.OnLog += (sender, e) =>
                 {
-                    Console.WriteLine(e.Message);
+                    switch (e.Entry.Type)
+                    {
+                        case LogType.Normal:
+                            Console.ForegroundColor = ConsoleColor.White;
+                            break;
+
+                        case LogType.Debug:
+                            Console.ForegroundColor = ConsoleColor.Gray;
+                            break;
+
+                        case LogType.Warning:
+                            Console.ForegroundColor = ConsoleColor.Yellow;
+                            break;
+
+                        case LogType.Error:
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            break;
+                    }
+                    Console.WriteLine(e.Entry.Message);
                 };
 
                 serv.Start(25000);
             }
-            Console.Write("Press any key to close.");
+            Console.Write("Press any key to close this window.");
             Console.ReadLine();
         }
     }

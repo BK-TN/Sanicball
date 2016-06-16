@@ -9,23 +9,33 @@ namespace SanicballServerLib
 {
     public class LogArgs : EventArgs
     {
-        public string Message { get; }
+        public LogEntry Entry { get; }
 
-        public LogArgs(string message)
+        public LogArgs(LogEntry entry)
         {
-            Message = message;
+            Entry = entry;
         }
+    }
+
+    public enum LogType
+    {
+        Normal,
+        Debug,
+        Warning,
+        Error
     }
 
     public struct LogEntry
     {
-        private DateTime Timestamp { get; }
-        private string Message { get; }
+        public DateTime Timestamp { get; }
+        public string Message { get; }
+        public LogType Type { get; }
 
-        public LogEntry(DateTime timestamp, string message)
+        public LogEntry(DateTime timestamp, string message, LogType type)
         {
             Timestamp = timestamp;
             Message = message;
+            Type = type;
         }
     }
 
@@ -47,8 +57,11 @@ namespace SanicballServerLib
         public void Start(int port)
         {
             running = true;
-            netServer = new NetServer(new NetPeerConfiguration(APP_ID)
-            { Port = 25000 });
+            NetPeerConfiguration config = new NetPeerConfiguration(APP_ID);
+            config.Port = 25000;
+            config.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
+
+            netServer = new NetServer(config);
             netServer.Start();
 
             Log("Server started on port " + port + "!");
@@ -61,18 +74,47 @@ namespace SanicballServerLib
             {
                 netServer.MessageReceivedEvent.WaitOne();
 
-                var msg = netServer.ReadMessage();
-                switch (msg.MessageType)
+                NetIncomingMessage msg;
+                while ((msg = netServer.ReadMessage()) != null)
                 {
-                    case NetIncomingMessageType.StatusChanged:
-                        byte status = msg.ReadByte();
-                        string statusMsg = msg.ReadString();
-                        Log("Status changed to " + (NetConnectionStatus)status + " - Message: " + statusMsg);
-                        break;
+                    switch (msg.MessageType)
+                    {
+                        case NetIncomingMessageType.VerboseDebugMessage:
+                        case NetIncomingMessageType.DebugMessage:
+                            Log(msg.ReadString(), LogType.Debug);
+                            break;
 
-                    default:
-                        Log("Recieved unhandled message of type " + msg.MessageType);
-                        break;
+                        case NetIncomingMessageType.WarningMessage:
+                            Log(msg.ReadString(), LogType.Warning);
+                            break;
+
+                        case NetIncomingMessageType.ErrorMessage:
+                            Log(msg.ReadString(), LogType.Error);
+                            break;
+
+                        case NetIncomingMessageType.StatusChanged:
+                            byte status = msg.ReadByte();
+                            string statusMsg = msg.ReadString();
+                            Log("Status change recieved: " + (NetConnectionStatus)status + " - Message: " + statusMsg, LogType.Debug);
+                            break;
+
+                        case NetIncomingMessageType.ConnectionApproval:
+                            string text = msg.ReadString();
+                            if (text.Contains("please"))
+                            {
+                                //Approve for being nice
+                                msg.SenderConnection.Approve();
+                            }
+                            else
+                            {
+                                msg.SenderConnection.Deny();
+                            }
+                            break;
+
+                        default:
+                            Log("Recieved unhandled message of type " + msg.MessageType, LogType.Debug);
+                            break;
+                    }
                 }
             }
         }
@@ -80,14 +122,13 @@ namespace SanicballServerLib
         public void Dispose()
         {
             netServer.Shutdown("Server was closed.");
-            Log("Goodbye world!");
         }
 
-        private void Log(object message)
+        private void Log(object message, LogType type = LogType.Normal)
         {
-            string stringMessage = message.ToString();
-            OnLog?.Invoke(this, new LogArgs(stringMessage));
-            log.Add(new LogEntry(DateTime.Now, stringMessage));
+            LogEntry entry = new LogEntry(DateTime.Now, message.ToString(), type);
+            OnLog?.Invoke(this, new LogArgs(entry));
+            log.Add(entry);
         }
     }
 }
