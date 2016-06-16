@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Lidgren.Network;
 using Sanicball.Data;
 
@@ -49,9 +50,13 @@ namespace SanicballServerLib
         private NetServer netServer;
         private bool running;
         private MatchSettings matchSettings;
+        private CommandQueue commandQueue;
 
-        public Server()
+        public bool Running { get { return running; } }
+
+        public Server(CommandQueue commandQueue)
         {
+            this.commandQueue = commandQueue;
         }
 
         public void Start(int port)
@@ -65,6 +70,8 @@ namespace SanicballServerLib
             netServer.Start();
 
             Log("Server started on port " + port + "!");
+
+            //Thread messageThread = new Thread(MessageLoop);
             MessageLoop();
         }
 
@@ -72,8 +79,17 @@ namespace SanicballServerLib
         {
             while (running)
             {
-                netServer.MessageReceivedEvent.WaitOne();
+                //Run with approx 20 ticks per second
+                Thread.Sleep(50);
 
+                //Check command queue
+                Command cmd;
+                while ((cmd = commandQueue.ReadNext()) != null)
+                {
+                    Log("Entered command: " + cmd.Name + ", " + cmd.ArgCount + " arguments", LogType.Debug);
+                }
+
+                //Check network message queue
                 NetIncomingMessage msg;
                 while ((msg = netServer.ReadMessage()) != null)
                 {
