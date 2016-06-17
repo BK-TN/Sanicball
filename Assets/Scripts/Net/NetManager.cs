@@ -6,41 +6,28 @@ namespace Sanicball.Net
 {
     public class NetManager : MonoBehaviour
     {
+        public const string APP_ID = "Sanicball";
+
         private NetClient client;
         private NetConnection conn;
-        private readonly NetPeerConfiguration conf = new NetPeerConfiguration("Sanicball");
         private MatchManager matchManager;
 
-        public MatchManager MatchManager
-        {
-            get { return matchManager; }
-            set
-            {
-                if (matchManager == null)
-                    matchManager = value;
-                else
-                    throw new System.InvalidOperationException("Match manager already set");
-            }
-        }
+        [SerializeField]
+        private MatchManager matchManagerPrefab = null;
 
         public void Start()
         {
-            if (matchManager == null)
-            {
-                throw new System.NullReferenceException("Match manager has not been set");
-            }
-
             DontDestroyOnLoad(gameObject);
         }
 
-        public bool Connect()
+        public void Connect(string ip, int port)
         {
+            NetPeerConfiguration conf = new NetPeerConfiguration(APP_ID);
             client = new NetClient(conf);
             client.Start();
             NetOutgoingMessage approval = client.CreateMessage();
             approval.Write("Approve me please");
-            conn = client.Connect("127.0.0.1", 25000, approval);
-            return false;
+            conn = client.Connect(ip, port, approval);
         }
 
         public void OnApplicationQuit()
@@ -74,9 +61,29 @@ namespace Sanicball.Net
                         break;
 
                     case NetIncomingMessageType.StatusChanged:
-                        byte status = msg.ReadByte();
-                        string statusMsg = msg.ReadString();
-                        Debug.Log("Status change recieved: " + (NetConnectionStatus)status + " - Message: " + statusMsg);
+                        NetConnectionStatus status = (NetConnectionStatus)msg.ReadByte();
+
+                        switch (status)
+                        {
+                            case NetConnectionStatus.Connected:
+                                Debug.Log("Connected!");
+                                if (msg.SenderConnection.RemoteHailMessage != null)
+                                {
+                                    Debug.Log("Server said: " + msg.SenderConnection.RemoteHailMessage.ReadString());
+									matchManager = Instantiate(matchManagerPrefab);
+									matchManager.InitOnlineMatch();
+                                }
+                                else
+                                {
+                                    Debug.LogError("Error: no hail message");
+                                }
+                                break;
+
+                            default:
+                                string statusMsg = msg.ReadString();
+                                Debug.Log("Status change recieved: " + status + " - Message: " + statusMsg);
+                                break;
+                        }
                         break;
 
                     default:

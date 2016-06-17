@@ -42,8 +42,6 @@ namespace SanicballServerLib
 
     public class Server : IDisposable
     {
-        private const string APP_ID = "Sanicball";
-
         public event EventHandler<LogArgs> OnLog;
 
         private List<LogEntry> log = new List<LogEntry>();
@@ -62,7 +60,7 @@ namespace SanicballServerLib
         public void Start(int port)
         {
             running = true;
-            NetPeerConfiguration config = new NetPeerConfiguration(APP_ID);
+            NetPeerConfiguration config = new NetPeerConfiguration(Sanicball.Net.NetManager.APP_ID);
             config.Port = 25000;
             config.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
 
@@ -119,7 +117,9 @@ namespace SanicballServerLib
                             if (text.Contains("please"))
                             {
                                 //Approve for being nice
-                                msg.SenderConnection.Approve();
+                                NetOutgoingMessage hailMsg = netServer.CreateMessage();
+                                hailMsg.Write("Thank you!");
+                                msg.SenderConnection.Approve(hailMsg);
                             }
                             else
                             {

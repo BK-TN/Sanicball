@@ -22,18 +22,13 @@ namespace Sanicball
         public void BeginLocalGame()
         {
             MatchManager manager = Instantiate(matchManagerPrefab);
-            manager.InitMatch();
+            manager.InitLocalMatch();
         }
 
         public void JoinOnlineGame()
         {
-            //TODO: Create network manager, join server, and wait for response
             NetManager netManager = Instantiate(netManagerPrefab);
-            MatchManager matchManager = Instantiate(matchManagerPrefab);
-
-            netManager.MatchManager = matchManager;
-            if (netManager.Connect())
-                matchManager.InitMatch();
+            netManager.Connect("127.0.0.1", 25000);
         }
     }
 }

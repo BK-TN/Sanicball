@@ -40,6 +40,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a88c4a06edd9ebe42a95090629d1f88b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  matchManagerPrefab: {fileID: 11456720, guid: fdb6e26d3a9dcac42af827fefb1aa46f, type: 2}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

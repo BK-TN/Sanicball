@@ -40,7 +40,7 @@ namespace Sanicball
         //Bools for scene initializing
         private bool loadingLobby = false;
         private bool loadingStage = false;
-        private bool firstTimeLoadingLobby = false;
+        private bool showSettingsOnLobbyLoad = false;
 
         //Events
         public event EventHandler<MatchPlayerEventArgs> MatchPlayerAdded;
@@ -60,16 +60,18 @@ namespace Sanicball
             DontDestroyOnLoad(gameObject);
         }
 
-        public void InitMatch()
+        public void InitLocalMatch()
         {
             currentSettings.CopyValues(Data.ActiveData.MatchSettings);
 
-            firstTimeLoadingLobby = true;
+            showSettingsOnLobbyLoad = true;
             GoToLobby();
         }
 
-        public void JoinMatch()
+        public void InitOnlineMatch()
         {
+            showSettingsOnLobbyLoad = true;
+            GoToLobby();
             //TODO: Recieve match status and sync up
         }
 
@@ -210,11 +212,11 @@ namespace Sanicball
             {
                 InitLobby();
                 loadingLobby = false;
-                if (firstTimeLoadingLobby)
+                if (showSettingsOnLobbyLoad)
                 {
                     //Let the player pick settings first time entering the lobby
                     LobbyReferences.Active.MatchSettingsPanel.Show();
-                    firstTimeLoadingLobby = false;
+                    showSettingsOnLobbyLoad = false;
                 }
             }
             if (loadingStage)
