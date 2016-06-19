@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -85,6 +86,11 @@ namespace SanicballServerLib
                 while ((cmd = commandQueue.ReadNext()) != null)
                 {
                     Log("Entered command: " + cmd.Name + ", " + cmd.ArgCount + " arguments", LogType.Debug);
+
+                    if (cmd.Name == "stop")
+                    {
+                        running = false;
+                    }
                 }
 
                 //Check network message queue
@@ -138,6 +144,27 @@ namespace SanicballServerLib
         public void Dispose()
         {
             netServer.Shutdown("Server was closed.");
+            Directory.CreateDirectory("Logs\\");
+            using (StreamWriter writer = new StreamWriter("Logs\\" + DateTime.Now.ToString("MM-dd-yyyy_HH-mm-ss") + ".txt"))
+            {
+                foreach (LogEntry entry in log)
+                {
+                    string logTypeText = "";
+                    switch (entry.Type)
+                    {
+                        case LogType.Debug:
+                            logTypeText = " [DEBUG]";
+                            break;
+                        case LogType.Warning:
+                            logTypeText = " [WARNING]";
+                            break;
+                        case LogType.Error:
+                            logTypeText = " [ERROR]";
+                            break;
+                    }
+                    writer.WriteLine(entry.Timestamp + logTypeText + " - " + entry.Message);
+                }
+            }
         }
 
         private void Log(object message, LogType type = LogType.Normal)

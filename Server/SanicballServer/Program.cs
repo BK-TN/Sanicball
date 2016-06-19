@@ -47,8 +47,13 @@ namespace SanicballServer
 
                 serv.Start(25000);
 
-                Console.WriteLine("Press any key to close this window.");
+                //Wait until server closes
+
+                inputThread.Abort();
                 inputThread.Join();
+
+                Console.WriteLine("Press any key to close this window.");
+                Console.ReadKey(true);
             }
         }
 
