@@ -51,10 +51,9 @@ namespace SanicballServer
 
                 inputThread.Abort();
                 inputThread.Join();
-
-                Console.WriteLine("Press any key to close this window.");
-                Console.ReadKey(true);
             }
+            Console.WriteLine("Press any key to close this window.");
+            Console.ReadKey(true);
         }
 
         private static void InputLoop()

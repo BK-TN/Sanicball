@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Lidgren.Network;
+using Newtonsoft.Json;
 using Sanicball.Data;
 
 namespace SanicballServerLib
@@ -43,6 +44,8 @@ namespace SanicballServerLib
 
     public class Server : IDisposable
     {
+        private const string settingsFile = "MatchSettings.json";
+
         public event EventHandler<LogArgs> OnLog;
 
         private List<LogEntry> log = new List<LogEntry>();
@@ -60,6 +63,27 @@ namespace SanicballServerLib
 
         public void Start(int port)
         {
+            bool defaultSettings = true;
+            if (File.Exists(settingsFile))
+            {
+                Log("Loading match settings");
+                using (StreamReader sr = new StreamReader(settingsFile))
+                {
+                    try
+                    {
+                        matchSettings = JsonConvert.DeserializeObject<MatchSettings>(sr.ReadToEnd());
+                        if (matchSettings != null)
+                            defaultSettings = false;
+                    }
+                    catch (JsonException ex)
+                    {
+                        Log("Failed to load " + settingsFile + ": " + ex.Message);
+                    }
+                }
+            }
+            if (defaultSettings)
+                matchSettings = new MatchSettings();
+
             running = true;
             NetPeerConfiguration config = new NetPeerConfiguration(Sanicball.Net.NetManager.APP_ID);
             config.Port = 25000;
@@ -143,6 +167,11 @@ namespace SanicballServerLib
 
         public void Dispose()
         {
+            Log("Saving match settings");
+            using (StreamWriter sw = new StreamWriter(settingsFile))
+            {
+                sw.Write(JsonConvert.SerializeObject(matchSettings));
+            }
             netServer.Shutdown("Server was closed.");
             Directory.CreateDirectory("Logs\\");
             using (StreamWriter writer = new StreamWriter("Logs\\" + DateTime.Now.ToString("MM-dd-yyyy_HH-mm-ss") + ".txt"))
@@ -155,9 +184,11 @@ namespace SanicballServerLib
                         case LogType.Debug:
                             logTypeText = " [DEBUG]";
                             break;
+
                         case LogType.Warning:
                             logTypeText = " [WARNING]";
                             break;
+
                         case LogType.Error:
                             logTypeText = " [ERROR]";
                             break;
