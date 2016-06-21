@@ -102,7 +102,7 @@ namespace SanicballServerLib
         {
             while (running)
             {
-                //Run with approx 20 ticks per second
+                //Run with approx 20 ticks per second (1000 / 50 ms)
                 Thread.Sleep(50);
 
                 //Check command queue
@@ -157,6 +157,23 @@ namespace SanicballServerLib
                             }
                             break;
 
+                        case NetIncomingMessageType.Data:
+                            byte messageType = msg.ReadByte();
+                            switch (messageType)
+                            {
+                                case MessageType.MatchSettingsChanged:
+                                    Log("Recieved new match settings");
+                                    string data = msg.ReadString();
+                                    MatchSettings settings = JsonConvert.DeserializeObject<MatchSettings>(data);
+                                    Log(data);
+
+                                    break;
+                                default:
+                                    Log("Recieved data message of unknown type");
+                                    break;
+                            }
+                            break;
+
                         default:
                             Log("Recieved unhandled message of type " + msg.MessageType, LogType.Debug);
                             break;
@@ -204,5 +221,10 @@ namespace SanicballServerLib
             OnLog?.Invoke(this, new LogArgs(entry));
             log.Add(entry);
         }
+    }
+
+    public class MessageType
+    {
+        public const byte MatchSettingsChanged = 0;
     }
 }

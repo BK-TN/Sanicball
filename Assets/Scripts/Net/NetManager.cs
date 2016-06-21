@@ -70,8 +70,13 @@ namespace Sanicball.Net
                                 if (msg.SenderConnection.RemoteHailMessage != null)
                                 {
                                     Debug.Log("Server said: " + msg.SenderConnection.RemoteHailMessage.ReadString());
-									matchManager = Instantiate(matchManagerPrefab);
-									matchManager.InitOnlineMatch();
+                                    matchManager = Instantiate(matchManagerPrefab);
+                                    matchManager.InitOnlineMatch();
+
+                                    NetOutgoingMessage settingsMsg = client.CreateMessage();
+                                    settingsMsg.Write((byte)0);
+                                    settingsMsg.Write(Newtonsoft.Json.JsonConvert.SerializeObject(new Data.MatchSettings()));
+                                    conn.SendMessage(settingsMsg, NetDeliveryMethod.ReliableOrdered, 0);
                                 }
                                 else
                                 {
