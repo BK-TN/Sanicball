@@ -14,6 +14,11 @@ namespace Sanicball.UI
         public Text aiOpponents;
         public Text aiSkill;
 
+        private Vector3 targetStageCamPos;
+
+        [SerializeField]
+        private Animation settingsChangedAnimation = null;
+
         [SerializeField]
         private Camera stageLayoutCamera;
 
@@ -33,8 +38,8 @@ namespace Sanicball.UI
             if (manager)
             {
                 var s = manager.CurrentSettings;
-                stageLayoutCamera.transform.position = new Vector3(s.StageId * 50, stageLayoutCamera.transform.position.y, stageLayoutCamera.transform.position.z);
 
+                targetStageCamPos = new Vector3(s.StageId * 50, stageLayoutCamera.transform.position.y, stageLayoutCamera.transform.position.z);
                 stageName.text = ActiveData.Stages[s.StageId].name;
                 stageImage.sprite = ActiveData.Stages[s.StageId].picture;
                 lapCount.text = s.Laps + (s.Laps == 1 ? " lap" : " laps");
@@ -44,6 +49,20 @@ namespace Sanicball.UI
                     aiOpponents.text += ActiveData.Characters[i].name + "\n";
                 }*/
                 aiSkill.text = "AI Skill: " + s.AISkill;
+
+                settingsChangedAnimation.Play();
+            }
+        }
+
+        private void Update()
+        {
+            if (Vector3.Distance(stageLayoutCamera.transform.position, targetStageCamPos) > 0.1f)
+            {
+                stageLayoutCamera.transform.position = Vector3.Lerp(stageLayoutCamera.transform.position, targetStageCamPos, Time.deltaTime * 10f);
+                if (Vector3.Distance(stageLayoutCamera.transform.position, targetStageCamPos) <= 0.1f)
+                {
+                    stageLayoutCamera.transform.position = targetStageCamPos;
+                }
             }
         }
     }
