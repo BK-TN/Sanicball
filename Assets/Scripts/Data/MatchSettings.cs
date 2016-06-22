@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -17,27 +18,21 @@ namespace Sanicball.Data
         [Newtonsoft.Json.JsonProperty]
         private int[] aiCharacters = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
 
+        public int StageId { get; set; }
+        public int Laps { get; set; }
+        public int AICount { get; set; }
+        public AISkillLevel AISkill { get; set; }
+        [Newtonsoft.Json.JsonIgnore]
+        public ReadOnlyCollection<int> AICharacters { get { return new ReadOnlyCollection<int>(aiCharacters); } }
+
         public MatchSettings()
         {
             Laps = 2;
             StageId = 0;
             AICount = 7;
             AISkill = AISkillLevel.Average;
+            aiCharacters = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
         }
-
-        public void CopyValues(MatchSettings original)
-        {
-            Laps = original.Laps;
-            StageId = original.StageId;
-            AICount = original.AICount;
-            AISkill = original.AISkill;
-            aiCharacters = (int[])original.aiCharacters.Clone();
-        }
-
-        public int StageId { get; set; }
-        public int Laps { get; set; }
-        public int AICount { get; set; }
-        public AISkillLevel AISkill { get; set; }
 
         public int GetAICharacter(int pos)
         {
@@ -57,6 +52,24 @@ namespace Sanicball.Data
             {
                 aiCharacters[pos] = characterId;
             }
+        }
+
+        public void CopyValues(MatchSettings original)
+        {
+            Laps = original.Laps;
+            StageId = original.StageId;
+            AICount = original.AICount;
+            AISkill = original.AISkill;
+            aiCharacters = (int[])original.aiCharacters.Clone();
+        }
+
+        public void CopyValues(ReadOnlyMatchSettings original)
+        {
+            Laps = original.Laps;
+            StageId = original.StageId;
+            AICount = original.AICount;
+            AISkill = original.AISkill;
+            aiCharacters = original.AICharacters.ToArray();
         }
     }
 }

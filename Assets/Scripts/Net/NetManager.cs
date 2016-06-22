@@ -72,11 +72,9 @@ namespace Sanicball.Net
                                     Debug.Log("Server said: " + msg.SenderConnection.RemoteHailMessage.ReadString());
                                     matchManager = Instantiate(matchManagerPrefab);
                                     matchManager.InitOnlineMatch();
+                                    matchManager.MatchSettingsChanged += MatchManager_MatchSettingsChanged;
 
-                                    NetOutgoingMessage settingsMsg = client.CreateMessage();
-                                    settingsMsg.Write((byte)0);
-                                    settingsMsg.Write(Newtonsoft.Json.JsonConvert.SerializeObject(new Data.MatchSettings()));
-                                    conn.SendMessage(settingsMsg, NetDeliveryMethod.ReliableOrdered, 0);
+                                    ;
                                 }
                                 else
                                 {
@@ -96,6 +94,16 @@ namespace Sanicball.Net
                         break;
                 }
             }
+        }
+
+        private void MatchManager_MatchSettingsChanged(object sender, System.EventArgs e)
+        {
+            NetOutgoingMessage settingsMsg = client.CreateMessage();
+            settingsMsg.Write((byte)0);
+            string serializedSettings = Newtonsoft.Json.JsonConvert.SerializeObject(matchManager.CurrentSettings);
+            Debug.Log(serializedSettings);
+            settingsMsg.Write(serializedSettings);
+            conn.SendMessage(settingsMsg, NetDeliveryMethod.ReliableOrdered, 0);
         }
     }
 }

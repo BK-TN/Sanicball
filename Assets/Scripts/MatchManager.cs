@@ -45,6 +45,7 @@ namespace Sanicball
         //Events
         public event EventHandler<MatchPlayerEventArgs> MatchPlayerAdded;
         public event EventHandler<MatchPlayerEventArgs> MatchPlayerRemoved;
+        public event EventHandler MatchSettingsChanged;
 
         /// <summary>
         /// Contains all players in the game, even ones from other clients in online races
@@ -53,7 +54,14 @@ namespace Sanicball
         /// <summary>
         /// Current settings for this match. On remote clients, this is only used for showing settings on the UI.
         /// </summary>
-        public Data.MatchSettings CurrentSettings { get { return currentSettings; } }
+        public Data.ReadOnlyMatchSettings CurrentSettings { get { return new Data.ReadOnlyMatchSettings(currentSettings); } }
+
+        public void ChangeSettings(Data.MatchSettings newSettings)
+        {
+            currentSettings.CopyValues(newSettings);
+            if (MatchSettingsChanged != null)
+                MatchSettingsChanged(this, EventArgs.Empty);
+        }
 
         private void Start()
         {
@@ -245,7 +253,7 @@ namespace Sanicball
         {
             inLobby = false;
             var raceManager = Instantiate(raceManagerPrefab);
-            raceManager.Settings.CopyValues(CurrentSettings);
+            raceManager.SetSettings(currentSettings);
         }
 
         public void QuitMatch()

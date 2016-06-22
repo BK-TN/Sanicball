@@ -47,7 +47,7 @@ namespace Sanicball
 
         public int Laps { get { return settings.Laps; } }
 
-        public Data.MatchSettings Settings { get { return settings; } }
+        public Data.ReadOnlyMatchSettings Settings { get { return new Data.ReadOnlyMatchSettings(settings); } }
 
         public int PlayerCount
         {
@@ -126,6 +126,11 @@ namespace Sanicball
         private void Start()
         {
             CurrentState = RaceState.Waiting;
+        }
+
+        public void SetSettings(Data.MatchSettings settingsToCopy)
+        {
+            settings.CopyValues(settingsToCopy);
         }
 
         private void CreateBallObjects()

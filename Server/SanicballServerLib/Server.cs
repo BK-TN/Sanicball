@@ -164,10 +164,11 @@ namespace SanicballServerLib
                                 case MessageType.MatchSettingsChanged:
                                     Log("Recieved new match settings");
                                     string data = msg.ReadString();
-                                    MatchSettings settings = JsonConvert.DeserializeObject<MatchSettings>(data);
-                                    Log(data);
-
+                                    ReadOnlyMatchSettings recievedSettings = JsonConvert.DeserializeObject<ReadOnlyMatchSettings>(data);
+                                    //TODO: Handle invalid settings
+                                    matchSettings.CopyValues(recievedSettings);
                                     break;
+
                                 default:
                                     Log("Recieved data message of unknown type");
                                     break;

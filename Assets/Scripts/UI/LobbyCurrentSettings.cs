@@ -17,13 +17,22 @@ namespace Sanicball.UI
         [SerializeField]
         private Camera stageLayoutCamera;
 
-        private void Update()
+        private void Start()
+        {
+            var manager = FindObjectOfType<MatchManager>();
+            if (manager)
+            {
+                manager.MatchSettingsChanged += Manager_MatchSettingsChanged;
+            }
+            Manager_MatchSettingsChanged(this, System.EventArgs.Empty);
+        }
+
+        private void Manager_MatchSettingsChanged(object sender, System.EventArgs e)
         {
             var manager = FindObjectOfType<MatchManager>();
             if (manager)
             {
                 var s = manager.CurrentSettings;
-
                 stageLayoutCamera.transform.position = new Vector3(s.StageId * 50, stageLayoutCamera.transform.position.y, stageLayoutCamera.transform.position.z);
 
                 stageName.text = ActiveData.Stages[s.StageId].name;

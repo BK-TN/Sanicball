@@ -52,7 +52,7 @@ namespace Sanicball.UI
             var manager = FindObjectOfType<MatchManager>();
             if (manager)
             {
-                manager.CurrentSettings.CopyValues(tempSettings);
+                manager.ChangeSettings(tempSettings);
                 ActiveData.MatchSettings.CopyValues(tempSettings);
             }
         }
@@ -134,7 +134,7 @@ namespace Sanicball.UI
 
         public void IncrementAICharacter(int pos)
         {
-            int characterId = tempSettings.GetAICharacter(pos);
+            int characterId = tempSettings.AICharacters[pos];
             characterId++;
             if (characterId >= ActiveData.Characters.Length)
             {
