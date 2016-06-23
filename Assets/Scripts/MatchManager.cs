@@ -7,12 +7,22 @@ namespace Sanicball
 {
     public class MatchPlayerEventArgs : EventArgs
     {
+        public MatchPlayer Player { get; private set; }
+
         public MatchPlayerEventArgs(MatchPlayer player)
         {
             Player = player;
         }
+    }
 
-        public MatchPlayer Player { get; private set; }
+    public class SettingsChangeArgs : EventArgs
+    {
+        public Data.MatchSettings NewSettings { get; private set; }
+
+        public SettingsChangeArgs(Data.MatchSettings newSettings)
+        {
+            NewSettings = newSettings;
+        }
     }
 
     /// <summary>
@@ -46,6 +56,7 @@ namespace Sanicball
         public event EventHandler<MatchPlayerEventArgs> MatchPlayerAdded;
         public event EventHandler<MatchPlayerEventArgs> MatchPlayerRemoved;
         public event EventHandler MatchSettingsChanged;
+        public event EventHandler<SettingsChangeArgs> SettingsChangeRequested;
 
         /// <summary>
         /// Contains all players in the game, even ones from other clients in online races
@@ -61,6 +72,12 @@ namespace Sanicball
             currentSettings.CopyValues(newSettings);
             if (MatchSettingsChanged != null)
                 MatchSettingsChanged(this, EventArgs.Empty);
+        }
+
+        public void RequestSettingsChange(Data.MatchSettings newSettings)
+        {
+            if (SettingsChangeRequested != null)
+                SettingsChangeRequested(this, new SettingsChangeArgs(newSettings));
         }
 
         private void Start()

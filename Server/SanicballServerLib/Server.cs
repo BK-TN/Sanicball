@@ -7,6 +7,7 @@ using System.Threading;
 using Lidgren.Network;
 using Newtonsoft.Json;
 using Sanicball.Data;
+using Sanicball.Net;
 
 namespace SanicballServerLib
 {
@@ -85,7 +86,7 @@ namespace SanicballServerLib
                 matchSettings = new MatchSettings();
 
             running = true;
-            NetPeerConfiguration config = new NetPeerConfiguration(Sanicball.Net.NetManager.APP_ID);
+            NetPeerConfiguration config = new NetPeerConfiguration(NetManager.APP_ID);
             config.Port = 25000;
             config.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
 
@@ -164,9 +165,15 @@ namespace SanicballServerLib
                                 case MessageType.MatchSettingsChanged:
                                     Log("Recieved new match settings");
                                     string data = msg.ReadString();
-                                    ReadOnlyMatchSettings recievedSettings = JsonConvert.DeserializeObject<ReadOnlyMatchSettings>(data);
+                                    MatchSettings recievedSettings = JsonConvert.DeserializeObject<MatchSettings>(data);
                                     //TODO: Handle invalid settings
                                     matchSettings.CopyValues(recievedSettings);
+
+                                    //Send new settings to all clients
+                                    NetOutgoingMessage settingsMsg = netServer.CreateMessage();
+                                    settingsMsg.Write(MessageType.MatchSettingsChanged);
+                                    settingsMsg.Write(data);
+                                    netServer.SendMessage(settingsMsg, netServer.Connections, NetDeliveryMethod.ReliableOrdered, 0);
                                     break;
 
                                 default:
@@ -222,10 +229,5 @@ namespace SanicballServerLib
             OnLog?.Invoke(this, new LogArgs(entry));
             log.Add(entry);
         }
-    }
-
-    public class MessageType
-    {
-        public const byte MatchSettingsChanged = 0;
     }
 }

@@ -72,9 +72,7 @@ namespace Sanicball.Net
                                     Debug.Log("Server said: " + msg.SenderConnection.RemoteHailMessage.ReadString());
                                     matchManager = Instantiate(matchManagerPrefab);
                                     matchManager.InitOnlineMatch();
-                                    matchManager.MatchSettingsChanged += MatchManager_MatchSettingsChanged;
-
-                                    ;
+                                    matchManager.SettingsChangeRequested += MatchManager_SettingsChangeRequested;
                                 }
                                 else
                                 {
@@ -89,6 +87,19 @@ namespace Sanicball.Net
                         }
                         break;
 
+                    case NetIncomingMessageType.Data:
+                        byte type = msg.ReadByte();
+                        switch (type)
+                        {
+                            case MessageType.MatchSettingsChanged:
+                                Debug.Log("New match settings recieved from server");
+                                string data = msg.ReadString();
+                                Data.MatchSettings settings = Newtonsoft.Json.JsonConvert.DeserializeObject<Data.MatchSettings>(data);
+                                matchManager.ChangeSettings(settings);
+                                break;
+                        }
+                        break;
+
                     default:
                         Debug.Log("Recieved unhandled message of type " + msg.MessageType);
                         break;
@@ -96,11 +107,11 @@ namespace Sanicball.Net
             }
         }
 
-        private void MatchManager_MatchSettingsChanged(object sender, System.EventArgs e)
+        private void MatchManager_SettingsChangeRequested(object sender, SettingsChangeArgs e)
         {
             NetOutgoingMessage settingsMsg = client.CreateMessage();
-            settingsMsg.Write((byte)0);
-            string serializedSettings = Newtonsoft.Json.JsonConvert.SerializeObject(matchManager.CurrentSettings);
+            settingsMsg.Write(MessageType.MatchSettingsChanged);
+            string serializedSettings = Newtonsoft.Json.JsonConvert.SerializeObject(e.NewSettings);
             Debug.Log(serializedSettings);
             settingsMsg.Write(serializedSettings);
             conn.SendMessage(settingsMsg, NetDeliveryMethod.ReliableOrdered, 0);

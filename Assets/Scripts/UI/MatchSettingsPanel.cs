@@ -52,7 +52,7 @@ namespace Sanicball.UI
             var manager = FindObjectOfType<MatchManager>();
             if (manager)
             {
-                manager.ChangeSettings(tempSettings);
+                manager.RequestSettingsChange(tempSettings);
                 ActiveData.MatchSettings.CopyValues(tempSettings);
             }
         }
