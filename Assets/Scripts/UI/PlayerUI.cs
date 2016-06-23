@@ -156,9 +156,9 @@ namespace Sanicball.UI
             speedFieldLabel.text = postfix;
 
             //Lap counter
-            if (TargetPlayer.Lap < TargetManager.Laps + 1)
+            if (TargetPlayer.Lap < TargetManager.Settings.Laps + 1)
             {
-                lapField.text = "Lap " + TargetPlayer.Lap + "/" + TargetManager.Laps;
+                lapField.text = "Lap " + TargetPlayer.Lap + "/" + TargetManager.Settings.Laps;
             }
             else
             {

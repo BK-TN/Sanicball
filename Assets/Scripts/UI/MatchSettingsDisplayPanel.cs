@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 namespace Sanicball.UI
 {
-    public class LobbyCurrentSettings : MonoBehaviour
+    public class MatchSettingsDisplayPanel : MonoBehaviour
     {
         [Header("Fields")]
         public Text stageName;
@@ -37,7 +37,7 @@ namespace Sanicball.UI
             var manager = FindObjectOfType<MatchManager>();
             if (manager)
             {
-                var s = manager.CurrentSettings;
+                MatchSettings s = manager.CurrentSettings;
 
                 targetStageCamPos = new Vector3(s.StageId * 50, stageLayoutCamera.transform.position.y, stageLayoutCamera.transform.position.z);
                 stageName.text = ActiveData.Stages[s.StageId].name;

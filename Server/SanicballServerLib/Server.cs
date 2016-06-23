@@ -73,8 +73,7 @@ namespace SanicballServerLib
                     try
                     {
                         matchSettings = JsonConvert.DeserializeObject<MatchSettings>(sr.ReadToEnd());
-                        if (matchSettings != null)
-                            defaultSettings = false;
+                        defaultSettings = false;
                     }
                     catch (JsonException ex)
                     {
@@ -167,7 +166,7 @@ namespace SanicballServerLib
                                     string data = msg.ReadString();
                                     MatchSettings recievedSettings = JsonConvert.DeserializeObject<MatchSettings>(data);
                                     //TODO: Handle invalid settings
-                                    matchSettings.CopyValues(recievedSettings);
+                                    matchSettings = recievedSettings;
 
                                     //Send new settings to all clients
                                     NetOutgoingMessage settingsMsg = netServer.CreateMessage();

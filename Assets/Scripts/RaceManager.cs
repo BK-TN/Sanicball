@@ -18,7 +18,7 @@ namespace Sanicball
         private List<RacePlayer> players = new List<RacePlayer>();
         private RaceState currentState = RaceState.None;
 
-        private Data.MatchSettings settings = new Data.MatchSettings();
+        private Data.MatchSettings settings;
 
         [SerializeField]
         private WaitingCamera waitingCamPrefab = null;
@@ -37,33 +37,10 @@ namespace Sanicball
         private bool raceTimerOn = false;
         private UI.RaceUI raceUI;
 
-        public System.TimeSpan RaceTime
-        {
-            get
-            {
-                return System.TimeSpan.FromSeconds(raceTimer);
-            }
-        }
-
-        public int Laps { get { return settings.Laps; } }
-
-        public Data.ReadOnlyMatchSettings Settings { get { return new Data.ReadOnlyMatchSettings(settings); } }
-
-        public int PlayerCount
-        {
-            get
-            {
-                return players.Count;
-            }
-        }
-
-        public RacePlayer this[int playerIndex]
-        {
-            get
-            {
-                return players[playerIndex];
-            }
-        }
+        public System.TimeSpan RaceTime { get { return System.TimeSpan.FromSeconds(raceTimer); } }
+        public Data.MatchSettings Settings { get { return settings; } set { settings = value; } }
+        public int PlayerCount { get { return players.Count; } }
+        public RacePlayer this[int playerIndex] { get { return players[playerIndex]; } }
 
         private RaceState CurrentState
         {
@@ -126,11 +103,6 @@ namespace Sanicball
         private void Start()
         {
             CurrentState = RaceState.Waiting;
-        }
-
-        public void SetSettings(Data.MatchSettings settingsToCopy)
-        {
-            settings.CopyValues(settingsToCopy);
         }
 
         private void CreateBallObjects()

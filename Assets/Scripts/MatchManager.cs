@@ -17,6 +17,7 @@ namespace Sanicball
 
     public class SettingsChangeArgs : EventArgs
     {
+>
         public Data.MatchSettings NewSettings { get; private set; }
 
         public SettingsChangeArgs(Data.MatchSettings newSettings)
@@ -41,7 +42,7 @@ namespace Sanicball
 
         //Match state
         private List<MatchPlayer> players = new List<MatchPlayer>();
-        private Data.MatchSettings currentSettings = new Data.MatchSettings();
+        private Data.MatchSettings currentSettings;
         private bool inLobby = false;
         private bool lobbyTimerOn = false;
         private const float lobbyTimerMax = 3;
@@ -65,11 +66,13 @@ namespace Sanicball
         /// <summary>
         /// Current settings for this match. On remote clients, this is only used for showing settings on the UI.
         /// </summary>
-        public Data.ReadOnlyMatchSettings CurrentSettings { get { return new Data.ReadOnlyMatchSettings(currentSettings); } }
+        public Data.MatchSettings CurrentSettings { get { return currentSettings; } }
+
+        //TODO match settings properties
 
         public void ChangeSettings(Data.MatchSettings newSettings)
         {
-            currentSettings.CopyValues(newSettings);
+            currentSettings = newSettings;
             if (MatchSettingsChanged != null)
                 MatchSettingsChanged(this, EventArgs.Empty);
         }
@@ -87,7 +90,7 @@ namespace Sanicball
 
         public void InitLocalMatch()
         {
-            currentSettings.CopyValues(Data.ActiveData.MatchSettings);
+            currentSettings = Data.ActiveData.MatchSettings;
 
             showSettingsOnLobbyLoad = true;
             GoToLobby();
@@ -95,9 +98,12 @@ namespace Sanicball
 
         public void InitOnlineMatch()
         {
+            //TODO: Recieve match status and sync up
+            //For now lets just use default settings
+            currentSettings = Data.MatchSettings.CreateDefault();
+
             showSettingsOnLobbyLoad = true;
             GoToLobby();
-            //TODO: Recieve match status and sync up
         }
 
         private void Update()
@@ -219,7 +225,7 @@ namespace Sanicball
 
         public void GoToStage()
         {
-            var targetStage = Data.ActiveData.Stages[CurrentSettings.StageId];
+            var targetStage = Data.ActiveData.Stages[currentSettings.StageId];
 
             loadingStage = true;
             loadingLobby = false;
@@ -270,7 +276,7 @@ namespace Sanicball
         {
             inLobby = false;
             var raceManager = Instantiate(raceManagerPrefab);
-            raceManager.SetSettings(currentSettings);
+            raceManager.Settings = currentSettings;
         }
 
         public void QuitMatch()
