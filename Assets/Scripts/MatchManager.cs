@@ -17,7 +17,6 @@ namespace Sanicball
 
     public class SettingsChangeArgs : EventArgs
     {
->
         public Data.MatchSettings NewSettings { get; private set; }
 
         public SettingsChangeArgs(Data.MatchSettings newSettings)
@@ -59,6 +58,9 @@ namespace Sanicball
         public event EventHandler MatchSettingsChanged;
         public event EventHandler<SettingsChangeArgs> SettingsChangeRequested;
 
+        //new stuff
+        private Match.MatchMessenger messenger;
+
         /// <summary>
         /// Contains all players in the game, even ones from other clients in online races
         /// </summary>
@@ -68,46 +70,52 @@ namespace Sanicball
         /// </summary>
         public Data.MatchSettings CurrentSettings { get { return currentSettings; } }
 
-        //TODO match settings properties
-
-        public void ChangeSettings(Data.MatchSettings newSettings)
+        private void SettingsChangedCallback(Match.SettingsChangedMessage msg)
         {
-            currentSettings = newSettings;
+            currentSettings = msg.NewMatchSettings;
             if (MatchSettingsChanged != null)
                 MatchSettingsChanged(this, EventArgs.Empty);
         }
 
         public void RequestSettingsChange(Data.MatchSettings newSettings)
         {
-            if (SettingsChangeRequested != null)
-                SettingsChangeRequested(this, new SettingsChangeArgs(newSettings));
-        }
-
-        private void Start()
-        {
-            DontDestroyOnLoad(gameObject);
+            messenger.SendMessage(new Match.SettingsChangedMessage(newSettings));
         }
 
         public void InitLocalMatch()
         {
             currentSettings = Data.ActiveData.MatchSettings;
 
+            messenger = new Match.LocalMatchMessenger();
+
             showSettingsOnLobbyLoad = true;
             GoToLobby();
         }
 
-        public void InitOnlineMatch()
+        public void InitOnlineMatch(Lidgren.Network.NetClient client, Lidgren.Network.NetConnection serverConnection)
         {
             //TODO: Recieve match status and sync up
             //For now lets just use default settings
             currentSettings = Data.MatchSettings.CreateDefault();
 
+            messenger = new Match.OnlineMatchMessenger(client, serverConnection);
+
             showSettingsOnLobbyLoad = true;
             GoToLobby();
         }
 
+        private void Start()
+        {
+            DontDestroyOnLoad(gameObject);
+
+            //Either InitLocalMatch or InitOnlineMatch should have been called by now so register some messenger callbacks
+            messenger.CreateListener<Match.SettingsChangedMessage>(SettingsChangedCallback);
+        }
+
         private void Update()
         {
+            messenger.UpdateListeners();
+
             if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.JoystickButton7))
             {
                 if (!UI.PauseMenu.GamePaused)

@@ -45,7 +45,8 @@ namespace SanicballServerLib
 
     public class Server : IDisposable
     {
-        private const string settingsFile = "MatchSettings.json";
+        private const string SETTINGS_FILENAME = "MatchSettings.json";
+        private const int TICKRATE = 20;
 
         public event EventHandler<LogArgs> OnLog;
 
@@ -65,10 +66,10 @@ namespace SanicballServerLib
         public void Start(int port)
         {
             bool defaultSettings = true;
-            if (File.Exists(settingsFile))
+            if (File.Exists(SETTINGS_FILENAME))
             {
                 Log("Loading match settings");
-                using (StreamReader sr = new StreamReader(settingsFile))
+                using (StreamReader sr = new StreamReader(SETTINGS_FILENAME))
                 {
                     try
                     {
@@ -77,7 +78,7 @@ namespace SanicballServerLib
                     }
                     catch (JsonException ex)
                     {
-                        Log("Failed to load " + settingsFile + ": " + ex.Message);
+                        Log("Failed to load " + SETTINGS_FILENAME + ": " + ex.Message);
                     }
                 }
             }
@@ -102,8 +103,7 @@ namespace SanicballServerLib
         {
             while (running)
             {
-                //Run with approx 20 ticks per second (1000 / 50 ms)
-                Thread.Sleep(50);
+                Thread.Sleep(1000 / TICKRATE);
 
                 //Check command queue
                 Command cmd;
@@ -192,7 +192,7 @@ namespace SanicballServerLib
         public void Dispose()
         {
             Log("Saving match settings");
-            using (StreamWriter sw = new StreamWriter(settingsFile))
+            using (StreamWriter sw = new StreamWriter(SETTINGS_FILENAME))
             {
                 sw.Write(JsonConvert.SerializeObject(matchSettings));
             }
