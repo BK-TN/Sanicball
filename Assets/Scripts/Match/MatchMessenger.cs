@@ -7,12 +7,12 @@ namespace Sanicball.Match
 {
     public class MatchMessageListener
     {
-        public System.Type Type { get; private set; }
+        public System.Type MessageType { get; private set; }
         public object Handler { get; private set; }
 
-        public MatchMessageListener(System.Type type, object handler)
+        public MatchMessageListener(System.Type messageType, object handler)
         {
-            Type = type;
+            MessageType = messageType;
             Handler = handler;
         }
     }
@@ -50,7 +50,7 @@ namespace Sanicball.Match
             for (int i = 0; i < listeners.Count; i++)
             {
                 MatchMessageListener listenerEntry = listeners[i];
-                if (listenerEntry.Type == handler.GetType() && (MatchMessageHandler<T>)listenerEntry.Handler == handler)
+                if (listenerEntry.MessageType == handler.GetType() && (MatchMessageHandler<T>)listenerEntry.Handler == handler)
                 {
                     listeners.Remove(listenerEntry);
                     return true;

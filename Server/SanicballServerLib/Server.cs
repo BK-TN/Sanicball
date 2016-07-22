@@ -161,18 +161,14 @@ namespace SanicballServerLib
                             byte messageType = msg.ReadByte();
                             switch (messageType)
                             {
-                                case MessageType.MatchSettingsChanged:
-                                    Log("Recieved new match settings");
-                                    string data = msg.ReadString();
-                                    MatchSettings recievedSettings = JsonConvert.DeserializeObject<MatchSettings>(data);
-                                    //TODO: Handle invalid settings
-                                    matchSettings = recievedSettings;
+                                case MessageType.MatchMessage:
 
-                                    //Send new settings to all clients
-                                    NetOutgoingMessage settingsMsg = netServer.CreateMessage();
-                                    settingsMsg.Write(MessageType.MatchSettingsChanged);
-                                    settingsMsg.Write(data);
-                                    netServer.SendMessage(settingsMsg, netServer.Connections, NetDeliveryMethod.ReliableOrdered, 0);
+                                    //Send the exact same message back again
+                                    NetOutgoingMessage testMsg = netServer.CreateMessage();
+                                    testMsg.Write(MessageType.MatchMessage);
+                                    testMsg.Write(msg.ReadString());
+                                    netServer.SendMessage(testMsg, msg.SenderConnection, NetDeliveryMethod.ReliableOrdered);
+                                    Log("Forwarded message", LogType.Debug);
                                     break;
 
                                 default:

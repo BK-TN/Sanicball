@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Reflection;
 using Lidgren.Network;
 using Sanicball.Net;
 using UnityEngine;
@@ -13,17 +14,28 @@ namespace Sanicball.Match
         private NetClient client;
         private NetConnection serverConnection;
 
+        //Settings to use for both serializing and deserializing messages
+        private Newtonsoft.Json.JsonSerializerSettings serializerSettings;
+
         public OnlineMatchMessenger(NetClient client, NetConnection serverConnection)
         {
             this.client = client;
             this.serverConnection = serverConnection;
+
+            serializerSettings = new Newtonsoft.Json.JsonSerializerSettings();
+            serializerSettings.TypeNameHandling = Newtonsoft.Json.TypeNameHandling.All;
         }
 
         public override void SendMessage<T>(T message)
         {
             NetOutgoingMessage netMessage = client.CreateMessage();
+            netMessage.Write(MessageType.MatchMessage);
 
-            //TODO: Send match messages over network
+            string data = Newtonsoft.Json.JsonConvert.SerializeObject(message, serializerSettings);
+            netMessage.Write(data);
+
+            //TODO: make it possible to use other net delivery methods for some things
+            client.SendMessage(netMessage, NetDeliveryMethod.ReliableOrdered);
         }
 
         public override void UpdateListeners()
@@ -53,12 +65,36 @@ namespace Sanicball.Match
                         break;
 
                     case NetIncomingMessageType.Data:
-                        //TODO: deserialize match messages
+
+                        switch (msg.ReadByte())
+                        {
+                            case MessageType.MatchMessage:
+                                MatchMessage message = Newtonsoft.Json.JsonConvert.DeserializeObject<MatchMessage>(msg.ReadString(), serializerSettings);
+
+                                //Use reflection to call ReceiveMessage with the proper type parameter
+                                MethodInfo methodToCall = typeof(OnlineMatchMessenger).GetMethod("RecieveMessage", BindingFlags.NonPublic | BindingFlags.Instance);
+                                MethodInfo genericVersion = methodToCall.MakeGenericMethod(message.GetType());
+                                genericVersion.Invoke(this, new[] { message });
+
+                                break;
+                        }
                         break;
 
                     default:
                         Debug.Log("Recieved unhandled message of type " + msg.MessageType);
                         break;
+                }
+            }
+        }
+
+        private void RecieveMessage<T>(T message) where T : MatchMessage
+        {
+            for (int i = 0; i < listeners.Count; i++)
+            {
+                MatchMessageListener listener = listeners[i];
+                if (listener.MessageType == message.GetType())
+                {
+                    ((MatchMessageHandler<T>)listener.Handler).Invoke(message);
                 }
             }
         }
