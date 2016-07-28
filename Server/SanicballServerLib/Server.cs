@@ -86,7 +86,7 @@ namespace SanicballServerLib
                 matchSettings = new MatchSettings();
 
             running = true;
-            NetPeerConfiguration config = new NetPeerConfiguration(NetManager.APP_ID);
+            NetPeerConfiguration config = new NetPeerConfiguration(Sanicball.Match.OnlineMatchMessenger.APP_ID);
             config.Port = 25000;
             config.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
 

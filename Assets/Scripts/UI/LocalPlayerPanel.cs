@@ -33,6 +33,8 @@ namespace Sanicball.UI
             characterSelectSubpanel.CharacterSelected += CharacterSelectSubpanel_CharacterSelected;
             characterSelectSubpanel.CancelSelected += CharacterSelectSubpanel_Cancelled;
 
+            playerManager.LocalPlayerJoined += PlayerManager_LocalPlayerJoined;
+
             infoBox.SetIcon(controlTypeIcons[(int)AssignedCtrlType]);
 
             //string kbButton = GameInput.GetKeyCodeName(ActiveData.Keybinds[Keybind.Menu]);
@@ -104,7 +106,8 @@ namespace Sanicball.UI
         {
             if (AssignedPlayer == null)
             {
-                AssignedPlayer = playerManager.CreatePlayerForControlType(AssignedCtrlType, c);
+                Debug.Log("A player panel just requested creating a player");
+                playerManager.CreatePlayerForControlType(AssignedCtrlType, c);
             }
             else
             {
@@ -113,6 +116,15 @@ namespace Sanicball.UI
             if (characterSelectSubpanel.gameObject.activeSelf)
             {
                 characterSelectSubpanel.gameObject.SetActive(false);
+            }
+        }
+
+        private void PlayerManager_LocalPlayerJoined(object sender, MatchPlayerEventArgs e)
+        {
+            if (e.Player.CtrlType == AssignedCtrlType)
+            {
+                AssignedPlayer = e.Player;
+                Debug.Log("A player panel just got a player assigned");
             }
         }
 

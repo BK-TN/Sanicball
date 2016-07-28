@@ -11,6 +11,7 @@ namespace Sanicball.UI
     public class LocalPlayerManager : MonoBehaviour
     {
         public LocalPlayerPanel localPlayerPanelPrefab;
+        public event System.EventHandler<MatchPlayerEventArgs> LocalPlayerJoined;
 
         private const int maxPlayers = 4;
         private MatchManager manager;
@@ -32,6 +33,8 @@ namespace Sanicball.UI
                         panel.SetCharacter(p.CharacterId);
                     }
                 }
+
+                manager.MatchPlayerAdded += Manager_MatchPlayerAdded;
             }
             else
             {
@@ -72,10 +75,25 @@ namespace Sanicball.UI
             return panel;
         }
 
-        public MatchPlayer CreatePlayerForControlType(ControlType ctrlType, int character)
+        public void CreatePlayerForControlType(ControlType ctrlType, int character)
         {
-            var newPlayer = manager.CreatePlayer(ctrlType.ToString(), ctrlType, character);
-            return newPlayer;
+            manager.RequestPlayerJoin(ctrlType, character);
+            //var newPlayer = manager.CreatePlayer(ctrlType.ToString(), ctrlType, character);
+            //return newPlayer;
+        }
+
+        private void Manager_MatchPlayerAdded(object sender, MatchPlayerEventArgs e)
+        {
+            if (e.IsLocal)
+            {
+                if (LocalPlayerJoined != null)
+                    LocalPlayerJoined(this, e);
+            }
+        }
+
+        public void SetCharacter(MatchPlayer player, int c)
+        {
+            manager.RequestCharacterChange(player.CtrlType, c);
         }
 
         public void RemoveControlType(ControlType ctrlType)
@@ -85,13 +103,8 @@ namespace Sanicball.UI
 
         public void LeaveMatch(MatchPlayer player)
         {
-            manager.RemovePlayer(player);
+            manager.RequestPlayerLeave(player.CtrlType);
             usedControls.Remove(player.CtrlType);
-        }
-
-        public void SetCharacter(MatchPlayer player, int c)
-        {
-            manager.SetCharacter(player, c);
         }
     }
 }

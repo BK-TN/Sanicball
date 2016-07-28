@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using UnityEngine;
 
 namespace Sanicball
@@ -8,10 +9,12 @@ namespace Sanicball
     public class MatchPlayerEventArgs : EventArgs
     {
         public MatchPlayer Player { get; private set; }
+        public bool IsLocal { get; private set; }
 
-        public MatchPlayerEventArgs(MatchPlayer player)
+        public MatchPlayerEventArgs(MatchPlayer player, bool isLocal)
         {
             Player = player;
+            IsLocal = isLocal;
         }
     }
 
@@ -40,12 +43,14 @@ namespace Sanicball
         private RaceManager raceManagerPrefab;
 
         //Match state
+        private List<MatchClient> clients = new List<MatchClient>();
         private List<MatchPlayer> players = new List<MatchPlayer>();
         private Data.MatchSettings currentSettings;
         private bool inLobby = false;
         private bool lobbyTimerOn = false;
         private const float lobbyTimerMax = 3;
         private float lobbyTimer = lobbyTimerMax;
+        private Guid myGuid;
 
         //Bools for scene initializing
         private bool loadingLobby = false;
@@ -61,6 +66,8 @@ namespace Sanicball
         //new stuff
         private Match.MatchMessenger messenger;
 
+        public bool OnlineMode { get; private set; }
+
         /// <summary>
         /// Contains all players in the game, even ones from other clients in online races
         /// </summary>
@@ -70,6 +77,8 @@ namespace Sanicball
         /// </summary>
         public Data.MatchSettings CurrentSettings { get { return currentSettings; } }
 
+        #region Match message callbacks
+
         private void SettingsChangedCallback(Match.SettingsChangedMessage msg)
         {
             currentSettings = msg.NewMatchSettings;
@@ -77,10 +86,89 @@ namespace Sanicball
                 MatchSettingsChanged(this, EventArgs.Empty);
         }
 
+        private void ClientJoinedCallback(Match.ClientJoinedMessage msg)
+        {
+            clients.Add(new MatchClient(msg.ClientGuid, msg.ClientName));
+            Debug.Log("New client " + msg.ClientName);
+        }
+
+        private void PlayerJoinedCallback(Match.PlayerJoinedMessage msg)
+        {
+            var p = new MatchPlayer(msg.ClientGuid, msg.CtrlType, msg.InitialCharacter);
+            players.Add(p);
+
+            if (inLobby)
+            {
+                SpawnLobbyBall(p);
+            }
+
+            p.ChangedReady += AnyPlayerChangedReadyHandler;
+
+            StopLobbyTimer(); //TODO: look into moving this (make the server trigger it while somehow still having it work in local play)
+
+            if (MatchPlayerAdded != null)
+                MatchPlayerAdded(this, new MatchPlayerEventArgs(p, msg.ClientGuid == myGuid));
+        }
+
+        private void PlayerLeftCallback(Match.PlayerLeftMessage msg)
+        {
+            var player = players.FirstOrDefault(a => a.ClientGuid == msg.ClientGuid && a.CtrlType == msg.CtrlType);
+            if (player != null)
+            {
+                players.Remove(player);
+
+                if (player.BallObject)
+                {
+                    Destroy(player.BallObject.gameObject);
+                }
+
+                if (MatchPlayerRemoved != null)
+                    MatchPlayerRemoved(this, new MatchPlayerEventArgs(player, msg.ClientGuid == myGuid)); //TODO: determine if removed player was local
+            }
+        }
+
+        private void CharacterChangedCallback(Match.CharacterChangedMessage msg)
+        {
+            if (!inLobby)
+            {
+                Debug.LogError("Cannot set character outside of lobby!");
+            }
+
+            var player = players.FirstOrDefault(a => a.ClientGuid == msg.ClientGuid && a.CtrlType == msg.CtrlType);
+            if (player != null)
+            {
+                player.CharacterId = msg.NewCharacter;
+                SpawnLobbyBall(player);
+            }
+        }
+
+        #endregion Match message callbacks
+
+        #region State changing methods
+
         public void RequestSettingsChange(Data.MatchSettings newSettings)
         {
             messenger.SendMessage(new Match.SettingsChangedMessage(newSettings));
         }
+
+        public void RequestPlayerJoin(ControlType ctrlType, int initialCharacter)
+        {
+            messenger.SendMessage(new Match.PlayerJoinedMessage(myGuid, ctrlType, initialCharacter));
+        }
+
+        public void RequestPlayerLeave(ControlType ctrlType)
+        {
+            messenger.SendMessage(new Match.PlayerLeftMessage(myGuid, ctrlType));
+        }
+
+        public void RequestCharacterChange(ControlType ctrlType, int newCharacter)
+        {
+            messenger.SendMessage(new Match.CharacterChangedMessage(myGuid, ctrlType, newCharacter));
+        }
+
+        #endregion State changing methods
+
+        #region Match initializing
 
         public void InitLocalMatch()
         {
@@ -94,6 +182,8 @@ namespace Sanicball
 
         public void InitOnlineMatch(Lidgren.Network.NetClient client, Lidgren.Network.NetConnection serverConnection)
         {
+            OnlineMode = true;
+
             //TODO: Recieve match status and sync up
             //For now lets just use default settings
             currentSettings = Data.MatchSettings.CreateDefault();
@@ -104,12 +194,22 @@ namespace Sanicball
             GoToLobby();
         }
 
+        #endregion Match initializing
+
         private void Start()
         {
             DontDestroyOnLoad(gameObject);
 
-            //Either InitLocalMatch or InitOnlineMatch should have been called by now so register some messenger callbacks
+            //A messenger should be created by now! Time to create some message listeners
             messenger.CreateListener<Match.SettingsChangedMessage>(SettingsChangedCallback);
+            messenger.CreateListener<Match.ClientJoinedMessage>(ClientJoinedCallback);
+            messenger.CreateListener<Match.PlayerJoinedMessage>(PlayerJoinedCallback);
+            messenger.CreateListener<Match.PlayerLeftMessage>(PlayerLeftCallback);
+            messenger.CreateListener<Match.CharacterChangedMessage>(CharacterChangedCallback);
+
+            //Create this client
+            myGuid = Guid.NewGuid();
+            messenger.SendMessage(new Match.ClientJoinedMessage(myGuid, "client#" + myGuid));
         }
 
         private void Update()
@@ -120,7 +220,8 @@ namespace Sanicball
             {
                 if (!UI.PauseMenu.GamePaused)
                 {
-                    Instantiate(pauseMenuPrefab);
+                    UI.PauseMenu menu = Instantiate(pauseMenuPrefab);
+                    menu.OnlineMode = OnlineMode;
                 }
                 else
                 {
@@ -146,52 +247,6 @@ namespace Sanicball
                     StopLobbyTimer();
                 }
             }
-        }
-
-        public MatchPlayer CreatePlayer(string name, ControlType ctrlType, int characterId)
-        {
-            var p = new MatchPlayer(name, ctrlType, characterId);
-            players.Add(p);
-            if (inLobby)
-            {
-                SpawnLobbyBall(p);
-            }
-
-            p.ChangedReady += AnyPlayerChangedReadyHandler;
-
-            StopLobbyTimer();
-
-            if (MatchPlayerAdded != null)
-                MatchPlayerAdded(this, new MatchPlayerEventArgs(p));
-
-            return p;
-        }
-
-        public void RemovePlayer(MatchPlayer player)
-        {
-            if (Players.Contains(player))
-            {
-                players.Remove(player);
-
-                if (player.BallObject)
-                {
-                    Destroy(player.BallObject.gameObject);
-                }
-
-                if (MatchPlayerRemoved != null)
-                    MatchPlayerRemoved(this, new MatchPlayerEventArgs(player));
-            }
-        }
-
-        public void SetCharacter(MatchPlayer player, int character)
-        {
-            if (!inLobby)
-            {
-                Debug.LogError("Cannot set character outside of lobby!");
-            }
-
-            player.CharacterId = character;
-            SpawnLobbyBall(player);
         }
 
         private void AnyPlayerChangedReadyHandler(object sender, EventArgs e)
@@ -306,19 +361,29 @@ namespace Sanicball
         }
     }
 
-    /// <summary>
-    /// Represents a player and its personal settings.
-    /// </summary>
+    public class MatchClient
+    {
+        public Guid Guid { get; private set; }
+        public string Name { get; private set; }
+
+        public MatchClient(Guid guid, string name)
+        {
+            Guid = guid;
+            Name = name;
+        }
+    }
+
     [Serializable]
     public class MatchPlayer
     {
+        private Guid clientGuid;
         private string name;
         private ControlType ctrlType;
         private bool readyToRace;
 
-        public MatchPlayer(string name, ControlType ctrlType, int initialCharacterId)
+        public MatchPlayer(Guid clientGuid, ControlType ctrlType, int initialCharacterId)
         {
-            this.name = name;
+            this.clientGuid = clientGuid;
             this.ctrlType = ctrlType;
             CharacterId = initialCharacterId;
         }
@@ -327,7 +392,7 @@ namespace Sanicball
 
         public event EventHandler ChangedReady;
 
-        public string Name { get { return name; } }
+        public Guid ClientGuid { get { return clientGuid; } }
         public ControlType CtrlType { get { return ctrlType; } }
         public int CharacterId { get; set; }
         public Ball BallObject { get; set; }
