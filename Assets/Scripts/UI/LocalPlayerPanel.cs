@@ -97,8 +97,10 @@ namespace Sanicball.UI
         {
             if (AssignedPlayer != null)
             {
-                AssignedPlayer.ReadyToRace = !AssignedPlayer.ReadyToRace;
-                readyIndicator.On = AssignedPlayer.ReadyToRace;
+                //TODO toggle ready in a better way
+
+                //AssignedPlayer.ReadyToRace = !AssignedPlayer.ReadyToRace;
+                //readyIndicator.On = AssignedPlayer.ReadyToRace;
             }
         }
 

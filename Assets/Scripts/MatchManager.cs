@@ -18,21 +18,21 @@ namespace Sanicball
         }
     }
 
-    public class SettingsChangeArgs : EventArgs
-    {
-        public Data.MatchSettings NewSettings { get; private set; }
-
-        public SettingsChangeArgs(Data.MatchSettings newSettings)
-        {
-            NewSettings = newSettings;
-        }
-    }
-
     /// <summary>
     /// Manages game state - scenes, players, all that jazz
     /// </summary>
     public class MatchManager : MonoBehaviour
     {
+        #region Events
+
+        public event EventHandler<MatchPlayerEventArgs> MatchPlayerAdded;
+        public event EventHandler<MatchPlayerEventArgs> MatchPlayerRemoved;
+        public event EventHandler MatchSettingsChanged;
+
+        #endregion Events
+
+        #region Exposed fields
+
         [SerializeField]
         private string lobbySceneName = "Lobby";
 
@@ -42,40 +42,92 @@ namespace Sanicball
         [SerializeField]
         private RaceManager raceManagerPrefab;
 
-        //Match state
+        #endregion Exposed fields
+
+        #region Match state
+
+        //List of all clients in the match. Only serves a purpose in online play.
+        //In local play, this list will always only contain the local client.
         private List<MatchClient> clients = new List<MatchClient>();
+
+        //Holds the guid of the local client, to check if messages are directed at it.
+        private Guid myGuid;
+
+        //List of all players - players are seperate from clients because each client can have
+        //up to 4 players playing in splitscreen.
         private List<MatchPlayer> players = new List<MatchPlayer>();
+
+        //These settings will be used when starting a race
         private Data.MatchSettings currentSettings;
-        private bool inLobby = false;
+
+        //Lobby timer stuff
         private bool lobbyTimerOn = false;
         private const float lobbyTimerMax = 3;
         private float lobbyTimer = lobbyTimerMax;
-        private Guid myGuid;
 
-        //Bools for scene initializing
+        #endregion Match state
+
+        #region Scenes and scene initializing
+
+        //Bools for scene initializing and related stuff
+        private bool inLobby = false; //Are we in the lobby or in a race?
         private bool loadingLobby = false;
         private bool loadingStage = false;
-        private bool showSettingsOnLobbyLoad = false;
+        private bool showSettingsOnLobbyLoad = false; //If true, the match settings window will pop up when the lobby scene is entered.
 
-        //Events
-        public event EventHandler<MatchPlayerEventArgs> MatchPlayerAdded;
-        public event EventHandler<MatchPlayerEventArgs> MatchPlayerRemoved;
-        public event EventHandler MatchSettingsChanged;
-        public event EventHandler<SettingsChangeArgs> SettingsChangeRequested;
+        #endregion Scenes and scene initializing
 
-        //new stuff
+        //Match messenger used to send and recieve state changes.
+        //This will be either a LocalMatchMessenger or OnlineMatchMessenger, but each are used the same way.
         private Match.MatchMessenger messenger;
 
+        #region Properties
+
+        /// <summary>
+        /// True if playing online. Used for enabling online-only behaviour, like the client list and the chat
+        /// </summary>
         public bool OnlineMode { get; private set; }
 
         /// <summary>
         /// Contains all players in the game, even ones from other clients in online races
         /// </summary>
         public ReadOnlyCollection<MatchPlayer> Players { get { return players.AsReadOnly(); } }
+
         /// <summary>
         /// Current settings for this match. On remote clients, this is only used for showing settings on the UI.
         /// </summary>
         public Data.MatchSettings CurrentSettings { get { return currentSettings; } }
+
+        #endregion Properties
+
+        #region State changing methods
+
+        public void RequestSettingsChange(Data.MatchSettings newSettings)
+        {
+            messenger.SendMessage(new Match.SettingsChangedMessage(newSettings));
+        }
+
+        public void RequestPlayerJoin(ControlType ctrlType, int initialCharacter)
+        {
+            messenger.SendMessage(new Match.PlayerJoinedMessage(myGuid, ctrlType, initialCharacter));
+        }
+
+        public void RequestPlayerLeave(ControlType ctrlType)
+        {
+            messenger.SendMessage(new Match.PlayerLeftMessage(myGuid, ctrlType));
+        }
+
+        public void RequestCharacterChange(ControlType ctrlType, int newCharacter)
+        {
+            messenger.SendMessage(new Match.CharacterChangedMessage(myGuid, ctrlType, newCharacter));
+        }
+
+        public void RequestReadyChange(ControlType ctrlType, bool ready)
+        {
+            messenger.SendMessage(new Match.ChangedReadyMessage(myGuid, ctrlType, ready));
+        }
+
+        #endregion State changing methods
 
         #region Match message callbacks
 
@@ -101,8 +153,6 @@ namespace Sanicball
             {
                 SpawnLobbyBall(p);
             }
-
-            p.ChangedReady += AnyPlayerChangedReadyHandler;
 
             StopLobbyTimer(); //TODO: look into moving this (make the server trigger it while somehow still having it work in local play)
 
@@ -142,31 +192,27 @@ namespace Sanicball
             }
         }
 
+        private void ChangedReadyCallback(Match.ChangedReadyMessage msg)
+        {
+            var player = players.FirstOrDefault(a => a.ClientGuid == msg.ClientGuid && a.CtrlType == msg.CtrlType);
+            if (player != null)
+            {
+                player.ReadyToRace = !player.ReadyToRace;
+
+                //Check if all players are ready and start/stop lobby timer accordingly
+                var allReady = players.TrueForAll(a => a.ReadyToRace);
+                if (allReady && !lobbyTimerOn)
+                {
+                    StartLobbyTimer();
+                }
+                if (!allReady && lobbyTimerOn)
+                {
+                    StopLobbyTimer();
+                }
+            }
+        }
+
         #endregion Match message callbacks
-
-        #region State changing methods
-
-        public void RequestSettingsChange(Data.MatchSettings newSettings)
-        {
-            messenger.SendMessage(new Match.SettingsChangedMessage(newSettings));
-        }
-
-        public void RequestPlayerJoin(ControlType ctrlType, int initialCharacter)
-        {
-            messenger.SendMessage(new Match.PlayerJoinedMessage(myGuid, ctrlType, initialCharacter));
-        }
-
-        public void RequestPlayerLeave(ControlType ctrlType)
-        {
-            messenger.SendMessage(new Match.PlayerLeftMessage(myGuid, ctrlType));
-        }
-
-        public void RequestCharacterChange(ControlType ctrlType, int newCharacter)
-        {
-            messenger.SendMessage(new Match.CharacterChangedMessage(myGuid, ctrlType, newCharacter));
-        }
-
-        #endregion State changing methods
 
         #region Match initializing
 
@@ -206,6 +252,7 @@ namespace Sanicball
             messenger.CreateListener<Match.PlayerJoinedMessage>(PlayerJoinedCallback);
             messenger.CreateListener<Match.PlayerLeftMessage>(PlayerLeftCallback);
             messenger.CreateListener<Match.CharacterChangedMessage>(CharacterChangedCallback);
+            messenger.CreateListener<Match.ChangedReadyMessage>(ChangedReadyCallback);
 
             //Create this client
             myGuid = Guid.NewGuid();
@@ -249,18 +296,7 @@ namespace Sanicball
             }
         }
 
-        private void AnyPlayerChangedReadyHandler(object sender, EventArgs e)
-        {
-            var allReady = players.TrueForAll(a => a.ReadyToRace);
-            if (allReady && !lobbyTimerOn)
-            {
-                StartLobbyTimer();
-            }
-            if (!allReady && lobbyTimerOn)
-            {
-                StopLobbyTimer();
-            }
-        }
+        #region Players ready and lobby timer
 
         private void StartLobbyTimer()
         {
@@ -274,6 +310,8 @@ namespace Sanicball
             lobbyTimer = lobbyTimerMax;
             LobbyReferences.Active.CountdownField.enabled = false;
         }
+
+        #endregion Players ready and lobby timer
 
         #region Scene changing / race loading
 
@@ -361,6 +399,7 @@ namespace Sanicball
         }
     }
 
+    [Serializable]
     public class MatchClient
     {
         public Guid Guid { get; private set; }
@@ -387,8 +426,6 @@ namespace Sanicball
             this.ctrlType = ctrlType;
             CharacterId = initialCharacterId;
         }
-
-        public event EventHandler LeftMatch;
 
         public event EventHandler ChangedReady;
 

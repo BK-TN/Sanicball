@@ -162,13 +162,15 @@ namespace SanicballServerLib
                             switch (messageType)
                             {
                                 case MessageType.MatchMessage:
-
                                     //Send the exact same message back again
+                                    Sanicball.Match.MatchMessage matchMessage = JsonConvert.DeserializeObject<Sanicball.Match.MatchMessage>(msg.ReadString(), new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
+                                    Log("Forwarding message of type " + matchMessage.GetType(), LogType.Debug);
+                                    string outMessage = JsonConvert.SerializeObject(matchMessage, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
+
                                     NetOutgoingMessage testMsg = netServer.CreateMessage();
                                     testMsg.Write(MessageType.MatchMessage);
-                                    testMsg.Write(msg.ReadString());
+                                    testMsg.Write(outMessage);
                                     netServer.SendMessage(testMsg, msg.SenderConnection, NetDeliveryMethod.ReliableOrdered);
-                                    Log("Forwarded message", LogType.Debug);
                                     break;
 
                                 default:
