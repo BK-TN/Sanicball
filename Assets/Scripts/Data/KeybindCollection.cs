@@ -19,6 +19,7 @@ namespace Sanicball.Data
         Brake,
         Jump,
         Respawn, //Toggle ready in lobby, respawn ingame
+		SwitchCamera,
         Menu,
         NextSong,
         Chat
@@ -47,7 +48,11 @@ namespace Sanicball.Data
 
             keybinds.Add(Keybind.Brake, KeyCode.LeftShift);
             keybinds.Add(Keybind.Jump, KeyCode.Space);
+//			keybinds.Add(Keybind.Jump, KeyCode.Joystick1Button14);
+
             keybinds.Add(Keybind.Respawn, KeyCode.R);
+			keybinds.Add(Keybind.SwitchCamera, KeyCode.M);
+
             keybinds.Add(Keybind.Menu, KeyCode.Return);
             keybinds.Add(Keybind.NextSong, KeyCode.N);
             keybinds.Add(Keybind.Chat, KeyCode.T);

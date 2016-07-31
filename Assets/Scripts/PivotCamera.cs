@@ -59,6 +59,14 @@ namespace Sanicball
                 bci.LookDirection = transform.rotation * Quaternion.Euler(0, -90, 0);
             }
 
+
+			var bciLocal = Target.GetComponent<BallControlInputLocal>();
+			if (bciLocal)
+			{
+				bciLocal.LookDirection = transform.rotation * Quaternion.Euler(0, -90, 0);
+			}
+
+
             //Mouse look
             if (UseMouse)
             {
@@ -74,14 +82,19 @@ namespace Sanicball
                     Cursor.visible = true;
                 }
 
-                if (Cursor.lockState == CursorLockMode.Locked)
+				if (Cursor.lockState == CursorLockMode.Locked && CtrlType == ControlType.Keyboard)
                 {
-                    float yAxisMove = Input.GetAxis("Mouse Y") * sensitivityMouse;
+//					Debug.Log("KEyboard Gura camara");
+
+					float yAxisMove = Input.GetAxis("Mouse Y") * sensitivityMouse;
                     ytargetRotation += -yAxisMove;
 
-                    float xAxisMove = Input.GetAxis("Mouse X") * sensitivityMouse;
+					float xAxisMove = Input.GetAxis("Mouse X") * sensitivityMouse;
                     xtargetRotation += xAxisMove;
                 }
+
+					
+
             }
 
             //Keyboard controls

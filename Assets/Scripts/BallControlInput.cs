@@ -1,5 +1,4 @@
 using UnityEngine;
-
 namespace Sanicball
 {
     [RequireComponent(typeof(Ball))]
@@ -19,13 +18,15 @@ namespace Sanicball
 
         private void Update()
         {
-            if (UI.PauseMenu.GamePaused) return; //Short circuit if paused
+			if (UI.PauseMenu.GamePaused || !ball.isLocalPlayer) return; //Short circuit if paused
 
             //GO FAST
             const float weight = 0.5f;
 
             var targetVector = GameInput.MovementVector(ball.CtrlType);
+
             rawDirection = Vector3.MoveTowards(rawDirection, targetVector, weight);
+
             Vector3 directionVector = rawDirection;
 
             if (directionVector != Vector3.zero)
@@ -58,11 +59,19 @@ namespace Sanicball
                     hasJumped = false;
             }
 
-            //RESPAWN FAST
-            if (GameInput.IsRespawning(ball.CtrlType) && ball.CanMove)
-            {
-                ball.RequestRespawn();
-            }
+			//Switch Camera Fast
+			if (GameInput.IsSwitchingCameras(ball.CtrlType) && ball.CanMove)
+			{
+				ball.SwitchCameraBall();
+			}
+
+
+
+//            //RESPAWN FAST
+//            if (GameInput.IsRespawning(ball.CtrlType) && ball.CanMove)
+//            {
+//                ball.RequestRespawn();
+//            }
         }
     }
 }

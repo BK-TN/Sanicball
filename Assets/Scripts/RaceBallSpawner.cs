@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Sanicball
 {
@@ -17,12 +18,42 @@ namespace Sanicball
         [SerializeField]
         private LayerMask ballSpawningMask = new LayerMask();
 
-        public Ball SpawnBall(int position, BallType ballType, ControlType ctrlType, int character, string nickname)
+		public Ball SpawnBall(int position, BallType ballType, ControlType ctrlType, int character, string nickname, NetworkConnection con )
         {
             float characterSize = Data.ActiveData.Characters[character].ballSize;
 
-            return SpawnBall(GetSpawnPoint(position, characterSize / 2f), transform.rotation, ballType, ctrlType, character, nickname);
+			GameObject.Find("SanicNetworkManager").GetComponent<SanicNetworkManager>().tipo = ballType;
+
+			GameObject.Find("SanicNetworkManager").GetComponent<SanicNetworkManager>().controlTipo = ctrlType;
+
+			GameObject.Find("SanicNetworkManager").GetComponent<SanicNetworkManager>().personaje = character;
+
+			GameObject.Find("SanicNetworkManager").GetComponent<SanicNetworkManager>().nickName = nickname;
+
+			if(ballType == BallType.Player){
+				return SpawnBallMultiplayer(GetSpawnPoint(position, characterSize / 2f), transform.rotation, ballType, ctrlType, character, nickname,con);
+
+			}else 
+				return SpawnBallLocal(GetSpawnPoint(position, characterSize / 2f), transform.rotation, ballType, ctrlType, character, nickname);
+
         }
+
+		public Ball SpawnBall(int position, BallType ballType, ControlType ctrlType, int character, string nickname )
+		{
+			float characterSize = Data.ActiveData.Characters[character].ballSize;
+
+			GameObject.Find("SanicNetworkManager").GetComponent<SanicNetworkManager>().tipo = ballType;
+
+			GameObject.Find("SanicNetworkManager").GetComponent<SanicNetworkManager>().controlTipo = ctrlType;
+
+			GameObject.Find("SanicNetworkManager").GetComponent<SanicNetworkManager>().personaje = character;
+
+			GameObject.Find("SanicNetworkManager").GetComponent<SanicNetworkManager>().nickName = nickname;
+
+			return SpawnBallLocal(GetSpawnPoint(position, characterSize / 2f), transform.rotation, ballType, ctrlType, character, nickname);
+
+		}
+
 
         public Vector3 GetSpawnPoint(int position, float offsetY)
         {

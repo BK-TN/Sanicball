@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
+using System;
+//using Newtonsoft.Json;
 using UnityEngine;
 
 namespace Sanicball.Data
@@ -105,8 +106,8 @@ namespace Sanicball.Data
                 }
                 //Deserialize from JSON into a data object
                 try
-                {
-                    var dataObj = JsonConvert.DeserializeObject<T>(dataString);
+				{
+					var dataObj = JsonUtility.FromJson<T>(dataString);
                     //Make sure an object was created, this would't end well with a null value
                     if (dataObj != null)
                     {
@@ -117,7 +118,7 @@ namespace Sanicball.Data
                         Debug.LogError("Failed to load " + filename + ": file is empty.");
                     }
                 }
-                catch (JsonException ex)
+                catch (Exception ex)
                 {
                     Debug.LogError("Failed to parse " + filename + "! JSON converter info: " + ex.Message);
                 }
@@ -129,7 +130,7 @@ namespace Sanicball.Data
 
         private void Save(string filename, object objToSave)
         {
-            var data = JsonConvert.SerializeObject(objToSave);
+			var data = JsonUtility.ToJson(objToSave);
             using (StreamWriter sw = new StreamWriter(Application.persistentDataPath + "/" + filename))
             {
                 sw.Write(data);

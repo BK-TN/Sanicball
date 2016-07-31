@@ -9,6 +9,7 @@ GameObject:
   m_Component:
   - 4: {fileID: 410042}
   - 114: {fileID: 11456720}
+  - 114: {fileID: 11415612}
   m_Layer: 0
   m_Name: Match Manager
   m_TagString: Untagged
@@ -25,9 +26,42 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 673.6974, y: 367.21255, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
+--- !u!114 &11415612
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 116384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 372142912, guid: 870353891bb340e2b2a9c8707e7419ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SceneId:
+    m_Value: 0
+  m_AssetId:
+    i0: 253
+    i1: 182
+    i2: 226
+    i3: 109
+    i4: 58
+    i5: 157
+    i6: 202
+    i7: 196
+    i8: 42
+    i9: 248
+    i10: 39
+    i11: 254
+    i12: 251
+    i13: 26
+    i14: 164
+    i15: 111
+  m_ServerOnly: 0
+  m_LocalPlayerAuthority: 0
 --- !u!114 &11456720
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -42,6 +76,12 @@ MonoBehaviour:
   lobbySceneName: Lobby
   pauseMenuPrefab: {fileID: 11429824, guid: 26112b52065230d4d957e3f9d87cb82e, type: 2}
   raceManagerPrefab: {fileID: 11420630, guid: e716ae2f6176c9442addf97bb30866ee, type: 2}
+  inLobby: 1
+  serverConnections: 0
+  loadingLobby: 0
+  loadingStage: 0
+  firstTimeLoadingLobby: 1
+  replace: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

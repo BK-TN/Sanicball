@@ -6,7 +6,8 @@ namespace Sanicball
     {
         public bool grounded = false;
         public AudioSource DriftAudio { get; set; }
-        public Ball target;
+		public Ball target;
+
 
         private ParticleSystem pSystem;
 

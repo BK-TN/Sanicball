@@ -16,7 +16,7 @@ public class Marker : MonoBehaviour
 
     private RectTransform rectTransform;
 
-    private const float clampMin = 0.2f;
+    private const float clampMin = 0.1f;
     private const float clampMax = 1 - clampMin;
 
     private void Start()
@@ -24,7 +24,7 @@ public class Marker : MonoBehaviour
         rectTransform = GetComponent<RectTransform>();
     }
 
-    private void Update()
+    private void Update()	
     {
         if (!target) return;
 

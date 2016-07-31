@@ -1,15 +1,17 @@
 ﻿using UnityEngine;
-
+using UnityEngine.Networking;
 namespace Sanicball
 {
     public class MatchStarter : MonoBehaviour
     {
-        public MatchManager prefabToUse;
+        public MatchManagerLocal prefabToUse;
 
         public void BeginLocalGame()
         {
             Instantiate(prefabToUse);
-            //UnityEngine.SceneManagement.SceneManager.LoadScene("Lobby");
+
+//			NetworkServer.Spawn(prefabToUse.gameObject);
+            UnityEngine.SceneManagement.SceneManager.LoadScene("LobbyLocal");
         }
     }
 }

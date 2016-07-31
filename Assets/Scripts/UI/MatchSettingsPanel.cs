@@ -26,6 +26,8 @@ namespace Sanicball.UI
 
         public void Show()
         {
+
+
             var canvasGroup = GetComponent<ToggleCanvasGroup>();
             canvasGroup.Show();
             UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(firstActive);
@@ -35,6 +37,7 @@ namespace Sanicball.UI
         {
             var canvasGroup = GetComponent<ToggleCanvasGroup>();
             canvasGroup.Hide();
+
         }
 
         public void RevertSettings()
@@ -44,6 +47,14 @@ namespace Sanicball.UI
             {
                 tempSettings.CopyValues(manager.CurrentSettings);
             }
+
+			var managerLocal = FindObjectOfType<MatchManagerLocal>();
+			if (managerLocal)
+			{
+				tempSettings.CopyValues(managerLocal.CurrentSettings);
+			}
+
+
             UpdateUiFields();
         }
 
@@ -55,6 +66,18 @@ namespace Sanicball.UI
                 manager.CurrentSettings.CopyValues(tempSettings);
                 ActiveData.MatchSettings.CopyValues(tempSettings);
             }
+
+
+
+
+			var managerLocal = FindObjectOfType<MatchManagerLocal>();
+			if (managerLocal)
+			{
+				managerLocal.CurrentSettings.CopyValues(tempSettings);
+				ActiveData.MatchSettings.CopyValues(tempSettings);
+			}
+
+
         }
 
         public void DefaultSettings()
@@ -64,7 +87,7 @@ namespace Sanicball.UI
         }
 
         public void IncrementLaps()
-        {
+        {			
             if (tempSettings.Laps < 6)
                 tempSettings.Laps++;
             else
@@ -98,19 +121,44 @@ namespace Sanicball.UI
 
         public void IncrementAICount()
         {
-            if (tempSettings.AICount < 12)
-                tempSettings.AICount++;
-            else
-                tempSettings.AICount = 0;
+		
+			if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name =="LobbyLocal"){
+				
+	            if (tempSettings.AICount < 12)
+	                tempSettings.AICount++;
+	            else
+	                tempSettings.AICount = 0;
+
+		
+			}else if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name =="Lobby"){
+				if (tempSettings.AICount < 3)
+					tempSettings.AICount++;
+				else
+					tempSettings.AICount = 0;
+
+		
+			}
             UpdateUiFields();
         }
 
         public void DecrementAICount()
         {
-            if (tempSettings.AICount > 0)
-                tempSettings.AICount--;
-            else
-                tempSettings.AICount = 12;
+
+			if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name =="LobbyLocal"){
+				
+	            if (tempSettings.AICount > 0)
+	                tempSettings.AICount--;
+	            else
+	                tempSettings.AICount = 12;
+
+			}else if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name =="Lobby"){
+
+				if (tempSettings.AICount > 0)
+					tempSettings.AICount--;
+				else
+					tempSettings.AICount = 3;
+			}
+
             UpdateUiFields();
         }
 

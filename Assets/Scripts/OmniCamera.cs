@@ -1,10 +1,11 @@
 ﻿using Sanicball;
 using UnityEngine;
+using UnityEngine.Networking;
 
 namespace Sanicball
 {
     [RequireComponent(typeof(Camera))]
-    public class OmniCamera : MonoBehaviour, IBallCamera
+	public class OmniCamera :MonoBehaviour, IBallCamera
     {
         public Rigidbody Target { get; set; }
         public Camera AttachedCamera
@@ -37,13 +38,15 @@ namespace Sanicball
 
         private void Update()
         {
+
+			
             //Input
             var targetDirectionOffset = Quaternion.identity;
             Vector2 camVector = GameInput.CameraVector(CtrlType);
             Vector3 orientedCamVector = new Vector3(camVector.x, 0, camVector.y);
             if (orientedCamVector != Vector3.zero)
             {
-                Quaternion camQuaternion = Quaternion.Slerp(Quaternion.identity, Quaternion.LookRotation(orientedCamVector), orientedCamVector.magnitude);
+				Quaternion camQuaternion = Quaternion.Slerp(Quaternion.identity, Quaternion.LookRotation(orientedCamVector), orientedCamVector.magnitude);
                 targetDirectionOffset = camQuaternion;
             }
 
@@ -58,6 +61,12 @@ namespace Sanicball
                 {
                     targetUp = bc.Up;
                 }
+				BallLocal bcLocal = Target.GetComponent<BallLocal>();
+				if (bcLocal)
+				{
+					targetUp = bcLocal.Up;
+				}
+
                 up = Vector3.Lerp(up, targetUp, Time.deltaTime * 10);
 
                 //Based on how fast the target is moving, create a rotation bending towards its velocity.
@@ -66,14 +75,22 @@ namespace Sanicball
                 Quaternion finalTargetDir = Quaternion.Slerp(currentDirection, towardsVelocity, Mathf.Max(0, Mathf.Min(-10 + Target.velocity.magnitude, maxTrans) / maxTrans));
 
                 //Lerp towards the final rotation
-                currentDirection = Quaternion.Slerp(currentDirection, finalTargetDir, Time.deltaTime * 2);
+                	currentDirection = Quaternion.Slerp(currentDirection, finalTargetDir, Time.deltaTime * 2);
 
                 //Look for a BallControlInput and set its look direction
                 BallControlInput bci = Target.GetComponent<BallControlInput>();
-                if (bci != null)
+				if (bci != null )
                 {
                     bci.LookDirection = currentDirection;
                 }
+
+
+
+				BallControlInputLocal bciLocal = Target.GetComponent<BallControlInputLocal>();
+				if (bciLocal != null )
+				{
+					bciLocal.LookDirection = currentDirection;
+				}
 
                 //Set camera FOV to get higher with more velocity
                 AttachedCamera.fieldOfView = Mathf.Lerp(AttachedCamera.fieldOfView, Mathf.Min(60f + (Target.velocity.magnitude), 100f), Time.deltaTime * 4);

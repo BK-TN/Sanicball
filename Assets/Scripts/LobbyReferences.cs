@@ -19,6 +19,11 @@ namespace Sanicball
         [SerializeField]
         private UnityEngine.UI.Text countdownField = null;
 
+
+		//tihis was Changed to make it multiplayer....
+		[SerializeField]
+		private SanicNetworkManager sanicNetwork = null;
+
         public static LobbyReferences Active
         {
             get; private set;
@@ -28,6 +33,8 @@ namespace Sanicball
         public UI.LocalPlayerManager LocalPlayerManager { get { return localPlayerManager; } }
         public UI.MatchSettingsPanel MatchSettingsPanel { get { return matchSettingsPanel; } }
         public LobbyBallSpawner BallSpawner { get { return ballSpawner; } }
+		public SanicNetworkManager SanicNetwork  {  get { return sanicNetwork; } }
+
         public UnityEngine.UI.Text CountdownField { get { return countdownField; } }
 
         private void Awake()

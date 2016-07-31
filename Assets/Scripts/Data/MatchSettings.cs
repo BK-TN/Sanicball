@@ -14,14 +14,14 @@ namespace Sanicball.Data
 
     public class MatchSettings
     {
-        [Newtonsoft.Json.JsonProperty]
+//        [Newtonsoft.Json.JsonProperty]
         private int[] aiCharacters = new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12 };
 
         public MatchSettings()
         {
             Laps = 2;
             StageId = 0;
-            AICount = 7;
+            AICount = 6;
             AISkill = AISkillLevel.Average;
         }
 
@@ -33,6 +33,12 @@ namespace Sanicball.Data
             AISkill = original.AISkill;
             aiCharacters = (int[])original.aiCharacters.Clone();
         }
+
+		public void SetClientValues(int laps, int stageID){
+
+			Laps = laps;
+			StageId = stageID;
+		}
 
         public int StageId { get; set; }
         public int Laps { get; set; }

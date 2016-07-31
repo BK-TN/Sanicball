@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.Networking.Match;
 using UnityEngine.UI;
 
 namespace Sanicball.UI
@@ -14,11 +16,22 @@ namespace Sanicball.UI
         [HideInInspector]
         public ServerInfo info;
 
+
         private bool pingDone = false;
         private float pingTimeout = 8f;
 
-        public void SetData(HostData data)
+//        public void SetData(HostData data)
+		public void SetData(MatchInfoSnapshot data)
+
         {
+
+			long inLobby;
+
+			serverNameText.text = data.name;
+
+			playerCountText.text = data.currentSize.ToString()+ "/" + data.maxSize.ToString();
+
+			/*
             info = new ServerInfo(data);
             serverNameText.text = info.GameName;
             serverStatusText.text = info.Status;
@@ -27,7 +40,58 @@ namespace Sanicball.UI
                 serverStatusText.text += " - uses NAT punching";
             }
             playerCountText.text = info.ConnectedPlayers + "/" + info.PlayerLimit;
+
+
+*/
+
+			GetComponent<Button>().onClick.AddListener(  delegate { test(data, name); });
         }
+
+		public void test( MatchInfoSnapshot match, string ok){
+
+			
+			NetworkManager.singleton.matchMaker.JoinMatch(match.networkId,"","","",0,0, OnMatchJoined);
+
+
+			Debug.Log (ok);
+		}
+
+		public void OnMatchJoined(bool success, string extendedInfo, MatchInfo matchInfo)
+		{
+			NetworkManager.singleton.GetComponent<SanicNetworkManager>().infoPanel.Display("Joining to Room..","Close",null);
+			Debug.Log("Im joining a Match");
+			if (LogFilter.logDebug)
+			{
+				Debug.Log("NetworkManager OnMatchJoined ");
+			}
+			if (success)
+			{
+				try
+				{
+//					Utility.SetAccessTokenForNetwork(matchInfo.networkId, new UnityEngine.Networking.Types.NetworkAccessToken(matchInfo.accessTokenString));
+				}
+				catch(System.Exception ex)
+				{
+					if (LogFilter.logError)
+					{
+						Debug.LogError(ex);
+					}
+				}
+				NetworkManager.singleton.StartClient (matchInfo);
+
+			}
+			else if (LogFilter.logError)
+			{
+				NetworkManager.singleton.GetComponent<SanicNetworkManager>().infoPanel.Display("Cant join to this Match, please try later","Close",null);
+
+				Debug.LogError(string.Concat("Join Failed:", matchInfo));
+			}
+		}
+
+
+
+		
+
 
         private void Update()
         {
