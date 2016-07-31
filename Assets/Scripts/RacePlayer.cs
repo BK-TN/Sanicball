@@ -40,8 +40,12 @@ namespace Sanicball
         private int lap;
         private int position;
 
-        private Ball ball;
+		public Ball ball;
         private IBallCamera ballCamera;
+		private GameObject oldBallCamera;
+		private GameObject newBallCamera;
+
+
         private int currentCheckpointIndex;
         private Vector3 currentCheckpointPos;
         private Checkpoint nextCheckpoint;
@@ -61,12 +65,19 @@ namespace Sanicball
             ball.CanMove = false;
             ball.CheckpointPassed += Ball_CheckpointPassed;
             ball.RespawnRequested += Ball_RespawnRequested;
+			if(ball.isLocalPlayer){
+				ball.SwitchCamerasEvent+= Ball_SwitchCameraRequest;
+			}
+
             currentCheckpointPos = sr.checkpoints[0].transform.position;
             this.ball = ball;
 
-            ball.CameraCreated += (sender, e) =>
+			ball.CameraCreatedEvent+= (sender, e) =>
             {
-                ballCamera = e.CameraCreated;
+                ballCamera = e.CameraCreated2;
+				oldBallCamera= e.OldCamera2;
+				newBallCamera= e.NewCamera2;
+
                 ballCamera.SetDirection(sr.checkpoints[0].transform.rotation);
             };
 
@@ -79,7 +90,7 @@ namespace Sanicball
         public event EventHandler FinishLinePassed;
 
         public bool IsLocalPlayer { get { return ball.Type == BallType.LobbyPlayer || ball.Type == BallType.Player; } }
-        public string Name { get { return ball.name; } }
+		public string Name { get { return ball.name; } }
         public int Character { get { return ball.CharacterId; } }
         public int Lap { get { return lap; } }
 
@@ -120,6 +131,9 @@ namespace Sanicball
         public void StartRace()
         {
             ball.CanMove = true;
+			if(!ball.isLocalPlayer && ball.isServer){
+				ball.RpcSetCanMove(true);
+			}
         }
 
         public void FinishRace(RaceFinishReport report)
@@ -142,8 +156,10 @@ namespace Sanicball
 
         public float CalculateRaceProgress()
         {
-            //This function returns race progress as laps done (1..*) + progress to next lap (0..1)
 
+//			if (ball ==null) return;
+
+            //This function returns race progress as laps done (1..*) + progress to next lap (0..1)
             float progPerCheckpoint = 1f / sr.checkpoints.Length;
 
             float ballToNext = Vector3.Distance(ball.transform.position, nextCheckpoint.transform.position);
@@ -168,6 +184,8 @@ namespace Sanicball
                     NextCheckpointPassed(this, new NextCheckpointPassArgs(e.CheckpointPassed, currentCheckpointIndex, TimeSpan.FromSeconds(lapTime)));
 
                 currentCheckpointIndex = (currentCheckpointIndex + 1) % sr.checkpoints.Length;
+				ball.currentCheckPoin=currentCheckpointIndex;
+
                 currentCheckpointPos = e.CheckpointPassed.transform.position;
 
                 if (currentCheckpointIndex == 0)
@@ -204,15 +222,64 @@ namespace Sanicball
         }
 
         private void Ball_RespawnRequested(object sender, EventArgs e)
-        {
-            ball.transform.position = sr.checkpoints[currentCheckpointIndex].GetRespawnPoint() + Vector3.up * ball.transform.localScale.x * 0.5f;
-            ball.GetComponent<Rigidbody>().velocity = Vector3.zero;
-            ball.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
-            if (ballCamera != null)
-            {
-                ballCamera.SetDirection(sr.checkpoints[currentCheckpointIndex].transform.rotation);
-            }
+		{  
+//			Debug.Log ((GameObject)sender
+			if(ball.isServer){
+				if(ball.isLocalPlayer || ball.Type== BallType.AI ){
+
+		            ball.transform.position = sr.checkpoints[currentCheckpointIndex].GetRespawnPoint() + Vector3.up * ball.transform.localScale.x * 0.5f;
+		            ball.GetComponent<Rigidbody>().velocity = Vector3.zero;
+		            ball.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+					if (ball.cameraBall != null)
+		            {
+						ball.cameraBall.SetDirection(sr.checkpoints[currentCheckpointIndex].transform.rotation);
+		            }
+				}else{
+					if(!ball.isLocalPlayer){
+						ball.RpcRequestSpawn( currentCheckpointIndex);
+					}
+
+				}
+			}
         }
+
+
+		private void Ball_SwitchCameraRequest(object sender, EventArgs e){
+
+			if(ballCamera== oldBallCamera.GetComponent<IBallCamera>()){
+
+
+				Cursor.lockState = CursorLockMode.None;
+				Cursor.visible = true;
+				oldBallCamera.GetComponent<PivotCamera>().UseMouse= false;
+
+				newBallCamera.SetActive(true);
+				oldBallCamera.SetActive(false);
+				ActiveData.GameSettings.useOldControls= false;
+
+				ballCamera = newBallCamera.GetComponent<IBallCamera>();
+			}else if ( ballCamera== newBallCamera.GetComponent<IBallCamera>()  )  {
+				Cursor.lockState = CursorLockMode.Locked;
+				Cursor.visible = false;
+				oldBallCamera.GetComponent<PivotCamera>().UseMouse= true;
+
+
+				newBallCamera.SetActive(false);
+				oldBallCamera.SetActive(true);
+				ActiveData.GameSettings.useOldControls= true;;
+
+
+				oldBallCamera.GetComponent<PivotCamera>().SetDirection(ballCamera.AttachedCamera.transform.rotation);
+				oldBallCamera.GetComponent<PivotCamera>().AttachedCamera.transform.position= ballCamera.AttachedCamera.transform.position;
+
+				ballCamera = oldBallCamera.GetComponent<IBallCamera>();
+
+			}
+
+
+		}
+
+
 
         private void SetNextCheckpoint()
         {

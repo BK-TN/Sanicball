@@ -138,16 +138,17 @@ namespace Sanicball
             switch (ctrlType)
             {
                 case ControlType.Keyboard:
-                    bool forward = Input.GetKey(ActiveData.Keybinds[Keybind.Forward]) && !KeyboardDisabled;
-                    bool left = Input.GetKey(ActiveData.Keybinds[Keybind.Left]) && !KeyboardDisabled;
-                    bool back = Input.GetKey(ActiveData.Keybinds[Keybind.Back]) && !KeyboardDisabled;
-                    bool right = Input.GetKey(ActiveData.Keybinds[Keybind.Right]) && !KeyboardDisabled;
+				bool forward =  Input.GetKey(ActiveData.Keybinds[Keybind.Forward]) && !KeyboardDisabled;
+				bool left = Input.GetKey(ActiveData.Keybinds[Keybind.Left]) && !KeyboardDisabled;
+				bool back = Input.GetKey(ActiveData.Keybinds[Keybind.Back]) && !KeyboardDisabled;
+				bool right = Input.GetKey(ActiveData.Keybinds[Keybind.Right]) && !KeyboardDisabled;
                     //bool up = Input.GetKey(KeyCode.E) && !KeyboardDisabled;
                     //bool down = Input.GetKey(KeyCode.Q) && !KeyboardDisabled;
-                    return KeysToVector3(right, left, false, false, forward, back);
+				return KeysToVector3(right, left, false, false, forward, back);
+
 
                 case ControlType.Joystick1:
-                    return new Vector3(Input.GetAxis(joystick1LeftX), 0, Input.GetAxis(joystick1LeftY));
+				return new Vector3(Input.GetAxis(joystick1LeftX), 0, Input.GetAxis(joystick1LeftY));
 
                 case ControlType.Joystick2:
                     return new Vector3(Input.GetAxis(joystick2LeftX), 0, Input.GetAxis(joystick2LeftY));
@@ -282,6 +283,7 @@ namespace Sanicball
                 case ControlType.Keyboard:
                     return Input.GetKey(ActiveData.Keybinds[Keybind.Brake]) && !KeyboardDisabled;
 
+
                 case ControlType.Joystick1:
                     return Input.GetKey(KeyCode.Joystick1Button1);
 
@@ -341,6 +343,40 @@ namespace Sanicball
             return false;
         }
 
+
+		public static bool IsSwitchingCameras(ControlType ctrlType)
+		{
+			switch (ctrlType)
+			{
+			case ControlType.Keyboard:
+				return Input.GetKeyDown(ActiveData.Keybinds[Keybind.SwitchCamera]) && !KeyboardDisabled;
+
+			}
+			return false;
+		}
+
+
+
+
+//		public static bool IsGoingFast(ControlType ctrlType)
+//		{
+//			switch (ctrlType)
+//			{
+//			case ControlType.Keyboard:
+//				return Input.GetKeyDown(ActiveData.Keybinds[Keybind.SwitchCamera]) && !KeyboardDisabled;
+//
+//			case ControlType.Mobile:
+//				return CF2Input.GetButtonDown("SwitchCam");
+//
+//
+//			}
+//			return false;
+//		}
+
+
+
+
+		// joystick funciona el boton2......ok.
         public static bool IsOpeningMenu(ControlType ctrlType)
         {
             switch (ctrlType)
@@ -362,6 +398,7 @@ namespace Sanicball
             }
             return false;
         }
+			
 
         #endregion Controller specific input
 

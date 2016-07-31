@@ -44,9 +44,10 @@ namespace Sanicball.UI
                 //Ball icon
                 icon.sprite = Data.ActiveData.Characters[TargetPlayer.Character].icon;
                 //Name field
-                if (TargetPlayer.CtrlType != ControlType.None)
-                    nameField.text = Utils.CtrlTypeStr(TargetPlayer.CtrlType);
-                else
+				if (TargetPlayer.CtrlType != ControlType.None && TargetPlayer.ball){
+//                    nameField.text = Utils.CtrlTypeStr(TargetPlayer.CtrlType);
+					nameField.text = TargetPlayer.Name;
+				}  else
                     nameField.text = "";
             }
 

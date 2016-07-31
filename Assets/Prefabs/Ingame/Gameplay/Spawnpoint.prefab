@@ -11,6 +11,7 @@ GameObject:
   - 33: {fileID: 3300000}
   - 23: {fileID: 2300000}
   - 114: {fileID: 11454616}
+  - 114: {fileID: 11430512}
   m_Layer: 0
   m_Name: Spawnpoint
   m_TagString: Untagged
@@ -27,6 +28,7 @@ Transform:
   m_LocalRotation: {x: 0, y: -0.012429298, z: 0, w: 0.99992275}
   m_LocalPosition: {x: 812.67975, y: 1.6740036, z: -282.33066}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: -1.4243, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -63,6 +65,38 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100000}
   m_Mesh: {fileID: 4300000, guid: 42f9606abf1f5a049a373f8ce5272ebf, type: 3}
+--- !u!114 &11430512
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 100000}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 372142912, guid: 870353891bb340e2b2a9c8707e7419ba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SceneId:
+    m_Value: 0
+  m_AssetId:
+    i0: 23
+    i1: 68
+    i2: 51
+    i3: 106
+    i4: 44
+    i5: 121
+    i6: 92
+    i7: 116
+    i8: 27
+    i9: 214
+    i10: 138
+    i11: 52
+    i12: 119
+    i13: 155
+    i14: 89
+    i15: 187
+  m_ServerOnly: 0
+  m_LocalPlayerAuthority: 0
 --- !u!114 &11454616
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -75,9 +109,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ballPrefab: {fileID: 11410174, guid: 15c7ed3ff76289b4680e4b9f1f52fb22, type: 2}
+  pelota: {fileID: 0}
   editorBallCount: 24
   editorBallSize: 1
-  columnWidth: 10
+  columns: 10
   ballSpawningMask:
     serializedVersion: 2
     m_Bits: 512

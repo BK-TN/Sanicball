@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Networking;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Sanicball
 {
@@ -13,9 +15,9 @@ namespace Sanicball
         Finished
     }
 
-    public class RaceManager : MonoBehaviour
+	public class RaceManager : MonoBehaviour
     {
-        private List<RacePlayer> players = new List<RacePlayer>();
+        public List<RacePlayer> players = new List<RacePlayer>();
         private RaceState currentState = RaceState.None;
 
         private Data.MatchSettings settings = new Data.MatchSettings();
@@ -36,6 +38,13 @@ namespace Sanicball
         private double raceTimer = 0f;
         private bool raceTimerOn = false;
         private UI.RaceUI raceUI;
+
+		private bool WaitingTimerOn =true;
+		private float WaitingTimer = 7;
+		private float WaitingTimerGlobal = 400;
+
+		private bool areAllReady;
+
 
         public System.TimeSpan RaceTime
         {
@@ -65,7 +74,7 @@ namespace Sanicball
             }
         }
 
-        private RaceState CurrentState
+		public RaceState CurrentState
         {
             get
             {
@@ -89,18 +98,35 @@ namespace Sanicball
                 {
                     case RaceState.Waiting:
                         activeWaitingCam = Instantiate(waitingCamPrefab);
+//					NetworkServer.Spawn(waitingCamPrefab.gameObject);
                         activeWaitingUI = Instantiate(waitingUIPrefab);
+//					NetworkServer.Spawn(waitingUIPrefab.gameObject);
+
                         activeWaitingUI.StageNameToShow = Data.ActiveData.Stages[settings.StageId].name;
                         break;
 
                     case RaceState.Countdown:
+
                         var countdown = Instantiate(raceCountdownPrefab);
+//					NetworkServer.Spawn(raceCountdownPrefab.gameObject);
                         countdown.OnCountdownFinished += Countdown_OnCountdownFinished;
                         raceUI = Instantiate(raceUIPrefab);
+//					NetworkServer.Spawn(raceUIPrefab.gameObject);
                         raceUI.TargetManager = this;
                         CreateBallObjects();
-                        break;
 
+					if (NetworkManager.singleton.GetComponent<SanicNetworkManager>().matchManager.isServer    ){
+						for (int i = 0; i < NetworkManager.singleton.GetComponent<SanicNetworkManager>().matchManager.Players.Count; i++){
+							if (NetworkManager.singleton.GetComponent<SanicNetworkManager>().matchManager.Players[i].BallObject.isLocalPlayer)
+								{
+								NetworkManager.singleton.GetComponent<SanicNetworkManager>().matchManager.Players[i].BallObject.RpcCountdown();
+							}
+						}
+					}
+					NetworkManager.singleton.GetComponent<SanicNetworkManager>().matchManager.firstTimeLoadingLobby=false;
+					NetworkManager.singleton.GetComponent<SanicNetworkManager>().isSpawning=false;
+
+                        break;
                     case RaceState.Racing:
                         raceTimerOn = true;
                         var music = FindObjectOfType<MusicPlayer>();
@@ -111,6 +137,7 @@ namespace Sanicball
                         foreach (var p in players)
                         {
                             p.StartRace();
+
                         }
                         break;
                 }
@@ -121,59 +148,112 @@ namespace Sanicball
         private void Countdown_OnCountdownFinished(object sender, System.EventArgs e)
         {
             CurrentState = RaceState.Racing;
+			FindObjectOfType<Sanicball.UI.PlayerUI>().GenerateRaceAvatar();
+
         }
 
         private void Start()
         {
+
             CurrentState = RaceState.Waiting;
+
         }
 
         private void CreateBallObjects()
         {
-            int nextPos = 0;
-
+			int nextPos = 0;
             var matchManager = FindObjectOfType<MatchManager>();
             for (int i = 0; i < matchManager.Players.Count; i++)
             {
                 var player = matchManager.Players[i];
+				if(NetworkManager.singleton.GetComponent<SanicNetworkManager>().matchManager.isServer){
+					player.BallObject = FindObjectOfType<RaceBallSpawner>().SpawnBall(nextPos, BallType.Player, player.CtrlType, player.CharacterId, player.Name  ,player.ConnectionSelf);
+	                player.BallObject.CanMove = false;
 
-                player.BallObject = FindObjectOfType<RaceBallSpawner>().SpawnBall(nextPos, BallType.Player, player.CtrlType, player.CharacterId, "Player - " + Utils.CtrlTypeStr(player.CtrlType));
-                player.BallObject.CanMove = false;
+					if(!player.BallObject.isLocalPlayer){
+						player.BallObject.RpcSetCanMove(false);
+						player.BallObject.RpcSetSettings(settings.Laps, settings.StageId);
+					}else{
 
-                var racePlayer = new RacePlayer(player.BallObject);
-                players.Add(racePlayer);
-                if (matchManager.Players.Count == 1)
-                    racePlayer.LapRecordsEnabled = true;
+					}
+				}
+					player.BallObject.transform.gameObject.GetComponent<NetworkTransform>().sendInterval=.14f;
 
-                racePlayer.FinishLinePassed += RacePlayer_FinishLinePassed;
+	            	var racePlayer = new RacePlayer(player.BallObject);
+	            	players.Add(racePlayer);
+				
+	                if (matchManager.Players.Count == 1)
+	                    racePlayer.LapRecordsEnabled = true;
 
-                var playerUI = Instantiate(playerUIPrefab);
-                playerUI.TargetPlayer = racePlayer;
-                playerUI.TargetManager = this;
+	                racePlayer.FinishLinePassed += RacePlayer_FinishLinePassed;
 
-                int persistentIndex = i;
-                player.BallObject.CameraCreated += (sender, e) =>
-                {
-                    playerUI.TargetCamera = e.CameraCreated.AttachedCamera;
-                    var splitter = e.CameraCreated.AttachedCamera.GetComponent<CameraSplitter>();
-                    if (splitter)
-                        splitter.SplitscreenIndex = persistentIndex;
-                };
+				if(player.BallObject.isLocalPlayer){
+	                var playerUI = Instantiate(playerUIPrefab);
+	                playerUI.TargetPlayer = racePlayer;
+	                playerUI.TargetManager = this;
 
-                nextPos++;
+
+	                int persistentIndex = i;
+					player.BallObject.CameraCreatedEvent += (sender, e) =>
+	                {
+						playerUI.TargetCamera = e.CameraCreated2.AttachedCamera;
+	                    var splitter = e.CameraCreated2.AttachedCamera.GetComponent<CameraSplitter>();
+	                    if (splitter)
+	                        splitter.SplitscreenIndex = persistentIndex;
+	                };
+					//in thispart the init is forced to keyboard...
+					player.BallObject.Init(Sanicball.BallType.Player , Sanicball.ControlType.Keyboard, player.BallObject.CharacterId, player.BallObject.NickName   );
+
+					if(player.BallObject.isServer ){
+						player.BallObject.RpcInit( player.BallObject.Type, player.BallObject.CtrlType,player.BallObject.CharacterId, player.BallObject.NickName   );
+					
+
+					}
+					if(!player.BallObject.isServer  && player.BallObject.isClient){
+						player.BallObject.CmdInit(Sanicball.BallType.Player , Sanicball.ControlType.Keyboard, player.BallObject.CharacterId,player.BallObject.NickName   );
+
+					}
+
+					player.BallObject.cameraBall.SetDirection( StageReferences.Active.checkpoints[0].transform.rotation );
+
+	                nextPos++;
+
+				}
+
             }
 
-            for (int i = 0; i < settings.AICount; i++)
-            {
-                var aiBall = FindObjectOfType<RaceBallSpawner>().SpawnBall(nextPos, BallType.AI, ControlType.None, settings.GetAICharacter(i), "AI #" + i);
-                aiBall.CanMove = false;
+			if(NetworkManager.singleton.GetComponent<SanicNetworkManager>().matchManager.isServer){
+	            for (int i = 0; i < settings.AICount; i++)
+		            {
+		                var aiBall = FindObjectOfType<RaceBallSpawner>().SpawnBall(nextPos, BallType.AI, ControlType.None, settings.GetAICharacter(i), "AI #" + i);
+		                aiBall.CanMove = false;
+						aiBall.GetComponent<NetworkTransform>().sendInterval= .25f;
 
-                var racePlayer = new RacePlayer(aiBall);
-                players.Add(racePlayer);
-                racePlayer.FinishLinePassed += RacePlayer_FinishLinePassed;
+		                var racePlayer = new RacePlayer(aiBall);
+		                players.Add(racePlayer);
+		                racePlayer.FinishLinePassed += RacePlayer_FinishLinePassed;
 
-                nextPos++;
-            }
+		                nextPos++;
+		            }
+			}
+
+			// Filling the raceManager of the clients
+			if( !NetworkManager.singleton.GetComponent<SanicNetworkManager>().matchManager.isServer  ){
+				
+				Ball[] listaBalls;
+				listaBalls = FindObjectsOfType<Ball>();
+				for(int j=0; j < listaBalls.Length ;j++){
+					if(!listaBalls[j].isLocalPlayer){
+						var racePlayer2 = new RacePlayer(listaBalls[j]);
+						racePlayer2.FinishLinePassed += RacePlayer_FinishLinePassed;
+						players.Add(racePlayer2);
+					}
+				}
+
+			}
+
+
+
         }
 
         private void RacePlayer_FinishLinePassed(object sender, System.EventArgs e)
@@ -201,10 +281,61 @@ namespace Sanicball
 
         private void Update()
         {
-            if (CurrentState == RaceState.Waiting && (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.JoystickButton0)))
-            {
-                CurrentState = RaceState.Countdown;
-            }
+
+			if(NetworkManager.singleton){
+				
+				if(NetworkManager.singleton.GetComponent<SanicNetworkManager>().matchManager.isServer){// debo agregar inputs de touch mobile...
+
+					if (CurrentState == RaceState.Waiting){
+
+						if (WaitingTimerOn && areAllReady == false )
+						{
+							float prevSecond;
+							prevSecond =Mathf.Ceil(WaitingTimerGlobal);
+							WaitingTimerGlobal -= Time.deltaTime;
+
+							if(Mathf.Ceil(WaitingTimerGlobal)!=prevSecond){
+								areAllReady = NetworkManager.singleton.GetComponent<SanicNetworkManager>().CheckIfAllReady();
+							}
+
+							if(areAllReady){
+								Debug.Log("---------WE CAN START The RACE , press Jump");
+							}
+
+						}
+
+						if (WaitingTimerOn && areAllReady == true )
+						{
+
+							float prevSecond2;
+							prevSecond2 =Mathf.Ceil(WaitingTimer);
+							WaitingTimer -= Time.deltaTime;
+
+							if(Mathf.Ceil(WaitingTimer)!=prevSecond2){
+								GameObject.Find("Waiting UI(Clone)").transform.FindChild("Instruction text (1)").GetComponent<Text>().text="Starting Race in.. "+ Mathf.Ceil(WaitingTimer) ;
+							}
+
+						}
+
+						if (WaitingTimer <= 0)
+						{					
+
+							NetworkManager.singleton.GetComponent<SanicNetworkManager>().InitRaceAllPlayers();
+							WaitingTimerOn=false;
+							WaitingTimer= 7;
+
+						}
+
+					}
+
+					if ( (CurrentState == RaceState.Waiting && areAllReady) && (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.JoystickButton0)))
+		            {
+						NetworkManager.singleton.GetComponent<SanicNetworkManager>().InitRaceAllPlayers();
+
+		            }
+
+				}
+			}
 
             if (raceTimerOn)
             {
@@ -212,9 +343,12 @@ namespace Sanicball
                 foreach (var p in players) p.UpdateTimer(Time.deltaTime);
             }
 
-            players = players.OrderByDescending(a => a.CalculateRaceProgress()).ToList();
-            for (int i = 0; i < players.Count; i++)
-                players[i].Position = i + 1;
+			if(NetworkManager.singleton){
+				
+	            players = players.OrderByDescending(a => a.CalculateRaceProgress()).ToList();
+	            for (int i = 0; i < players.Count; i++)
+	                players[i].Position = i + 1;
+			}
         }
     }
 }

@@ -26,6 +26,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 41.378635, y: 200.69995, z: -136.04373}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -114,6 +115,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6432750b56b705f48bc3f72624a17b91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  players: []
   waitingCamPrefab: {fileID: 11449898, guid: d15a84041c7ea2f4882ea49b6ae309e7, type: 2}
   waitingUIPrefab: {fileID: 11478624, guid: 02831016a06e59645b9005e90f3c70a4, type: 2}
   raceCountdownPrefab: {fileID: 11403300, guid: 7ff1b6fd875580b4b872372d3464561b,

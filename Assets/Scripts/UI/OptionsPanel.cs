@@ -36,9 +36,9 @@ namespace Sanicball.UI
         private GameSettings tempSettings = new GameSettings();
 
         public void Apply()
-        {
+		{
             ActiveData.GameSettings.CopyValues(tempSettings);
-            ActiveData.GameSettings.Apply(true);
+			ActiveData.GameSettings.Apply(true);
         }
 
         public void RevertToCurrent()

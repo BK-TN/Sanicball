@@ -84,7 +84,7 @@ public class MusicPlayer : MonoBehaviour
             GetComponent<AudioSource>().volume = Mathf.Min(GetComponent<AudioSource>().volume + Time.deltaTime * 0.1f, 0.5f);
         }
         //If it's not playing but supposed to play, change song
-        if ((!GetComponent<AudioSource>().isPlaying || GameInput.IsChangingSong()) && isPlaying)
+		if ((!GetComponent<AudioSource>().isPlaying || GameInput.IsChangingSong() ) && isPlaying)
         {
             if (currentSongID < playlist.Length - 1)
             {

@@ -36,6 +36,27 @@ namespace Sanicball.UI
                 }*/
                 aiSkill.text = "AI Skill: " + s.AISkill;
             }
+
+			var managerLocal = FindObjectOfType<MatchManagerLocal>();
+			if (managerLocal)
+			{
+				var s = managerLocal.CurrentSettings;
+
+				stageLayoutCamera.transform.position = new Vector3(s.StageId * 50, stageLayoutCamera.transform.position.y, stageLayoutCamera.transform.position.z);
+
+				stageName.text = ActiveData.Stages[s.StageId].name;
+				stageImage.sprite = ActiveData.Stages[s.StageId].picture;
+				lapCount.text = s.Laps + (s.Laps == 1 ? " lap" : " laps");
+				aiOpponents.text = "";
+				/*foreach (var i in s.aiCharacters)
+                {
+                    aiOpponents.text += ActiveData.Characters[i].name + "\n";
+                }*/
+				aiSkill.text = "AI Skill: " + s.AISkill;
+			}
+
+
+
         }
     }
 }

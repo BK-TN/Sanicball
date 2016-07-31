@@ -28,9 +28,9 @@ public class Path : MonoBehaviour
 
     private void OnDrawGizmosSelected()
     {
-        if (nodes != null && !hidePath)
-        {
-            iTween.DrawPath(nodes, pathColor);
-        }
+//        if (nodes != null && !hidePath)
+//        {
+//            iTween.DrawPath(nodes, pathColor);
+//        }
     }
 }

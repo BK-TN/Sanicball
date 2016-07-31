@@ -119,8 +119,46 @@ namespace Sanicball.UI
         {
             checkpointMarker = Instantiate(markerPrefab);
             checkpointMarker.transform.SetParent(markerContainer, false);
+
             checkpointMarker.Text = "Checkpoint";
+
+
+
         }
+		public void GenerateRaceAvatar(){
+
+			Debug.Log("Making PlayerMArkers");
+//			Ball[] listaBalls;
+//			listaBalls = FindObjectsOfType<Ball>();
+//			Debug.Log(listaBalls.Count());
+
+
+			for(int j=0; j < SanicNetworkManager.singleton.GetComponent<SanicNetworkManager>().raceManager.players.Count() ;j++){
+
+//				SanicNetworkManager.singleton.GetComponent<SanicNetworkManager>().matchManager.Players
+
+				if(!SanicNetworkManager.singleton.GetComponent<SanicNetworkManager>().raceManager.players[j].ball.isLocalPlayer){
+
+					Marker playerMarkerRace = Instantiate(markerPrefab);
+
+					playerMarkerRace.transform.SetParent( markerContainer, false );
+					playerMarkerRace.GetComponent<Image>().sprite= Data.ActiveData.Characters[SanicNetworkManager.singleton.GetComponent<SanicNetworkManager>().raceManager.players[j].ball.CharacterId].icon; 
+					playerMarkerRace.GetComponent<RectTransform>().localScale= new Vector3(.7f,.7f,.7f);
+//					playerMarkerRace.GetComponent<RectTransform>().rect.height=50;
+
+					Color avatarColor= new Color(1,1,1,.6f);
+					playerMarkerRace.GetComponent<Image>().color= avatarColor;
+
+
+					playerMarkerRace.Target = SanicNetworkManager.singleton.GetComponent<SanicNetworkManager>().raceManager.players[j].ball.gameObject.transform;
+					playerMarkerRace.Text= "";
+					//						var racePlayer2 = new RacePlayer(listaBalls[j]);
+
+
+				}
+			}
+
+		}
 
         private void Update()
         {
@@ -132,52 +170,54 @@ namespace Sanicball.UI
 
             if (TargetPlayer == null || TargetManager == null) return;
 
-            float speed = TargetPlayer.Speed;
-            string postfix = " ";
+			if( TargetPlayer.ball!= null){
+	            	float speed = TargetPlayer.Speed;
+	            string postfix = " ";
 
-            //Speed label
-            if (!ActiveData.GameSettings.useImperial)
-            {
-                postfix += (Mathf.Floor(speed) == 1f) ? "fast/h" : "fasts/h";
-            }
-            else
-            {
-                speed *= 0.62f;
-                postfix += (Mathf.Floor(speed) == 1f) ? "lightspeed" : "lightspeeds";
-                speedFieldLabel.fontSize = 62;
-            }
+	            //Speed label
+	            if (!ActiveData.GameSettings.useImperial)
+	            {
+	                postfix += (Mathf.Floor(speed) == 1f) ? "fast/h" : "fasts/h";
+	            }
+	            else
+	            {
+	                speed *= 0.62f;
+	                postfix += (Mathf.Floor(speed) == 1f) ? "lightspeed" : "lightspeeds";
+	                speedFieldLabel.fontSize = 62;
+	            }
 
-            //Speed field size and color
-            var min = 96;
-            var max = 150;
-            var size = max - (max - min) * Mathf.Exp(-speed * 0.02f);
-            speedField.fontSize = (int)size;
-            speedField.text = Mathf.Floor(speed).ToString();
-            speedFieldLabel.text = postfix;
+	            //Speed field size and color
+	            var min = 96;
+	            var max = 150;
+	            var size = max - (max - min) * Mathf.Exp(-speed * 0.02f);
+	            speedField.fontSize = (int)size;
+	            speedField.text = Mathf.Floor(speed).ToString();
+	            speedFieldLabel.text = postfix;
 
-            //Lap counter
-            if (TargetPlayer.Lap < TargetManager.Laps + 1)
-            {
-                lapField.text = "Lap " + TargetPlayer.Lap + "/" + TargetManager.Laps;
-            }
-            else
-            {
-                lapField.text = "Race finished";
-                lapField.color = finishedColor;
-            }
+	            //Lap counter
+	            if (TargetPlayer.Lap < TargetManager.Laps + 1)
+	            {
+	                lapField.text = "Lap " + TargetPlayer.Lap + "/" + TargetManager.Laps;
+	            }
+	            else
+	            {
+	                lapField.text = "Race finished";
+	                lapField.color = finishedColor;
+	            }
 
-            //Race time
-            System.TimeSpan timeToUse = TargetManager.RaceTime;
-            if (TargetPlayer.FinishReport != null)
-            {
-                timeToUse = TargetPlayer.FinishReport.Time;
-                timeField.color = finishedColor;
-            }
-            timeField.text = GetTimeString(timeToUse);
+	            //Race time
+	            System.TimeSpan timeToUse = TargetManager.RaceTime;
+	            if (TargetPlayer.FinishReport != null)
+	            {
+	                timeToUse = TargetPlayer.FinishReport.Time;
+	                timeField.color = finishedColor;
+	            }
+	            timeField.text = GetTimeString(timeToUse);
 
-            //Checkpoint marker
-            checkpointMarker.Target = TargetPlayer.NextCheckpoint.transform;
-            checkpointMarker.CameraToUse = TargetCamera;
+	            //Checkpoint marker
+	            checkpointMarker.Target = TargetPlayer.NextCheckpoint.transform;
+	            checkpointMarker.CameraToUse = TargetCamera;
+			}
         }
 
         private string GetTimeString(System.TimeSpan timeToUse)
