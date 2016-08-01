@@ -7,7 +7,7 @@ using System.Threading;
 using Lidgren.Network;
 using Newtonsoft.Json;
 using Sanicball.Data;
-using Sanicball.Net;
+using Sanicball.Match;
 
 namespace SanicballServerLib
 {
