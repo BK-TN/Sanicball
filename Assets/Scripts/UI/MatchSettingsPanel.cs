@@ -39,7 +39,7 @@ namespace Sanicball.UI
 
         public void RevertSettings()
         {
-            var manager = FindObjectOfType<MatchManager>();
+            var manager = FindObjectOfType<Match.MatchManager>();
             if (manager)
             {
                 tempSettings = manager.CurrentSettings;
@@ -49,7 +49,7 @@ namespace Sanicball.UI
 
         public void SaveSettings()
         {
-            var manager = FindObjectOfType<MatchManager>();
+            var manager = FindObjectOfType<Match.MatchManager>();
             if (manager)
             {
                 manager.RequestSettingsChange(tempSettings);

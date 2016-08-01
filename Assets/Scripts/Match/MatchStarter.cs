@@ -1,8 +1,7 @@
 ﻿using Lidgren.Network;
-using Sanicball.Net;
 using UnityEngine;
 
-namespace Sanicball
+namespace Sanicball.Match
 {
     public class MatchStarter : MonoBehaviour
     {

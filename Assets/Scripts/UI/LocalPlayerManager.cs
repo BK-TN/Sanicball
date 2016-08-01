@@ -11,15 +11,15 @@ namespace Sanicball.UI
     public class LocalPlayerManager : MonoBehaviour
     {
         public LocalPlayerPanel localPlayerPanelPrefab;
-        public event System.EventHandler<MatchPlayerEventArgs> LocalPlayerJoined;
+        public event System.EventHandler<Match.MatchPlayerEventArgs> LocalPlayerJoined;
 
         private const int maxPlayers = 4;
-        private MatchManager manager;
+        private Match.MatchManager manager;
         private List<ControlType> usedControls = new List<ControlType>();
 
         private void Start()
         {
-            manager = FindObjectOfType<MatchManager>();
+            manager = FindObjectOfType<Match.MatchManager>();
 
             if (manager)
             {
@@ -82,7 +82,7 @@ namespace Sanicball.UI
             //return newPlayer;
         }
 
-        private void Manager_MatchPlayerAdded(object sender, MatchPlayerEventArgs e)
+        private void Manager_MatchPlayerAdded(object sender, Match.MatchPlayerEventArgs e)
         {
             if (e.IsLocal)
             {
@@ -91,7 +91,7 @@ namespace Sanicball.UI
             }
         }
 
-        public void SetCharacter(MatchPlayer player, int c)
+        public void SetCharacter(Match.MatchPlayer player, int c)
         {
             manager.RequestCharacterChange(player.CtrlType, c);
         }
@@ -101,7 +101,7 @@ namespace Sanicball.UI
             usedControls.Remove(ctrlType);
         }
 
-        public void LeaveMatch(MatchPlayer player)
+        public void LeaveMatch(Match.MatchPlayer player)
         {
             manager.RequestPlayerLeave(player.CtrlType);
             usedControls.Remove(player.CtrlType);

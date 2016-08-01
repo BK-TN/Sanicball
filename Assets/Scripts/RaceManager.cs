@@ -109,7 +109,7 @@ namespace Sanicball
         {
             int nextPos = 0;
 
-            var matchManager = FindObjectOfType<MatchManager>();
+            var matchManager = FindObjectOfType<Match.MatchManager>();
             for (int i = 0; i < matchManager.Players.Count; i++)
             {
                 var player = matchManager.Players[i];

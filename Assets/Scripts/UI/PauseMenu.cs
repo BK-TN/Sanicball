@@ -80,7 +80,7 @@ namespace Sanicball.UI
 
         public void BackToLobby()
         {
-            var matchManager = FindObjectOfType<MatchManager>();
+            var matchManager = FindObjectOfType<Match.MatchManager>();
             if (matchManager)
             {
                 matchManager.GoToLobby();
@@ -93,7 +93,7 @@ namespace Sanicball.UI
 
         public void QuitMatch()
         {
-            var matchManager = FindObjectOfType<MatchManager>();
+            var matchManager = FindObjectOfType<Match.MatchManager>();
             if (matchManager)
             {
                 matchManager.QuitMatch();

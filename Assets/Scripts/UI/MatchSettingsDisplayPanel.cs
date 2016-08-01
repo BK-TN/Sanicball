@@ -24,7 +24,7 @@ namespace Sanicball.UI
 
         private void Start()
         {
-            var manager = FindObjectOfType<MatchManager>();
+            var manager = FindObjectOfType<Match.MatchManager>();
             if (manager)
             {
                 manager.MatchSettingsChanged += Manager_MatchSettingsChanged;
@@ -34,7 +34,7 @@ namespace Sanicball.UI
 
         private void Manager_MatchSettingsChanged(object sender, System.EventArgs e)
         {
-            var manager = FindObjectOfType<MatchManager>();
+            var manager = FindObjectOfType<Match.MatchManager>();
             if (manager)
             {
                 MatchSettings s = manager.CurrentSettings;

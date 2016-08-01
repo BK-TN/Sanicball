@@ -24,7 +24,7 @@ namespace Sanicball.UI
         private CharacterSelectPanel characterSelectSubpanel = null;
 
         public ControlType AssignedCtrlType { get; set; }
-        public MatchPlayer AssignedPlayer { get; set; }
+        public Match.MatchPlayer AssignedPlayer { get; set; }
 
         private bool uiPressed = false;
 
@@ -121,7 +121,7 @@ namespace Sanicball.UI
             }
         }
 
-        private void PlayerManager_LocalPlayerJoined(object sender, MatchPlayerEventArgs e)
+        private void PlayerManager_LocalPlayerJoined(object sender, Match.MatchPlayerEventArgs e)
         {
             if (e.Player.CtrlType == AssignedCtrlType)
             {

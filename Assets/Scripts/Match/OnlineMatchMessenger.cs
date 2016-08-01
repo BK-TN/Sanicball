@@ -2,11 +2,15 @@
 using System.Collections;
 using System.Reflection;
 using Lidgren.Network;
-using Sanicball.Net;
 using UnityEngine;
 
 namespace Sanicball.Match
 {
+    public class MessageType
+    {
+        public const byte MatchMessage = 0;
+    }
+
     public class OnlineMatchMessenger : MatchMessenger
     {
         public const string APP_ID = "Sanicball";
