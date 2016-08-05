@@ -22,7 +22,6 @@ namespace Sanicball.Match
     public class MatchPlayer
     {
         private Guid clientGuid;
-        private string name;
         private ControlType ctrlType;
         private bool readyToRace;
 

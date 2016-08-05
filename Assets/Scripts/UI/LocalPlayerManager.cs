@@ -26,7 +26,7 @@ namespace Sanicball.UI
                 //Create local player panels for players already in the game
                 foreach (var p in manager.Players)
                 {
-                    if (p.CtrlType != ControlType.None)
+                    if (p.ClientGuid == manager.LocalClientGuid && p.CtrlType != ControlType.None)
                     {
                         var panel = CreatePanelForControlType(p.CtrlType, true);
                         panel.AssignedPlayer = p;
@@ -94,6 +94,11 @@ namespace Sanicball.UI
         public void SetCharacter(Match.MatchPlayer player, int c)
         {
             manager.RequestCharacterChange(player.CtrlType, c);
+        }
+
+        public void SetReady(Match.MatchPlayer player, bool ready)
+        {
+            manager.RequestReadyChange(player.CtrlType, ready);
         }
 
         public void RemoveControlType(ControlType ctrlType)

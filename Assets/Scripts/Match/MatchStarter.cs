@@ -51,8 +51,10 @@ namespace Sanicball.Match
                                     Debug.Log("Connected!");
                                     if (msg.SenderConnection.RemoteHailMessage != null)
                                     {
-                                        Debug.Log("Server said: " + msg.SenderConnection.RemoteHailMessage.ReadString());
-                                        BeginOnlineGame();
+                                        string hailMsg = msg.SenderConnection.RemoteHailMessage.ReadString();
+                                        Debug.Log("Server said: " + hailMsg);
+                                        MatchState matchInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<MatchState>(hailMsg);
+                                        BeginOnlineGame(matchInfo);
                                     }
                                     else
                                     {
@@ -93,10 +95,11 @@ namespace Sanicball.Match
             NetConnection conn = joiningClient.Connect(IP, PORT, approval);
         }
 
-        private void BeginOnlineGame()
+        //Called when succesfully connected to a server
+        private void BeginOnlineGame(MatchState matchState)
         {
             MatchManager manager = Instantiate(matchManagerPrefab);
-            manager.InitOnlineMatch(joiningClient, joiningServerConnection);
+            manager.InitOnlineMatch(joiningClient, joiningServerConnection, matchState);
         }
     }
 }

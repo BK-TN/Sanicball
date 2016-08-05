@@ -53,8 +53,12 @@ namespace SanicballServerLib
         private List<LogEntry> log = new List<LogEntry>();
         private NetServer netServer;
         private bool running;
-        private MatchSettings matchSettings;
         private CommandQueue commandQueue;
+
+        //Match state
+        private List<MatchClientState> matchClients = new List<MatchClientState>();
+        private List<MatchPlayerState> matchPlayers = new List<MatchPlayerState>();
+        private MatchSettings matchSettings;
 
         public bool Running { get { return running; } }
 
@@ -83,10 +87,10 @@ namespace SanicballServerLib
                 }
             }
             if (defaultSettings)
-                matchSettings = new MatchSettings();
+                matchSettings = MatchSettings.CreateDefault();
 
             running = true;
-            NetPeerConfiguration config = new NetPeerConfiguration(Sanicball.Match.OnlineMatchMessenger.APP_ID);
+            NetPeerConfiguration config = new NetPeerConfiguration(OnlineMatchMessenger.APP_ID);
             config.Port = 25000;
             config.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
 
@@ -148,7 +152,11 @@ namespace SanicballServerLib
                             {
                                 //Approve for being nice
                                 NetOutgoingMessage hailMsg = netServer.CreateMessage();
-                                hailMsg.Write("Thank you!");
+
+                                MatchState info = new MatchState(new List<MatchClientState>(matchClients), new List<MatchPlayerState>(matchPlayers), matchSettings);
+                                string infoStr = JsonConvert.SerializeObject(info);
+
+                                hailMsg.Write(infoStr);
                                 msg.SenderConnection.Approve(hailMsg);
                             }
                             else
@@ -162,15 +170,62 @@ namespace SanicballServerLib
                             switch (messageType)
                             {
                                 case MessageType.MatchMessage:
-                                    //Send the exact same message back again
-                                    Sanicball.Match.MatchMessage matchMessage = JsonConvert.DeserializeObject<Sanicball.Match.MatchMessage>(msg.ReadString(), new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
-                                    Log("Forwarding message of type " + matchMessage.GetType(), LogType.Debug);
-                                    string outMessage = JsonConvert.SerializeObject(matchMessage, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
+                                    MatchMessage matchMessage = JsonConvert.DeserializeObject<MatchMessage>(msg.ReadString(), new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
 
-                                    NetOutgoingMessage testMsg = netServer.CreateMessage();
-                                    testMsg.Write(MessageType.MatchMessage);
-                                    testMsg.Write(outMessage);
-                                    netServer.SendMessage(testMsg, msg.SenderConnection, NetDeliveryMethod.ReliableOrdered);
+                                    if (matchMessage is ClientJoinedMessage)
+                                    {
+                                        var castedMsg = (ClientJoinedMessage)matchMessage;
+                                        matchClients.Add(new MatchClientState(castedMsg.ClientGuid, castedMsg.ClientName));
+                                        Log("Client " + castedMsg.ClientGuid + " joined", LogType.Debug);
+                                    }
+
+                                    if (matchMessage is PlayerJoinedMessage)
+                                    {
+                                        var castedMsg = (PlayerJoinedMessage)matchMessage;
+                                        matchPlayers.Add(new MatchPlayerState(castedMsg.ClientGuid, castedMsg.CtrlType, false, castedMsg.InitialCharacter));
+                                        Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " joined", LogType.Debug);
+                                    }
+
+                                    if (matchMessage is PlayerLeftMessage)
+                                    {
+                                        var castedMsg = (PlayerLeftMessage)matchMessage;
+                                        matchPlayers.RemoveAll(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
+                                        Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " left", LogType.Debug);
+                                    }
+
+                                    if (matchMessage is CharacterChangedMessage)
+                                    {
+                                        var castedMsg = (CharacterChangedMessage)matchMessage;
+                                        MatchPlayerState player = matchPlayers.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
+                                        if (player != null)
+                                        {
+                                            player = new MatchPlayerState(player.ClientGuid, player.CtrlType, player.ReadyToRace, castedMsg.NewCharacter);
+                                        }
+                                        Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " set character to " + castedMsg.NewCharacter, LogType.Debug);
+                                    }
+
+                                    if (matchMessage is ChangedReadyMessage)
+                                    {
+                                        var castedMsg = (ChangedReadyMessage)matchMessage;
+                                        MatchPlayerState player = matchPlayers.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
+                                        if (player != null)
+                                        {
+                                            player = new MatchPlayerState(player.ClientGuid, player.CtrlType, castedMsg.Ready, player.CharacterId);
+                                        }
+                                        Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " set ready to " + castedMsg.Ready, LogType.Debug);
+                                    }
+
+                                    if (matchMessage is SettingsChangedMessage)
+                                    {
+                                        var castedMsg = (SettingsChangedMessage)matchMessage;
+                                        matchSettings = castedMsg.NewMatchSettings;
+                                        Log("New settings recieved", LogType.Debug);
+                                    }
+
+                                    //Forward this message to ALL clients
+                                    //This is just for testing, some messages might not need to be forwarded
+                                    Log("Forwarding message of type " + matchMessage.GetType(), LogType.Debug);
+                                    SendToAll(matchMessage);
                                     break;
 
                                 default:
@@ -185,6 +240,16 @@ namespace SanicballServerLib
                     }
                 }
             }
+        }
+
+        private void SendToAll(MatchMessage matchMsg)
+        {
+            string matchMsgSerialized = JsonConvert.SerializeObject(matchMsg, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
+
+            NetOutgoingMessage netMsg = netServer.CreateMessage();
+            netMsg.Write(MessageType.MatchMessage);
+            netMsg.Write(matchMsgSerialized);
+            netServer.SendMessage(netMsg, netServer.Connections, NetDeliveryMethod.ReliableOrdered, 0);
         }
 
         public void Dispose()

@@ -86,6 +86,8 @@ namespace Sanicball.Match
         /// </summary>
         public Data.MatchSettings CurrentSettings { get { return currentSettings; } }
 
+        public Guid LocalClientGuid { get { return myGuid; } }
+
         #endregion Properties
 
         #region State changing methods
@@ -214,13 +216,29 @@ namespace Sanicball.Match
             GoToLobby();
         }
 
-        public void InitOnlineMatch(Lidgren.Network.NetClient client, Lidgren.Network.NetConnection serverConnection)
+        public void InitOnlineMatch(Lidgren.Network.NetClient client, Lidgren.Network.NetConnection serverConnection, MatchState matchState)
         {
             OnlineMode = true;
 
-            //TODO: Recieve match status and sync up
-            //For now lets just use default settings
-            currentSettings = Data.MatchSettings.CreateDefault();
+            //Recieve match status and sync up
+            foreach (var clientInfo in matchState.Clients)
+            {
+                clients.Add(new MatchClient(clientInfo.Guid, clientInfo.Name));
+            }
+
+            foreach (var playerInfo in matchState.Players)
+            {
+                MatchPlayer p = new MatchPlayer(playerInfo.ClientGuid, playerInfo.CtrlType, playerInfo.CharacterId);
+                p.ReadyToRace = playerInfo.ReadyToRace;
+                players.Add(p);
+
+                if (inLobby)
+                {
+                    SpawnLobbyBall(p);
+                }
+            }
+
+            currentSettings = matchState.Settings;
 
             messenger = new Match.OnlineMatchMessenger(client, serverConnection);
 
@@ -235,16 +253,16 @@ namespace Sanicball.Match
             DontDestroyOnLoad(gameObject);
 
             //A messenger should be created by now! Time to create some message listeners
-            messenger.CreateListener<Match.SettingsChangedMessage>(SettingsChangedCallback);
-            messenger.CreateListener<Match.ClientJoinedMessage>(ClientJoinedCallback);
-            messenger.CreateListener<Match.PlayerJoinedMessage>(PlayerJoinedCallback);
-            messenger.CreateListener<Match.PlayerLeftMessage>(PlayerLeftCallback);
-            messenger.CreateListener<Match.CharacterChangedMessage>(CharacterChangedCallback);
-            messenger.CreateListener<Match.ChangedReadyMessage>(ChangedReadyCallback);
+            messenger.CreateListener<SettingsChangedMessage>(SettingsChangedCallback);
+            messenger.CreateListener<ClientJoinedMessage>(ClientJoinedCallback);
+            messenger.CreateListener<PlayerJoinedMessage>(PlayerJoinedCallback);
+            messenger.CreateListener<PlayerLeftMessage>(PlayerLeftCallback);
+            messenger.CreateListener<CharacterChangedMessage>(CharacterChangedCallback);
+            messenger.CreateListener<ChangedReadyMessage>(ChangedReadyCallback);
 
             //Create this client
             myGuid = Guid.NewGuid();
-            messenger.SendMessage(new Match.ClientJoinedMessage(myGuid, "client#" + myGuid));
+            messenger.SendMessage(new ClientJoinedMessage(myGuid, "client#" + myGuid));
         }
 
         private void Update()
@@ -383,7 +401,7 @@ namespace Sanicball.Match
             {
                 Destroy(player.BallObject.gameObject);
             }
-            player.BallObject = spawner.SpawnBall(Data.PlayerType.Normal, player.CtrlType, player.CharacterId, "Player");
+            player.BallObject = spawner.SpawnBall(Data.PlayerType.Normal, (player.ClientGuid == myGuid) ? player.CtrlType : ControlType.None, player.CharacterId, "Player");
         }
     }
 }
