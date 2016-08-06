@@ -77,6 +77,11 @@ namespace Sanicball.Match
         public bool OnlineMode { get; private set; }
 
         /// <summary>
+        /// Contains all clients connected to the game. In offline matches this will always only contain one client.
+        /// </summary>
+        public ReadOnlyCollection<MatchClient> Clients { get { return clients.AsReadOnly(); } }
+
+        /// <summary>
         /// Contains all players in the game, even ones from other clients in online races
         /// </summary>
         public ReadOnlyCollection<MatchPlayer> Players { get { return players.AsReadOnly(); } }
