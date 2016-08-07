@@ -126,20 +126,20 @@ namespace Sanicball.Match
 
         #region Match message callbacks
 
-        private void SettingsChangedCallback(Match.SettingsChangedMessage msg)
+        private void SettingsChangedCallback(SettingsChangedMessage msg)
         {
             currentSettings = msg.NewMatchSettings;
             if (MatchSettingsChanged != null)
                 MatchSettingsChanged(this, EventArgs.Empty);
         }
 
-        private void ClientJoinedCallback(Match.ClientJoinedMessage msg)
+        private void ClientJoinedCallback(ClientJoinedMessage msg)
         {
             clients.Add(new MatchClient(msg.ClientGuid, msg.ClientName));
             Debug.Log("New client " + msg.ClientName);
         }
 
-        private void PlayerJoinedCallback(Match.PlayerJoinedMessage msg)
+        private void PlayerJoinedCallback(PlayerJoinedMessage msg)
         {
             var p = new MatchPlayer(msg.ClientGuid, msg.CtrlType, msg.InitialCharacter);
             players.Add(p);
@@ -155,7 +155,7 @@ namespace Sanicball.Match
                 MatchPlayerAdded(this, new MatchPlayerEventArgs(p, msg.ClientGuid == myGuid));
         }
 
-        private void PlayerLeftCallback(Match.PlayerLeftMessage msg)
+        private void PlayerLeftCallback(PlayerLeftMessage msg)
         {
             var player = players.FirstOrDefault(a => a.ClientGuid == msg.ClientGuid && a.CtrlType == msg.CtrlType);
             if (player != null)
@@ -172,7 +172,7 @@ namespace Sanicball.Match
             }
         }
 
-        private void CharacterChangedCallback(Match.CharacterChangedMessage msg)
+        private void CharacterChangedCallback(CharacterChangedMessage msg)
         {
             if (!inLobby)
             {
@@ -187,7 +187,7 @@ namespace Sanicball.Match
             }
         }
 
-        private void ChangedReadyCallback(Match.ChangedReadyMessage msg)
+        private void ChangedReadyCallback(ChangedReadyMessage msg)
         {
             var player = players.FirstOrDefault(a => a.ClientGuid == msg.ClientGuid && a.CtrlType == msg.CtrlType);
             if (player != null)
@@ -207,6 +207,11 @@ namespace Sanicball.Match
             }
         }
 
+        private void ChatMessageCallback(ChatMessage msg)
+        {
+            Debug.Log("Chat message from " + msg.From + ": " + msg.Text);
+        }
+
         #endregion Match message callbacks
 
         #region Match initializing
@@ -215,7 +220,7 @@ namespace Sanicball.Match
         {
             currentSettings = Data.ActiveData.MatchSettings;
 
-            messenger = new Match.LocalMatchMessenger();
+            messenger = new LocalMatchMessenger();
 
             showSettingsOnLobbyLoad = true;
             GoToLobby();
@@ -245,7 +250,7 @@ namespace Sanicball.Match
 
             currentSettings = matchState.Settings;
 
-            messenger = new Match.OnlineMatchMessenger(client, serverConnection);
+            messenger = new OnlineMatchMessenger(client, serverConnection);
 
             showSettingsOnLobbyLoad = true;
             GoToLobby();
@@ -264,6 +269,7 @@ namespace Sanicball.Match
             messenger.CreateListener<PlayerLeftMessage>(PlayerLeftCallback);
             messenger.CreateListener<CharacterChangedMessage>(CharacterChangedCallback);
             messenger.CreateListener<ChangedReadyMessage>(ChangedReadyCallback);
+            messenger.CreateListener<ChatMessage>(ChatMessageCallback);
 
             //Create this client
             myGuid = Guid.NewGuid();

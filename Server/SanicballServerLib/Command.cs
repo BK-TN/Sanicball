@@ -7,35 +7,29 @@ namespace SanicballServerLib
 {
     public class Command
     {
-        private string[] args;
-
         public string Name { get; }
-        public int ArgCount { get { return args.Length; } }
+        public string Content { get; }
 
         public Command(string text)
         {
-            text = text.Trim();
-            string[] parts = text.Split(' ');
-            if (parts.Length > 0)
-            {
-                Name = parts[0];
+            Name = "";
+            Content = "";
 
-                args = new string[parts.Length - 1];
-                for (int i = 0; i < args.Length; i++)
+            text = text.Trim();
+
+            int split = text.IndexOf(' ');
+            if (split > -1)
+            {
+                Name = text.Substring(0, split);
+                if (text.Length > split + 1)
                 {
-                    args[i] = parts[i + 1];
+                    Content = text.Substring(split + 1, text.Length - (split + 1));
                 }
             }
             else
             {
-                Name = "";
-                parts = new string[0];
+                Name = text;
             }
-        }
-
-        public string GetArg(int pos)
-        {
-            return args[pos];
         }
     }
 }

@@ -56,9 +56,13 @@ namespace SanicballServerLib
         private CommandQueue commandQueue;
 
         //Match state
+
         private List<MatchClientState> matchClients = new List<MatchClientState>();
         private List<MatchPlayerState> matchPlayers = new List<MatchPlayerState>();
         private MatchSettings matchSettings;
+
+        //Associates connections with the match client they create (To identify which client is sending a message)
+        private Dictionary<NetConnection, MatchClientState> matchClientConnections = new Dictionary<NetConnection, MatchClientState>();
 
         public bool Running { get { return running; } }
 
@@ -113,11 +117,17 @@ namespace SanicballServerLib
                 Command cmd;
                 while ((cmd = commandQueue.ReadNext()) != null)
                 {
-                    Log("Entered command: " + cmd.Name + ", " + cmd.ArgCount + " arguments", LogType.Debug);
+                    Log("Entered command: " + cmd.Name + ", content: \"" + cmd.Content + "\"", LogType.Debug);
 
                     if (cmd.Name == "stop")
                     {
                         running = false;
+                    }
+
+                    if (cmd.Name == "say")
+                    {
+                        SendToAll(new ChatMessage("Server", ChatMessageType.User, cmd.Content));
+                        Log("Message sent");
                     }
                 }
 
@@ -141,9 +151,36 @@ namespace SanicballServerLib
                             break;
 
                         case NetIncomingMessageType.StatusChanged:
-                            byte status = msg.ReadByte();
+                            NetConnectionStatus status = (NetConnectionStatus)msg.ReadByte();
+
                             string statusMsg = msg.ReadString();
-                            Log("Status change recieved: " + (NetConnectionStatus)status + " - Message: " + statusMsg, LogType.Debug);
+                            switch (status)
+                            {
+                                case NetConnectionStatus.Disconnected:
+                                    MatchClientState associatedClient;
+                                    if (matchClientConnections.TryGetValue(msg.SenderConnection, out associatedClient))
+                                    {
+                                        //Remove all players created by this client
+                                        foreach (MatchPlayerState player in matchPlayers.Where(a => a.ClientGuid == associatedClient.Guid))
+                                        {
+                                            SendToAll(new PlayerLeftMessage(player.ClientGuid, player.CtrlType));
+                                        }
+                                        //Remove the client
+                                        matchClients.Remove(associatedClient);
+                                        matchClientConnections.Remove(msg.SenderConnection);
+
+                                        Log("Client " + associatedClient.Name + " disconnected");
+                                    }
+                                    else
+                                    {
+                                        Log("Unknown client disconnected (Client was most likely not done connecting)");
+                                    }
+                                    break;
+
+                                default:
+                                    Log("Status change recieved: " + status + " - Message: " + statusMsg, LogType.Debug);
+                                    break;
+                            }
                             break;
 
                         case NetIncomingMessageType.ConnectionApproval:
@@ -175,7 +212,11 @@ namespace SanicballServerLib
                                     if (matchMessage is ClientJoinedMessage)
                                     {
                                         var castedMsg = (ClientJoinedMessage)matchMessage;
-                                        matchClients.Add(new MatchClientState(castedMsg.ClientGuid, castedMsg.ClientName));
+
+                                        MatchClientState newClient = new MatchClientState(castedMsg.ClientGuid, castedMsg.ClientName);
+                                        matchClients.Add(newClient);
+                                        matchClientConnections.Add(msg.SenderConnection, newClient);
+
                                         Log("Client " + castedMsg.ClientGuid + " joined", LogType.Debug);
                                     }
 
@@ -244,6 +285,7 @@ namespace SanicballServerLib
 
         private void SendToAll(MatchMessage matchMsg)
         {
+            if (netServer.ConnectionsCount == 0) return;
             string matchMsgSerialized = JsonConvert.SerializeObject(matchMsg, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
 
             NetOutgoingMessage netMsg = netServer.CreateMessage();

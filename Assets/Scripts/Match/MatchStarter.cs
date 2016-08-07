@@ -62,6 +62,10 @@ namespace Sanicball.Match
                                     }
                                     break;
 
+                                case NetConnectionStatus.Disconnected:
+                                    Debug.Log("Disconnected, shit");
+                                    break;
+
                                 default:
                                     string statusMsg = msg.ReadString();
                                     Debug.Log("Status change recieved: " + status + " - Message: " + statusMsg);
@@ -92,7 +96,7 @@ namespace Sanicball.Match
             NetOutgoingMessage approval = joiningClient.CreateMessage();
             approval.Write("Approve me please");
 
-            NetConnection conn = joiningClient.Connect(IP, PORT, approval);
+            joiningClient.Connect(IP, PORT, approval);
         }
 
         //Called when succesfully connected to a server
