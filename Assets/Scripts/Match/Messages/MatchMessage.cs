@@ -7,5 +7,8 @@ namespace Sanicball.Match
 
     public abstract class MatchMessage
     {
+        protected bool reliable = true;
+
+        public bool Reliable { get { return reliable; } }
     }
 }

@@ -265,7 +265,8 @@ namespace SanicballServerLib
 
                                     //Forward this message to ALL clients
                                     //This is just for testing, some messages might not need to be forwarded
-                                    Log("Forwarding message of type " + matchMessage.GetType(), LogType.Debug);
+                                    if (matchMessage.Reliable)
+                                        Log("Forwarding message of type " + matchMessage.GetType(), LogType.Debug);
                                     SendToAll(matchMessage);
                                     break;
 

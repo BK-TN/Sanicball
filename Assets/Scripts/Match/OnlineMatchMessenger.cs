@@ -38,8 +38,7 @@ namespace Sanicball.Match
             string data = Newtonsoft.Json.JsonConvert.SerializeObject(message, serializerSettings);
             netMessage.Write(data);
 
-            //TODO: make it possible to use other net delivery methods for some things
-            client.SendMessage(netMessage, NetDeliveryMethod.ReliableOrdered);
+            client.SendMessage(netMessage, message.Reliable ? NetDeliveryMethod.ReliableOrdered : NetDeliveryMethod.UnreliableSequenced, message.Reliable ? 0 : 1);
         }
 
         public override void UpdateListeners()

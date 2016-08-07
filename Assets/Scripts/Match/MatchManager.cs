@@ -69,6 +69,10 @@ namespace Sanicball.Match
         //This will be either a LocalMatchMessenger or OnlineMatchMessenger, but each are used the same way.
         private Match.MatchMessenger messenger;
 
+        //Timer used for syncing realtime stuff in online
+        private float netUpdateTimer = 0;
+        private const int netUpdatesPerSecond = 20;
+
         #region Properties
 
         /// <summary>
@@ -212,6 +216,23 @@ namespace Sanicball.Match
             Debug.Log("Chat message from " + msg.From + ": " + msg.Text);
         }
 
+        private void PlayerMovementCallback(PlayerMovementMessage msg)
+        {
+            if (msg.ClientGuid == myGuid) return;
+
+            MatchPlayer player = players.FirstOrDefault(a => a.ClientGuid == msg.ClientGuid && a.CtrlType == msg.CtrlType);
+            if (player != null && player.BallObject != null)
+            {
+                Rigidbody ballRb = player.BallObject.GetComponent<Rigidbody>();
+
+                player.BallObject.transform.position = msg.Position.ToVector3();
+                player.BallObject.transform.rotation = Quaternion.Euler(msg.Rotation.ToVector3());
+                ballRb.velocity = msg.Velocity.ToVector3();
+                ballRb.angularVelocity = msg.AngularVelocity.ToVector3();
+                player.BallObject.DirectionVector = msg.DirectionVector.ToVector3();
+            }
+        }
+
         #endregion Match message callbacks
 
         #region Match initializing
@@ -270,6 +291,7 @@ namespace Sanicball.Match
             messenger.CreateListener<CharacterChangedMessage>(CharacterChangedCallback);
             messenger.CreateListener<ChangedReadyMessage>(ChangedReadyCallback);
             messenger.CreateListener<ChatMessage>(ChatMessageCallback);
+            messenger.CreateListener<PlayerMovementMessage>(PlayerMovementCallback);
 
             //Create this client
             myGuid = Guid.NewGuid();
@@ -309,6 +331,32 @@ namespace Sanicball.Match
                 {
                     GoToStage();
                     StopLobbyTimer();
+                }
+            }
+
+            if (OnlineMode)
+            {
+                netUpdateTimer -= Time.deltaTime;
+
+                if (netUpdateTimer <= 0)
+                {
+                    netUpdateTimer = 1f / netUpdatesPerSecond;
+
+                    //Send local player positions to other clients
+                    foreach (MatchPlayer player in players)
+                    {
+                        if (player.ClientGuid == myGuid && player.BallObject)
+                        {
+                            Rigidbody ballRb = player.BallObject.GetComponent<Rigidbody>();
+                            messenger.SendMessage(new PlayerMovementMessage(myGuid, player.CtrlType,
+                                player.BallObject.transform.position.ToSimpleVector3(),
+                                player.BallObject.transform.rotation.eulerAngles.ToSimpleVector3(),
+                                ballRb.velocity.ToSimpleVector3(),
+                                ballRb.angularVelocity.ToSimpleVector3(),
+                                player.BallObject.DirectionVector.ToSimpleVector3()
+                                ));
+                        }
+                    }
                 }
             }
         }
