@@ -15,15 +15,22 @@ namespace Sanicball.UI
         [SerializeField]
         private RectTransform clientList = null;
         [SerializeField]
-        private RectTransform clientListEntryPrefab = null;
+        private ClientListEntry clientListEntryPrefab = null;
 
-        private List<RectTransform> curClientListEntries = new List<RectTransform>();
+        private List<ClientListEntry> curClientListEntries = new List<ClientListEntry>();
 
         private MatchManager manager;
 
         private void Start()
         {
             manager = FindObjectOfType<MatchManager>();
+
+            //Self destruct if not in online mode
+            if (!manager.OnlineMode)
+            {
+                Destroy(gameObject);
+                return;
+            }
             UpdateText();
         }
 
@@ -34,18 +41,19 @@ namespace Sanicball.UI
             leftText.text = serverName;
             rightText.text = clients + " " + (clients != 1 ? "clients" : "client") + " connected playing with " + players + " " + (players != 1 ? "players" : "player");
 
-            foreach (RectTransform rt in curClientListEntries)
+            foreach (ClientListEntry entry in curClientListEntries)
             {
-                Destroy(rt.gameObject);
+                Destroy(entry.gameObject);
             }
             curClientListEntries.Clear();
 
             foreach (MatchClient c in manager.Clients)
             {
-                RectTransform instance = Instantiate(clientListEntryPrefab);
-                instance.SetParent(clientList, false);
-                instance.GetComponentInChildren<Text>().text = c.Name;
-                curClientListEntries.Add(instance);
+                ClientListEntry listEntry = Instantiate(clientListEntryPrefab);
+                listEntry.transform.SetParent(clientList, false);
+
+                listEntry.FillFields(c, manager);
+                curClientListEntries.Add(listEntry);
             }
         }
 

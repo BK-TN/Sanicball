@@ -207,7 +207,17 @@ namespace SanicballServerLib
                             switch (messageType)
                             {
                                 case MessageType.MatchMessage:
-                                    MatchMessage matchMessage = JsonConvert.DeserializeObject<MatchMessage>(msg.ReadString(), new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
+
+                                    MatchMessage matchMessage = null;
+                                    try
+                                    {
+                                        matchMessage = JsonConvert.DeserializeObject<MatchMessage>(msg.ReadString(), new JsonSerializerSettings() { TypeNameHandling = TypeNameHandling.All });
+                                    }
+                                    catch (JsonException ex)
+                                    {
+                                        Log("Failed to deserialize recieved match message. Error description: " + ex.Message);
+                                        continue; //Skip to next message in queue
+                                    }
 
                                     if (matchMessage is ClientJoinedMessage)
                                     {
@@ -218,42 +228,85 @@ namespace SanicballServerLib
                                         matchClientConnections.Add(msg.SenderConnection, newClient);
 
                                         Log("Client " + castedMsg.ClientGuid + " joined", LogType.Debug);
+                                        SendToAll(matchMessage);
                                     }
 
                                     if (matchMessage is PlayerJoinedMessage)
                                     {
                                         var castedMsg = (PlayerJoinedMessage)matchMessage;
-                                        matchPlayers.Add(new MatchPlayerState(castedMsg.ClientGuid, castedMsg.CtrlType, false, castedMsg.InitialCharacter));
-                                        Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " joined", LogType.Debug);
+
+                                        //Check if the message was sent from the same client it wants to act for
+
+                                        if (castedMsg.ClientGuid != matchClientConnections[msg.SenderConnection].Guid)
+                                        {
+                                            Log("Recieved PlayerJoinedMessage with invalid ClientGuid property", LogType.Warning);
+                                        }
+                                        else
+                                        {
+                                            matchPlayers.Add(new MatchPlayerState(castedMsg.ClientGuid, castedMsg.CtrlType, false, castedMsg.InitialCharacter));
+                                            Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " joined", LogType.Debug);
+                                            SendToAll(matchMessage);
+                                        }
                                     }
 
                                     if (matchMessage is PlayerLeftMessage)
                                     {
                                         var castedMsg = (PlayerLeftMessage)matchMessage;
-                                        matchPlayers.RemoveAll(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
-                                        Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " left", LogType.Debug);
+
+                                        //Check if the message was sent from the same client it wants to act for
+                                        if (castedMsg.ClientGuid != matchClientConnections[msg.SenderConnection].Guid)
+                                        {
+                                            Log("Recieved PlayerLeftMessage with invalid ClientGuid property", LogType.Warning);
+                                        }
+                                        else
+                                        {
+                                            matchPlayers.RemoveAll(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
+                                            Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " left", LogType.Debug);
+                                            SendToAll(matchMessage);
+                                        }
                                     }
 
                                     if (matchMessage is CharacterChangedMessage)
                                     {
                                         var castedMsg = (CharacterChangedMessage)matchMessage;
-                                        MatchPlayerState player = matchPlayers.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
-                                        if (player != null)
+
+                                        //Check if the message was sent from the same client it wants to act for
+                                        if (castedMsg.ClientGuid != matchClientConnections[msg.SenderConnection].Guid)
                                         {
-                                            player = new MatchPlayerState(player.ClientGuid, player.CtrlType, player.ReadyToRace, castedMsg.NewCharacter);
+                                            Log("Recieved CharacterChangedMessage with invalid ClientGuid property", LogType.Warning);
                                         }
-                                        Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " set character to " + castedMsg.NewCharacter, LogType.Debug);
+                                        else
+                                        {
+                                            MatchPlayerState player = matchPlayers.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
+                                            if (player != null)
+                                            {
+                                                player = new MatchPlayerState(player.ClientGuid, player.CtrlType, player.ReadyToRace, castedMsg.NewCharacter);
+                                            }
+                                            Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " set character to " + castedMsg.NewCharacter, LogType.Debug);
+
+                                            SendToAll(matchMessage);
+                                        }
                                     }
 
                                     if (matchMessage is ChangedReadyMessage)
                                     {
                                         var castedMsg = (ChangedReadyMessage)matchMessage;
-                                        MatchPlayerState player = matchPlayers.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
-                                        if (player != null)
+
+                                        //Check if the message was sent from the same client it wants to act for
+                                        if (castedMsg.ClientGuid != matchClientConnections[msg.SenderConnection].Guid)
                                         {
-                                            player = new MatchPlayerState(player.ClientGuid, player.CtrlType, castedMsg.Ready, player.CharacterId);
+                                            Log("Recieved ChangeReadyMessage with invalid ClientGuid property", LogType.Warning);
                                         }
-                                        Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " set ready to " + castedMsg.Ready, LogType.Debug);
+                                        else
+                                        {
+                                            MatchPlayerState player = matchPlayers.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
+                                            if (player != null)
+                                            {
+                                                player = new MatchPlayerState(player.ClientGuid, player.CtrlType, castedMsg.Ready, player.CharacterId);
+                                            }
+                                            Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " set ready to " + castedMsg.Ready, LogType.Debug);
+                                            SendToAll(matchMessage);
+                                        }
                                     }
 
                                     if (matchMessage is SettingsChangedMessage)
@@ -261,13 +314,12 @@ namespace SanicballServerLib
                                         var castedMsg = (SettingsChangedMessage)matchMessage;
                                         matchSettings = castedMsg.NewMatchSettings;
                                         Log("New settings recieved", LogType.Debug);
+                                        SendToAll(matchMessage);
                                     }
 
                                     //Forward this message to ALL clients
                                     //This is just for testing, some messages might not need to be forwarded
-                                    if (matchMessage.Reliable)
-                                        Log("Forwarding message of type " + matchMessage.GetType(), LogType.Debug);
-                                    SendToAll(matchMessage);
+
                                     break;
 
                                 default:
@@ -286,6 +338,8 @@ namespace SanicballServerLib
 
         private void SendToAll(MatchMessage matchMsg)
         {
+            if (matchMsg.Reliable)
+                Log("Forwarding message of type " + matchMsg.GetType(), LogType.Debug);
             if (netServer.ConnectionsCount == 0) return;
             string matchMsgSerialized = JsonConvert.SerializeObject(matchMsg, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
 
