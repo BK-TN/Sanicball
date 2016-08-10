@@ -78,7 +78,7 @@ namespace Sanicball.Match
         /// <summary>
         /// True if playing online. Used for enabling online-only behaviour, like the client list and the chat
         /// </summary>
-        public bool OnlineMode { get; private set; }
+        public bool OnlineMode { get { return messenger is OnlineMatchMessenger; } }
 
         /// <summary>
         /// Contains all clients connected to the game. In offline matches this will always only contain one client.
@@ -216,6 +216,12 @@ namespace Sanicball.Match
             Debug.Log("Chat message from " + msg.From + ": " + msg.Text);
         }
 
+        private void LoadRaceCallback(LoadRaceMessage msg)
+        {
+            GoToStage();
+            StopLobbyTimer();
+        }
+
         private void PlayerMovementCallback(PlayerMovementMessage msg)
         {
             if (msg.ClientGuid == myGuid) return;
@@ -249,8 +255,6 @@ namespace Sanicball.Match
 
         public void InitOnlineMatch(Lidgren.Network.NetClient client, Lidgren.Network.NetConnection serverConnection, MatchState matchState)
         {
-            OnlineMode = true;
-
             //Recieve match status and sync up
             foreach (var clientInfo in matchState.Clients)
             {
@@ -292,6 +296,7 @@ namespace Sanicball.Match
             messenger.CreateListener<ChangedReadyMessage>(ChangedReadyCallback);
             messenger.CreateListener<ChatMessage>(ChatMessageCallback);
             messenger.CreateListener<PlayerMovementMessage>(PlayerMovementCallback);
+            messenger.CreateListener<LoadRaceMessage>(LoadRaceCallback);
 
             //Create this client
             myGuid = Guid.NewGuid();
@@ -302,6 +307,7 @@ namespace Sanicball.Match
         {
             messenger.UpdateListeners();
 
+            //Pausing/unpausing
             if (Input.GetKeyDown(KeyCode.Escape) || Input.GetKeyDown(KeyCode.JoystickButton7))
             {
                 if (!UI.PauseMenu.GamePaused)
@@ -317,6 +323,7 @@ namespace Sanicball.Match
                 }
             }
 
+            //Shortcut to show match settings
             if (inLobby && Input.GetKeyDown(KeyCode.O))
             {
                 LobbyReferences.Active.MatchSettingsPanel.Show();
@@ -325,12 +332,12 @@ namespace Sanicball.Match
             if (lobbyTimerOn && inLobby)
             {
                 lobbyTimer -= Time.deltaTime;
-                LobbyReferences.Active.CountdownField.text = "Match starts in " + Mathf.Ceil(lobbyTimer);
+                LobbyReferences.Active.CountdownField.text = "Match starts in " + Mathf.Max(1f, Mathf.Ceil(lobbyTimer));
 
-                if (lobbyTimer <= 0)
+                //LoadRaceMessages don't need to be sent in online mode - the server will ignore it anyway.
+                if (lobbyTimer <= 0 && !OnlineMode)
                 {
-                    GoToStage();
-                    StopLobbyTimer();
+                    messenger.SendMessage(new LoadRaceMessage());
                 }
             }
 

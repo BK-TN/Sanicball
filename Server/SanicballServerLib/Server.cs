@@ -61,6 +61,10 @@ namespace SanicballServerLib
         private List<MatchPlayerState> matchPlayers = new List<MatchPlayerState>();
         private MatchSettings matchSettings;
 
+        //Lobby timer
+        private System.Diagnostics.Stopwatch lobbyTimer = new System.Diagnostics.Stopwatch();
+        private const float lobbyTimerGoal = 3;
+
         //Associates connections with the match client they create (To identify which client is sending a message)
         private Dictionary<NetConnection, MatchClientState> matchClientConnections = new Dictionary<NetConnection, MatchClientState>();
 
@@ -94,6 +98,7 @@ namespace SanicballServerLib
                 matchSettings = MatchSettings.CreateDefault();
 
             running = true;
+
             NetPeerConfiguration config = new NetPeerConfiguration(OnlineMatchMessenger.APP_ID);
             config.Port = 25000;
             config.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
@@ -112,6 +117,17 @@ namespace SanicballServerLib
             while (running)
             {
                 Thread.Sleep(1000 / TICKRATE);
+
+                //Check lobby timer
+                if (lobbyTimer.IsRunning)
+                {
+                    if (lobbyTimer.Elapsed.TotalSeconds >= lobbyTimerGoal)
+                    {
+                        lobbyTimer.Reset();
+                        SendToAll(new LoadRaceMessage());
+                        Log("Lobby timer reached goal time, sending LoadRaceMessage", LogType.Debug);
+                    }
+                }
 
                 //Check command queue
                 Command cmd;
@@ -302,9 +318,27 @@ namespace SanicballServerLib
                                             MatchPlayerState player = matchPlayers.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
                                             if (player != null)
                                             {
-                                                player = new MatchPlayerState(player.ClientGuid, player.CtrlType, castedMsg.Ready, player.CharacterId);
+                                                int index = matchPlayers.IndexOf(player);
+                                                matchPlayers[index] = new MatchPlayerState(player.ClientGuid, player.CtrlType, castedMsg.Ready, player.CharacterId);
                                             }
                                             Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " set ready to " + castedMsg.Ready, LogType.Debug);
+
+                                            //Start lobby timer if all players are ready - otherwise reset it if it's running
+                                            bool allPlayersReady = matchPlayers.All(a => a.ReadyToRace);
+                                            if (allPlayersReady)
+                                            {
+                                                lobbyTimer.Start();
+                                                Log("All players ready, timer started", LogType.Debug);
+                                            }
+                                            else
+                                            {
+                                                if (lobbyTimer.IsRunning)
+                                                {
+                                                    lobbyTimer.Reset();
+                                                    Log("Timer stopped, not all players are ready", LogType.Debug);
+                                                }
+                                            }
+
                                             SendToAll(matchMessage);
                                         }
                                     }
