@@ -165,22 +165,25 @@ namespace Sanicball
             //Create objects and components based on ball type
             if (type == BallType.Player)
             {
-                IBallCamera camera;
-                //Create camera
-                if (Data.ActiveData.GameSettings.useOldControls)
+                if (ctrlType != ControlType.None)
                 {
-                    camera = Instantiate(prefabs.OldCamera);
-                    ((PivotCamera)camera).UseMouse = ctrlType == ControlType.Keyboard;
-                }
-                else
-                {
-                    camera = Instantiate(prefabs.Camera);
-                }
-                camera.Target = rb;
-                camera.CtrlType = ctrlType;
+                    IBallCamera camera;
+                    //Create camera
+                    if (Data.ActiveData.GameSettings.useOldControls)
+                    {
+                        camera = Instantiate(prefabs.OldCamera);
+                        ((PivotCamera)camera).UseMouse = ctrlType == ControlType.Keyboard;
+                    }
+                    else
+                    {
+                        camera = Instantiate(prefabs.Camera);
+                    }
+                    camera.Target = rb;
+                    camera.CtrlType = ctrlType;
 
-                if (CameraCreated != null)
-                    CameraCreated(this, new CameraCreationArgs(camera));
+                    if (CameraCreated != null)
+                        CameraCreated(this, new CameraCreationArgs(camera));
+                }
             }
             if (type == BallType.LobbyPlayer)
             {

@@ -56,7 +56,6 @@ namespace SanicballServerLib
         private CommandQueue commandQueue;
 
         //Match state
-
         private List<MatchClientState> matchClients = new List<MatchClientState>();
         private List<MatchPlayerState> matchPlayers = new List<MatchPlayerState>();
         private MatchSettings matchSettings;
@@ -351,9 +350,10 @@ namespace SanicballServerLib
                                         SendToAll(matchMessage);
                                     }
 
-                                    //Forward this message to ALL clients
-                                    //This is just for testing, some messages might not need to be forwarded
-
+                                    if (matchMessage is PlayerMovementMessage)
+                                    {
+                                        SendToAll(matchMessage);
+                                    }
                                     break;
 
                                 default:

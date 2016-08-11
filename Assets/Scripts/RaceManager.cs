@@ -110,41 +110,61 @@ namespace Sanicball
             int nextPos = 0;
 
             var matchManager = FindObjectOfType<Match.MatchManager>();
+
+            //Enable lap records if there is only one local player.
+            bool enableLapRecords = matchManager.Players.Count(a => a.ClientGuid == matchManager.LocalClientGuid) == 1;
+
+            //Store index for next local player, used to set up splitscreen cameras correctly
+            int nextLocalPlayerIndex = 0;
+
+            //Create all player balls
             for (int i = 0; i < matchManager.Players.Count; i++)
             {
                 var player = matchManager.Players[i];
 
-                player.BallObject = FindObjectOfType<RaceBallSpawner>().SpawnBall(nextPos, BallType.Player, player.CtrlType, player.CharacterId, "Player - " + Utils.CtrlTypeStr(player.CtrlType));
+                bool local = player.ClientGuid == matchManager.LocalClientGuid;
+
+                //Create ball
+                player.BallObject = FindObjectOfType<RaceBallSpawner>().SpawnBall(nextPos, BallType.Player, local ? player.CtrlType : ControlType.None, player.CharacterId, "Ball - " + Utils.CtrlTypeStr(player.CtrlType));
                 player.BallObject.CanMove = false;
 
+                //Create race player
                 var racePlayer = new RacePlayer(player.BallObject);
                 players.Add(racePlayer);
-                if (matchManager.Players.Count == 1)
-                    racePlayer.LapRecordsEnabled = true;
-
+                racePlayer.LapRecordsEnabled = enableLapRecords && local;
                 racePlayer.FinishLinePassed += RacePlayer_FinishLinePassed;
 
-                var playerUI = Instantiate(playerUIPrefab);
-                playerUI.TargetPlayer = racePlayer;
-                playerUI.TargetManager = this;
-
-                int persistentIndex = i;
-                player.BallObject.CameraCreated += (sender, e) =>
+                if (local)
                 {
-                    playerUI.TargetCamera = e.CameraCreated.AttachedCamera;
-                    var splitter = e.CameraCreated.AttachedCamera.GetComponent<CameraSplitter>();
-                    if (splitter)
-                        splitter.SplitscreenIndex = persistentIndex;
-                };
+                    //Create player UI
+                    var playerUI = Instantiate(playerUIPrefab);
+                    playerUI.TargetPlayer = racePlayer;
+                    playerUI.TargetManager = this;
+
+                    //Connect UI to camera (when the camera has been instanced)
+                    int persistentIndex = nextLocalPlayerIndex;
+                    player.BallObject.CameraCreated += (sender, e) =>
+                    {
+                        playerUI.TargetCamera = e.CameraCreated.AttachedCamera;
+                        var splitter = e.CameraCreated.AttachedCamera.GetComponent<CameraSplitter>();
+                        if (splitter)
+                            splitter.SplitscreenIndex = persistentIndex;
+                    };
+
+                    nextLocalPlayerIndex++;
+                }
 
                 nextPos++;
             }
 
+            //Create all AI balls
             for (int i = 0; i < settings.AICount; i++)
             {
+                //Spawn ball object
                 var aiBall = FindObjectOfType<RaceBallSpawner>().SpawnBall(nextPos, BallType.AI, ControlType.None, settings.GetAICharacter(i), "AI #" + i);
                 aiBall.CanMove = false;
 
+                //Create race player
                 var racePlayer = new RacePlayer(aiBall);
                 players.Add(racePlayer);
                 racePlayer.FinishLinePassed += RacePlayer_FinishLinePassed;
