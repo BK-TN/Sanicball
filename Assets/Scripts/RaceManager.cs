@@ -17,8 +17,9 @@ namespace Sanicball
     {
         private List<RacePlayer> players = new List<RacePlayer>();
         private RaceState currentState = RaceState.None;
-
         private Data.MatchSettings settings;
+
+        private Match.MatchMessenger messenger;
 
         [SerializeField]
         private WaitingCamera waitingCamPrefab = null;
@@ -38,7 +39,7 @@ namespace Sanicball
         private UI.RaceUI raceUI;
 
         public System.TimeSpan RaceTime { get { return System.TimeSpan.FromSeconds(raceTimer); } }
-        public Data.MatchSettings Settings { get { return settings; } set { settings = value; } }
+        public Data.MatchSettings Settings { get { return settings; } }
         public int PlayerCount { get { return players.Count; } }
         public RacePlayer this[int playerIndex] { get { return players[playerIndex]; } }
 
@@ -98,6 +99,26 @@ namespace Sanicball
         private void Countdown_OnCountdownFinished(object sender, System.EventArgs e)
         {
             CurrentState = RaceState.Racing;
+        }
+
+        public void Init(Data.MatchSettings settings, Match.MatchMessenger messenger)
+        {
+            this.settings = settings;
+            this.messenger = messenger;
+
+            messenger.CreateListener<Match.StartRaceMessage>(StartRaceCallback);
+        }
+
+        public void OnDestroy()
+        {
+            //ALL created listeners should be removed from the messenger here
+            //Otherwise the race manager won't get destroyed properly
+            messenger.RemoveListener<Match.StartRaceMessage>(StartRaceCallback);
+        }
+
+        private void StartRaceCallback(Match.StartRaceMessage msg)
+        {
+            CurrentState = RaceState.Countdown;
         }
 
         private void Start()
@@ -200,7 +221,7 @@ namespace Sanicball
         {
             if (CurrentState == RaceState.Waiting && (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.JoystickButton0)))
             {
-                CurrentState = RaceState.Countdown;
+                messenger.SendMessage(new Match.StartRaceMessage());
             }
 
             if (raceTimerOn)

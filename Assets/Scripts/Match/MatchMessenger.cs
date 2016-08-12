@@ -50,7 +50,7 @@ namespace Sanicball.Match
             for (int i = 0; i < listeners.Count; i++)
             {
                 MatchMessageListener listenerEntry = listeners[i];
-                if (listenerEntry.MessageType == handler.GetType() && (MatchMessageHandler<T>)listenerEntry.Handler == handler)
+                if (listenerEntry.MessageType == typeof(T) && (MatchMessageHandler<T>)listenerEntry.Handler == handler)
                 {
                     listeners.Remove(listenerEntry);
                     return true;

@@ -176,13 +176,14 @@ namespace SanicballServerLib
                                     if (matchClientConnections.TryGetValue(msg.SenderConnection, out associatedClient))
                                     {
                                         //Remove all players created by this client
-                                        foreach (MatchPlayerState player in matchPlayers.Where(a => a.ClientGuid == associatedClient.Guid))
-                                        {
-                                            SendToAll(new PlayerLeftMessage(player.ClientGuid, player.CtrlType));
-                                        }
+                                        matchPlayers.RemoveAll(a => a.ClientGuid == associatedClient.Guid);
+
                                         //Remove the client
                                         matchClients.Remove(associatedClient);
                                         matchClientConnections.Remove(msg.SenderConnection);
+
+                                        //Tell connected clients to remove the client+players
+                                        SendToAll(new ClientLeftMessage(associatedClient.Guid));
 
                                         Log("Client " + associatedClient.Name + " disconnected");
                                     }
@@ -350,10 +351,15 @@ namespace SanicballServerLib
                                         SendToAll(matchMessage);
                                     }
 
+                                    if (matchMessage is StartRaceMessage)
+                                    {
+                                    }
+
                                     if (matchMessage is PlayerMovementMessage)
                                     {
                                         SendToAll(matchMessage);
                                     }
+
                                     break;
 
                                 default:

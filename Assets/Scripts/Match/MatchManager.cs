@@ -143,6 +143,18 @@ namespace Sanicball.Match
             Debug.Log("New client " + msg.ClientName);
         }
 
+        private void ClientLeftCallback(ClientLeftMessage msg)
+        {
+            //Remove all players added by this client
+            List<MatchPlayer> playersToRemove = players.Where(a => a.ClientGuid == msg.ClientGuid).ToList();
+            foreach (MatchPlayer player in playersToRemove)
+            {
+                PlayerLeftCallback(new PlayerLeftMessage(player.ClientGuid, player.CtrlType));
+            }
+            //Remove the client
+            clients.RemoveAll(a => a.Guid == msg.ClientGuid);
+        }
+
         private void PlayerJoinedCallback(PlayerJoinedMessage msg)
         {
             var p = new MatchPlayer(msg.ClientGuid, msg.CtrlType, msg.InitialCharacter);
@@ -290,6 +302,7 @@ namespace Sanicball.Match
             //A messenger should be created by now! Time to create some message listeners
             messenger.CreateListener<SettingsChangedMessage>(SettingsChangedCallback);
             messenger.CreateListener<ClientJoinedMessage>(ClientJoinedCallback);
+            messenger.CreateListener<ClientLeftMessage>(ClientLeftCallback);
             messenger.CreateListener<PlayerJoinedMessage>(PlayerJoinedCallback);
             messenger.CreateListener<PlayerLeftMessage>(PlayerLeftCallback);
             messenger.CreateListener<CharacterChangedMessage>(CharacterChangedCallback);
@@ -449,7 +462,7 @@ namespace Sanicball.Match
         {
             inLobby = false;
             var raceManager = Instantiate(raceManagerPrefab);
-            raceManager.Settings = currentSettings;
+            raceManager.Init(currentSettings, messenger);
         }
 
         public void QuitMatch()
