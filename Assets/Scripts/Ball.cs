@@ -58,11 +58,14 @@ namespace Sanicball
         private PivotCamera oldCamera;
         [SerializeField]
         private AITarget aiTarget;
+        [SerializeField]
+        private ParticleSystem removalParticles;
 
         public DriftySmoke Smoke { get { return smoke; } }
         public OmniCamera Camera { get { return camera; } }
         public PivotCamera OldCamera { get { return oldCamera; } }
         public AITarget AiTarget { get { return aiTarget; } }
+        public ParticleSystem RemovalParticles { get { return removalParticles; } }
     }
 
     [RequireComponent(typeof(Rigidbody))]
@@ -363,5 +366,24 @@ namespace Sanicball
             Gizmos.color = Color.red;
             Gizmos.DrawRay(transform.position, Up);
         }
+
+        #region Removal particles
+
+        private bool quitting = false;
+
+        public void OnApplicationQuit()
+        {
+            quitting = true;
+        }
+
+        private void OnDestroy()
+        {
+            if (!quitting)
+            {
+                Instantiate(prefabs.RemovalParticles, transform.position, transform.rotation);
+            }
+        }
+
+        #endregion Removal particles
     }
 }

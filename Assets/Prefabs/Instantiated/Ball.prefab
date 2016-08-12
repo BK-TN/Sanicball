@@ -95,6 +95,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 452612}
   m_RootOrder: 3
@@ -107,6 +108,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0.73001164, z: 0, w: 0.6834348}
   m_LocalPosition: {x: 0, y: 0, z: -3.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 93.7747, z: 0}
   m_Children:
   - {fileID: 458098}
   - {fileID: 482622}
@@ -123,6 +125,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 452612}
   m_RootOrder: 0
@@ -135,6 +138,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 452612}
   m_RootOrder: 2
@@ -147,6 +151,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 452612}
   m_RootOrder: 1
@@ -561,6 +566,7 @@ MonoBehaviour:
     camera: {fileID: 11443186, guid: 1f3ec1af904b6b54b9cfc2b288854f02, type: 2}
     oldCamera: {fileID: 11400000, guid: 395e30509a198fc4fb2aac437f95e4c0, type: 2}
     aiTarget: {fileID: 11400006, guid: 97eba7661fd1a27439ece48ef79ce6d0, type: 2}
+    removalParticles: {fileID: 19835562, guid: e8c684b001602cc4295dfd027bb84014, type: 2}
   sounds:
     jump: {fileID: 8245922}
     roll: {fileID: 8294728}
