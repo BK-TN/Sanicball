@@ -83,11 +83,8 @@ namespace Sanicball.Match
             manager.InitLocalMatch();
         }
 
-        public void JoinOnlineGame()
+        public void JoinOnlineGame(string ip = "127.0.0.1", int port = 25000)
         {
-            const string IP = "127.0.0.1";
-            const int PORT = 25000;
-
             NetPeerConfiguration conf = new NetPeerConfiguration(APP_ID);
             joiningClient = new NetClient(conf);
             joiningClient.Start();
@@ -96,7 +93,7 @@ namespace Sanicball.Match
             NetOutgoingMessage approval = joiningClient.CreateMessage();
             approval.Write("Approve me please");
 
-            joiningClient.Connect(IP, PORT, approval);
+            joiningClient.Connect(ip, port, approval);
         }
 
         //Called when succesfully connected to a server

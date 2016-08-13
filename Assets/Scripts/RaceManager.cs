@@ -19,6 +19,7 @@ namespace Sanicball
         private RaceState currentState = RaceState.None;
         private Data.MatchSettings settings;
 
+        private Match.MatchManager matchManager;
         private Match.MatchMessenger messenger;
 
         [SerializeField]
@@ -69,6 +70,10 @@ namespace Sanicball
                         activeWaitingCam = Instantiate(waitingCamPrefab);
                         activeWaitingUI = Instantiate(waitingUIPrefab);
                         activeWaitingUI.StageNameToShow = Data.ActiveData.Stages[settings.StageId].name;
+                        if (matchManager.OnlineMode)
+                        {
+                            activeWaitingUI.InfoToShow = "Waiting for other players...";
+                        }
                         break;
 
                     case RaceState.Countdown:
@@ -101,9 +106,10 @@ namespace Sanicball
             CurrentState = RaceState.Racing;
         }
 
-        public void Init(Data.MatchSettings settings, Match.MatchMessenger messenger)
+        public void Init(Data.MatchSettings settings, Match.MatchManager matchManager, Match.MatchMessenger messenger)
         {
             this.settings = settings;
+            this.matchManager = matchManager;
             this.messenger = messenger;
 
             messenger.CreateListener<Match.StartRaceMessage>(StartRaceCallback);
@@ -124,13 +130,17 @@ namespace Sanicball
         private void Start()
         {
             CurrentState = RaceState.Waiting;
+
+            //In online mode, send a RaceStartMessage as soon as the track is loaded (which is now)
+            if (matchManager.OnlineMode)
+            {
+                messenger.SendMessage(new Match.StartRaceMessage());
+            }
         }
 
         private void CreateBallObjects()
         {
             int nextPos = 0;
-
-            var matchManager = FindObjectOfType<Match.MatchManager>();
 
             //Enable lap records if there is only one local player.
             bool enableLapRecords = matchManager.Players.Count(a => a.ClientGuid == matchManager.LocalClientGuid) == 1;
@@ -219,7 +229,8 @@ namespace Sanicball
 
         private void Update()
         {
-            if (CurrentState == RaceState.Waiting && (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.JoystickButton0)))
+            //Manual race starting in offline mode
+            if (!matchManager.OnlineMode && CurrentState == RaceState.Waiting && (Input.GetKeyDown(KeyCode.Space) || Input.GetKeyDown(KeyCode.JoystickButton0)))
             {
                 messenger.SendMessage(new Match.StartRaceMessage());
             }

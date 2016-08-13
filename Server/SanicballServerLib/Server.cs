@@ -64,6 +64,9 @@ namespace SanicballServerLib
         private System.Diagnostics.Stopwatch lobbyTimer = new System.Diagnostics.Stopwatch();
         private const float lobbyTimerGoal = 3;
 
+        //List of clients that haven't loaded a stage yet
+        private List<MatchClientState> clientsLoadingStage = new List<MatchClientState>();
+
         //Associates connections with the match client they create (To identify which client is sending a message)
         private Dictionary<NetConnection, MatchClientState> matchClientConnections = new Dictionary<NetConnection, MatchClientState>();
 
@@ -123,8 +126,10 @@ namespace SanicballServerLib
                     if (lobbyTimer.Elapsed.TotalSeconds >= lobbyTimerGoal)
                     {
                         lobbyTimer.Reset();
-                        SendToAll(new LoadRaceMessage());
                         Log("Lobby timer reached goal time, sending LoadRaceMessage", LogType.Debug);
+                        SendToAll(new LoadRaceMessage());
+                        //Wait for clients to load the stage
+                        clientsLoadingStage.AddRange(matchClients);
                     }
                 }
 
@@ -353,6 +358,15 @@ namespace SanicballServerLib
 
                                     if (matchMessage is StartRaceMessage)
                                     {
+                                        MatchClientState client = matchClientConnections[msg.SenderConnection];
+                                        clientsLoadingStage.Remove(client);
+                                        Log("Waiting for " + clientsLoadingStage.Count + " client(s) to load");
+
+                                        if (clientsLoadingStage.Count == 0)
+                                        {
+                                            Log("Starting race!", LogType.Debug);
+                                            SendToAll(new StartRaceMessage());
+                                        }
                                     }
 
                                     if (matchMessage is PlayerMovementMessage)

@@ -367,23 +367,10 @@ namespace Sanicball
             Gizmos.DrawRay(transform.position, Up);
         }
 
-        #region Removal particles
-
-        private bool quitting = false;
-
-        public void OnApplicationQuit()
+        public void CreateRemovalParticles()
         {
-            quitting = true;
+            //TODO: Create a special version of the particle system for Super Sanic that has a cloud of pot leaves instead. No, really.
+            Instantiate(prefabs.RemovalParticles, transform.position, transform.rotation);
         }
-
-        private void OnDestroy()
-        {
-            if (!quitting)
-            {
-                Instantiate(prefabs.RemovalParticles, transform.position, transform.rotation);
-            }
-        }
-
-        #endregion Removal particles
     }
 }

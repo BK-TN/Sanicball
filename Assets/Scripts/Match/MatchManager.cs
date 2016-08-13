@@ -180,6 +180,7 @@ namespace Sanicball.Match
 
                 if (player.BallObject)
                 {
+                    player.BallObject.CreateRemovalParticles();
                     Destroy(player.BallObject.gameObject);
                 }
 
@@ -462,7 +463,7 @@ namespace Sanicball.Match
         {
             inLobby = false;
             var raceManager = Instantiate(raceManagerPrefab);
-            raceManager.Init(currentSettings, messenger);
+            raceManager.Init(currentSettings, this, messenger);
         }
 
         public void QuitMatch()
@@ -478,6 +479,7 @@ namespace Sanicball.Match
             var spawner = LobbyReferences.Active.BallSpawner;
             if (player.BallObject != null)
             {
+                player.BallObject.CreateRemovalParticles();
                 Destroy(player.BallObject.gameObject);
             }
             player.BallObject = spawner.SpawnBall(Data.PlayerType.Normal, (player.ClientGuid == myGuid) ? player.CtrlType : ControlType.None, player.CharacterId, "Player");
