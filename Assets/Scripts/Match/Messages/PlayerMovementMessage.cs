@@ -32,6 +32,7 @@ namespace Sanicball.Match
 
     public class PlayerMovementMessage : MatchMessage
     {
+        public System.DateTime Timestamp { get; private set; }
         public System.Guid ClientGuid { get; private set; }
         public ControlType CtrlType { get; private set; }
         public SimpleVector3 Position { get; private set; }
@@ -40,10 +41,11 @@ namespace Sanicball.Match
         public SimpleVector3 AngularVelocity { get; private set; }
         public SimpleVector3 DirectionVector { get; private set; }
 
-        public PlayerMovementMessage(System.Guid clientGuid, ControlType ctrlType, SimpleVector3 position, SimpleVector3 rotation, SimpleVector3 velocity, SimpleVector3 angularVelocity, SimpleVector3 directionVector)
+        public PlayerMovementMessage(System.DateTime timestamp, System.Guid clientGuid, ControlType ctrlType, SimpleVector3 position, SimpleVector3 rotation, SimpleVector3 velocity, SimpleVector3 angularVelocity, SimpleVector3 directionVector)
         {
             reliable = false;
 
+            Timestamp = timestamp;
             ClientGuid = clientGuid;
             CtrlType = ctrlType;
             Position = position;

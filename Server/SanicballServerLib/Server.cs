@@ -66,6 +66,8 @@ namespace SanicballServerLib
 
         //List of clients that haven't loaded a stage yet
         private List<MatchClientState> clientsLoadingStage = new List<MatchClientState>();
+        private System.Diagnostics.Stopwatch stageLoadingTimeoutTimer = new System.Diagnostics.Stopwatch();
+        private const float stageLoadingTimeoutTimerGoal = 20;
 
         //Associates connections with the match client they create (To identify which client is sending a message)
         private Dictionary<NetConnection, MatchClientState> matchClientConnections = new Dictionary<NetConnection, MatchClientState>();
@@ -130,6 +132,18 @@ namespace SanicballServerLib
                         SendToAll(new LoadRaceMessage());
                         //Wait for clients to load the stage
                         clientsLoadingStage.AddRange(matchClients);
+                        stageLoadingTimeoutTimer.Start();
+                    }
+                }
+
+                //Check stage loading timer
+                if (stageLoadingTimeoutTimer.IsRunning)
+                {
+                    if (stageLoadingTimeoutTimer.Elapsed.TotalSeconds >= stageLoadingTimeoutTimerGoal)
+                    {
+                        Log("Some players are still loading the race, starting anyway", LogType.Debug);
+                        SendToAll(new StartRaceMessage());
+                        stageLoadingTimeoutTimer.Reset();
                     }
                 }
 
@@ -366,6 +380,7 @@ namespace SanicballServerLib
                                         {
                                             Log("Starting race!", LogType.Debug);
                                             SendToAll(new StartRaceMessage());
+                                            stageLoadingTimeoutTimer.Reset();
                                         }
                                     }
 

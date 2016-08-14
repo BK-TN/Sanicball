@@ -242,13 +242,7 @@ namespace Sanicball.Match
             MatchPlayer player = players.FirstOrDefault(a => a.ClientGuid == msg.ClientGuid && a.CtrlType == msg.CtrlType);
             if (player != null && player.BallObject != null)
             {
-                Rigidbody ballRb = player.BallObject.GetComponent<Rigidbody>();
-
-                player.BallObject.transform.position = msg.Position.ToVector3();
-                player.BallObject.transform.rotation = Quaternion.Euler(msg.Rotation.ToVector3());
-                ballRb.velocity = msg.Velocity.ToVector3();
-                ballRb.angularVelocity = msg.AngularVelocity.ToVector3();
-                player.BallObject.DirectionVector = msg.DirectionVector.ToVector3();
+                player.ProcessMovementMessage(msg);
             }
         }
 
@@ -369,7 +363,10 @@ namespace Sanicball.Match
                         if (player.ClientGuid == myGuid && player.BallObject)
                         {
                             Rigidbody ballRb = player.BallObject.GetComponent<Rigidbody>();
-                            messenger.SendMessage(new PlayerMovementMessage(myGuid, player.CtrlType,
+                            messenger.SendMessage(new PlayerMovementMessage(
+                                DateTime.Now,
+                                myGuid,
+                                player.CtrlType,
                                 player.BallObject.transform.position.ToSimpleVector3(),
                                 player.BallObject.transform.rotation.eulerAngles.ToSimpleVector3(),
                                 ballRb.velocity.ToSimpleVector3(),

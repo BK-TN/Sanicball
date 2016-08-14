@@ -24,6 +24,7 @@ namespace Sanicball.Match
         private Guid clientGuid;
         private ControlType ctrlType;
         private bool readyToRace;
+        private DateTime latestMovementMessageTime = DateTime.Now;
 
         public MatchPlayer(Guid clientGuid, ControlType ctrlType, int initialCharacterId)
         {
@@ -46,6 +47,22 @@ namespace Sanicball.Match
                 readyToRace = value;
                 if (ChangedReady != null)
                     ChangedReady(this, EventArgs.Empty);
+            }
+        }
+
+        public void ProcessMovementMessage(PlayerMovementMessage msg)
+        {
+            if (msg.Timestamp > latestMovementMessageTime)
+            {
+                Rigidbody ballRb = BallObject.GetComponent<Rigidbody>();
+
+                BallObject.transform.position = msg.Position.ToVector3();
+                BallObject.transform.rotation = Quaternion.Euler(msg.Rotation.ToVector3());
+                ballRb.velocity = msg.Velocity.ToVector3();
+                ballRb.angularVelocity = msg.AngularVelocity.ToVector3();
+                BallObject.DirectionVector = msg.DirectionVector.ToVector3();
+
+                latestMovementMessageTime = msg.Timestamp;
             }
         }
     }
