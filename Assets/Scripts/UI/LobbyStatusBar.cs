@@ -36,6 +36,8 @@ namespace Sanicball.UI
 
         private void UpdateText()
         {
+            if (!manager) return;
+
             int clients = manager.Clients.Count;
             int players = manager.Players.Count;
             leftText.text = serverName;

@@ -20,7 +20,7 @@ namespace Sanicball.UI
         private Animation settingsChangedAnimation = null;
 
         [SerializeField]
-        private Camera stageLayoutCamera;
+        private Camera stageLayoutCamera = null;
 
         private void Start()
         {
@@ -39,6 +39,14 @@ namespace Sanicball.UI
             {
                 MatchSettings s = manager.CurrentSettings;
 
+                if (!stageLayoutCamera)
+                {
+                    Debug.Log("is null");
+                }
+                else
+                {
+                    Debug.Log("is not null");
+                }
                 targetStageCamPos = new Vector3(s.StageId * 50, stageLayoutCamera.transform.position.y, stageLayoutCamera.transform.position.z);
                 stageName.text = ActiveData.Stages[s.StageId].name;
                 stageImage.sprite = ActiveData.Stages[s.StageId].picture;
