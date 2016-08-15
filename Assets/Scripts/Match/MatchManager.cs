@@ -28,6 +28,8 @@ namespace Sanicball.Match
         [SerializeField]
         private UI.PauseMenu pauseMenuPrefab;
         [SerializeField]
+        private UI.Chat chatPrefab;
+        [SerializeField]
         private RaceManager raceManagerPrefab;
 
         #endregion Exposed fields
@@ -48,7 +50,7 @@ namespace Sanicball.Match
         //These settings will be used when starting a race
         private Data.MatchSettings currentSettings;
 
-        //Lobby timer stuff
+        //Lobby countdown timer stuff
         private bool lobbyTimerOn = false;
         private const float lobbyTimerMax = 3;
         private float lobbyTimer = lobbyTimerMax;
@@ -67,7 +69,9 @@ namespace Sanicball.Match
 
         //Match messenger used to send and recieve state changes.
         //This will be either a LocalMatchMessenger or OnlineMatchMessenger, but each are used the same way.
-        private Match.MatchMessenger messenger;
+        private MatchMessenger messenger;
+
+        private UI.Chat activeChat;
 
         //Timer used for syncing realtime stuff in online
         private float netUpdateTimer = 0;
@@ -224,15 +228,15 @@ namespace Sanicball.Match
             }
         }
 
-        private void ChatMessageCallback(ChatMessage msg)
-        {
-            Debug.Log("Chat message from " + msg.From + ": " + msg.Text);
-        }
-
         private void LoadRaceCallback(LoadRaceMessage msg)
         {
             GoToStage();
             StopLobbyTimer();
+        }
+
+        private void ChatCallback(ChatMessage msg)
+        {
+            activeChat.ShowMessage(msg.From, msg.Text);
         }
 
         private void PlayerMovementCallback(PlayerMovementMessage msg)
@@ -302,13 +306,23 @@ namespace Sanicball.Match
             messenger.CreateListener<PlayerLeftMessage>(PlayerLeftCallback);
             messenger.CreateListener<CharacterChangedMessage>(CharacterChangedCallback);
             messenger.CreateListener<ChangedReadyMessage>(ChangedReadyCallback);
-            messenger.CreateListener<ChatMessage>(ChatMessageCallback);
-            messenger.CreateListener<PlayerMovementMessage>(PlayerMovementCallback);
             messenger.CreateListener<LoadRaceMessage>(LoadRaceCallback);
+            messenger.CreateListener<ChatMessage>(ChatCallback);
+            messenger.CreateListener<PlayerMovementMessage>(PlayerMovementCallback);
 
             //Create this client
             myGuid = Guid.NewGuid();
             messenger.SendMessage(new ClientJoinedMessage(myGuid, "client#" + myGuid));
+
+            //Create chat
+            activeChat = Instantiate(chatPrefab);
+            activeChat.MessageSent += LocalChatMessageSent;
+        }
+
+        private void LocalChatMessageSent(object sender, UI.ChatMessageArgs args)
+        {
+            MatchClient myClient = clients.FirstOrDefault(a => a.Guid == myGuid);
+            messenger.SendMessage(new ChatMessage(myClient.Name, ChatMessageType.User, args.Text));
         }
 
         private void Update()
@@ -329,12 +343,6 @@ namespace Sanicball.Match
                     if (menu)
                         Destroy(menu.gameObject);
                 }
-            }
-
-            //Shortcut to show match settings
-            if (inLobby && Input.GetKeyDown(KeyCode.O))
-            {
-                LobbyReferences.Active.MatchSettingsPanel.Show();
             }
 
             if (lobbyTimerOn && inLobby)
@@ -377,6 +385,13 @@ namespace Sanicball.Match
                     }
                 }
             }
+        }
+
+        public void OnDestroy()
+        {
+            messenger.Close();
+            if (activeChat)
+                Destroy(activeChat.gameObject);
         }
 
         #region Players ready and lobby timer

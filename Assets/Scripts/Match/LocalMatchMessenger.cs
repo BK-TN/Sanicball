@@ -22,5 +22,9 @@ namespace Sanicball.Match
         public override void UpdateListeners()
         {
         }
+
+        public override void Close()
+        {
+        }
     }
 }

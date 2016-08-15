@@ -90,6 +90,11 @@ namespace Sanicball.Match
             }
         }
 
+        public override void Close()
+        {
+            client.Disconnect("Client closed the game.");
+        }
+
         private void RecieveMessage<T>(T message) where T : MatchMessage
         {
             for (int i = 0; i < listeners.Count; i++)

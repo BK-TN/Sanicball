@@ -59,7 +59,7 @@ namespace Sanicball.UI
 
         public void DefaultSettings()
         {
-            tempSettings = new MatchSettings();
+            tempSettings = MatchSettings.CreateDefault();
             UpdateUiFields();
         }
 

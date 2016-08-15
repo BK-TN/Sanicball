@@ -29,6 +29,8 @@ namespace Sanicball.Match
 
         public abstract void UpdateListeners();
 
+        public abstract void Close();
+
         /// <summary>
         /// Creates a listener for a type of message that calls the supplied handler delegate when this message type is recieved.
         /// </summary>

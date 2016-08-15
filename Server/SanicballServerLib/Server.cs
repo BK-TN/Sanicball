@@ -151,17 +151,35 @@ namespace SanicballServerLib
                 Command cmd;
                 while ((cmd = commandQueue.ReadNext()) != null)
                 {
-                    Log("Entered command: " + cmd.Name + ", content: \"" + cmd.Content + "\"", LogType.Debug);
-
-                    if (cmd.Name == "stop")
+                    switch (cmd.Name)
                     {
-                        running = false;
-                    }
+                        case "stop":
+                            running = false;
+                            break;
 
-                    if (cmd.Name == "say")
-                    {
-                        SendToAll(new ChatMessage("Server", ChatMessageType.User, cmd.Content));
-                        Log("Message sent");
+                        case "say":
+                            if (cmd.Content.Trim() == string.Empty)
+                            {
+                                Log("Usage: say [message]");
+                            }
+                            else
+                            {
+                                SendToAll(new ChatMessage("Server", ChatMessageType.User, cmd.Content));
+                                Log("Chat message sent");
+                            }
+                            break;
+
+                        case "clients":
+                            Log(matchClients.Count + " connected client(s)");
+                            foreach (MatchClientState client in matchClients)
+                            {
+                                Log(client.Name);
+                            }
+                            break;
+
+                        default:
+                            Log("Unknown command \"" + cmd.Name + "\"");
+                            break;
                     }
                 }
 
@@ -204,7 +222,8 @@ namespace SanicballServerLib
                                         //Tell connected clients to remove the client+players
                                         SendToAll(new ClientLeftMessage(associatedClient.Guid));
 
-                                        Log("Client " + associatedClient.Name + " disconnected");
+                                        Log("Client " + associatedClient.Guid + " disconnected (" + statusMsg + ")");
+                                        Broadcast(associatedClient.Name + " has left the match");
                                     }
                                     else
                                     {
@@ -262,7 +281,8 @@ namespace SanicballServerLib
                                         matchClients.Add(newClient);
                                         matchClientConnections.Add(msg.SenderConnection, newClient);
 
-                                        Log("Client " + castedMsg.ClientGuid + " joined", LogType.Debug);
+                                        Log("Client " + castedMsg.ClientGuid + " joined");
+                                        Broadcast(castedMsg.ClientName + " has joined the match");
                                         SendToAll(matchMessage);
                                     }
 
@@ -384,6 +404,14 @@ namespace SanicballServerLib
                                         }
                                     }
 
+                                    if (matchMessage is ChatMessage)
+                                    {
+                                        var castedMsg = (ChatMessage)matchMessage;
+                                        Log(string.Format("[{0}] {1}: {2}", castedMsg.Type, castedMsg.From, castedMsg.Text));
+
+                                        SendToAll(matchMessage);
+                                    }
+
                                     if (matchMessage is PlayerMovementMessage)
                                     {
                                         SendToAll(matchMessage);
@@ -416,6 +444,11 @@ namespace SanicballServerLib
             netMsg.Write(MessageType.MatchMessage);
             netMsg.Write(matchMsgSerialized);
             netServer.SendMessage(netMsg, netServer.Connections, NetDeliveryMethod.ReliableOrdered, 0);
+        }
+
+        private void Broadcast(string text)
+        {
+            SendToAll(new ChatMessage("Server", ChatMessageType.System, text));
         }
 
         public void Dispose()
