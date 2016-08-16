@@ -9,6 +9,12 @@ namespace Sanicball.Match
 
         [SerializeField]
         private MatchManager matchManagerPrefab = null;
+        [SerializeField]
+        private UI.Popup connectingPopupPrefab = null;
+        [SerializeField]
+        private UI.PopupHandler popupHandler = null;
+
+        private UI.PopupConnecting activeConnectingPopup;
 
         //NetClient and -Connection for when joining online matches
         private NetClient joiningClient;
@@ -64,6 +70,7 @@ namespace Sanicball.Match
 
                                 case NetConnectionStatus.Disconnected:
                                     Debug.Log("Disconnected, shit");
+                                    activeConnectingPopup.Failed("Connection timed out.");
                                     break;
 
                                 default:
@@ -73,6 +80,12 @@ namespace Sanicball.Match
                             }
                             break;
                     }
+                }
+                if (Input.GetKeyDown(KeyCode.Escape))
+                {
+                    popupHandler.CloseActivePopup();
+                    joiningClient.Disconnect("Cancelled");
+                    joiningClient = null;
                 }
             }
         }
@@ -94,6 +107,10 @@ namespace Sanicball.Match
             approval.Write("Approve me please");
 
             joiningClient.Connect(ip, port, approval);
+
+            popupHandler.OpenPopup(connectingPopupPrefab);
+
+            activeConnectingPopup = FindObjectOfType<UI.PopupConnecting>();
         }
 
         //Called when succesfully connected to a server

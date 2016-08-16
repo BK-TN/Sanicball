@@ -11,6 +11,16 @@ namespace Sanicball.Match
         public const byte MatchMessage = 0;
     }
 
+    public class DisconnectArgs : EventArgs
+    {
+        public string Reason { get; private set; }
+
+        public DisconnectArgs(string reason)
+        {
+            Reason = reason;
+        }
+    }
+
     public class OnlineMatchMessenger : MatchMessenger
     {
         public const string APP_ID = "Sanicball";
@@ -20,6 +30,8 @@ namespace Sanicball.Match
 
         //Settings to use for both serializing and deserializing messages
         private Newtonsoft.Json.JsonSerializerSettings serializerSettings;
+
+        public event EventHandler<DisconnectArgs> Disconnected;
 
         public OnlineMatchMessenger(NetClient client, NetConnection serverConnection)
         {
@@ -64,7 +76,18 @@ namespace Sanicball.Match
                     case NetIncomingMessageType.StatusChanged:
                         NetConnectionStatus status = (NetConnectionStatus)msg.ReadByte();
                         string statusMsg = msg.ReadString();
-                        Debug.Log("Status change recieved: " + status + " - Message: " + statusMsg);
+
+                        switch (status)
+                        {
+                            case NetConnectionStatus.Disconnected:
+                                if (Disconnected != null)
+                                    Disconnected(this, new DisconnectArgs(statusMsg));
+                                break;
+
+                            default:
+                                Debug.Log("Status change recieved: " + status + " - Message: " + statusMsg);
+                                break;
+                        }
                         break;
 
                     case NetIncomingMessageType.Data:

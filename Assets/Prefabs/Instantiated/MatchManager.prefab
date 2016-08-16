@@ -44,6 +44,8 @@ MonoBehaviour:
   pauseMenuPrefab: {fileID: 11429824, guid: 26112b52065230d4d957e3f9d87cb82e, type: 2}
   chatPrefab: {fileID: 11491130, guid: 5161f6d36bd9b40418c825fd34b1deb7, type: 2}
   raceManagerPrefab: {fileID: 11420630, guid: e716ae2f6176c9442addf97bb30866ee, type: 2}
+  disconnectedPopupPrefab: {fileID: 11490040, guid: 11ce84fdcf53cfe47a5dae11b1a8076a,
+    type: 2}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

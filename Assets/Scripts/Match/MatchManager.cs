@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -31,6 +32,8 @@ namespace Sanicball.Match
         private UI.Chat chatPrefab;
         [SerializeField]
         private RaceManager raceManagerPrefab;
+        [SerializeField]
+        private UI.Popup disconnectedPopupPrefab;
 
         #endregion Exposed fields
 
@@ -291,6 +294,10 @@ namespace Sanicball.Match
 
             //Create messenger
             messenger = new OnlineMatchMessenger(client, serverConnection);
+            ((OnlineMatchMessenger)messenger).Disconnected += (sender, e) =>
+            {
+                QuitMatch(e.Reason);
+            };
 
             //Create chat
             activeChat = Instantiate(chatPrefab);
@@ -483,9 +490,23 @@ namespace Sanicball.Match
             raceManager.Init(currentSettings, this, messenger);
         }
 
-        public void QuitMatch()
+        public void QuitMatch(string reason = null)
+        {
+            StartCoroutine(QuitMatchInternal(reason));
+        }
+
+        private IEnumerator QuitMatchInternal(string reason)
         {
             UnityEngine.SceneManagement.SceneManager.LoadScene("Menu");
+
+            if (reason != null)
+            {
+                yield return null;
+
+                FindObjectOfType<UI.PopupHandler>().OpenPopup(disconnectedPopupPrefab);
+                FindObjectOfType<UI.PopupDisconnected>().Reason = reason;
+            }
+
             Destroy(gameObject);
         }
 
