@@ -236,7 +236,8 @@ namespace Sanicball.Match
 
         private void ChatCallback(ChatMessage msg)
         {
-            activeChat.ShowMessage(msg.From, msg.Text);
+            if (activeChat)
+                activeChat.ShowMessage(msg.From, msg.Text);
         }
 
         private void PlayerMovementCallback(PlayerMovementMessage msg)
@@ -266,12 +267,13 @@ namespace Sanicball.Match
 
         public void InitOnlineMatch(Lidgren.Network.NetClient client, Lidgren.Network.NetConnection serverConnection, MatchState matchState)
         {
-            //Recieve match status and sync up
+            //Create existing clients
             foreach (var clientInfo in matchState.Clients)
             {
                 clients.Add(new MatchClient(clientInfo.Guid, clientInfo.Name));
             }
 
+            //Create existing players
             foreach (var playerInfo in matchState.Players)
             {
                 MatchPlayer p = new MatchPlayer(playerInfo.ClientGuid, playerInfo.CtrlType, playerInfo.CharacterId);
@@ -284,10 +286,17 @@ namespace Sanicball.Match
                 }
             }
 
+            //Set settings
             currentSettings = matchState.Settings;
 
+            //Create messenger
             messenger = new OnlineMatchMessenger(client, serverConnection);
 
+            //Create chat
+            activeChat = Instantiate(chatPrefab);
+            activeChat.MessageSent += LocalChatMessageSent;
+
+            //Enter the lobby
             showSettingsOnLobbyLoad = true;
             GoToLobby();
         }
@@ -313,10 +322,6 @@ namespace Sanicball.Match
             //Create this client
             myGuid = Guid.NewGuid();
             messenger.SendMessage(new ClientJoinedMessage(myGuid, "client#" + myGuid));
-
-            //Create chat
-            activeChat = Instantiate(chatPrefab);
-            activeChat.MessageSent += LocalChatMessageSent;
         }
 
         private void LocalChatMessageSent(object sender, UI.ChatMessageArgs args)

@@ -81,24 +81,7 @@ namespace SanicballServerLib
 
         public void Start(int port)
         {
-            bool defaultSettings = true;
-            if (File.Exists(SETTINGS_FILENAME))
-            {
-                Log("Loading match settings");
-                using (StreamReader sr = new StreamReader(SETTINGS_FILENAME))
-                {
-                    try
-                    {
-                        matchSettings = JsonConvert.DeserializeObject<MatchSettings>(sr.ReadToEnd());
-                        defaultSettings = false;
-                    }
-                    catch (JsonException ex)
-                    {
-                        Log("Failed to load " + SETTINGS_FILENAME + ": " + ex.Message);
-                    }
-                }
-            }
-            if (defaultSettings)
+            if (!LoadMatchSettings())
                 matchSettings = MatchSettings.CreateDefault();
 
             running = true;
@@ -114,6 +97,31 @@ namespace SanicballServerLib
 
             //Thread messageThread = new Thread(MessageLoop);
             MessageLoop();
+        }
+
+        private bool LoadMatchSettings(string path = SETTINGS_FILENAME)
+        {
+            if (File.Exists(path))
+            {
+                using (StreamReader sr = new StreamReader(path))
+                {
+                    try
+                    {
+                        matchSettings = JsonConvert.DeserializeObject<MatchSettings>(sr.ReadToEnd());
+                        Log("Loaded match settings from " + path);
+                        return true;
+                    }
+                    catch (JsonException ex)
+                    {
+                        Log("Failed to load " + path + ": " + ex.Message);
+                    }
+                }
+            }
+            else
+            {
+                Log("File " + path + " not found");
+            }
+            return false;
         }
 
         private void MessageLoop()
@@ -154,6 +162,9 @@ namespace SanicballServerLib
                     switch (cmd.Name)
                     {
                         case "stop":
+                        case "close":
+                        case "disconnect":
+                        case "quit":
                             running = false;
                             break;
 
@@ -174,6 +185,55 @@ namespace SanicballServerLib
                             foreach (MatchClientState client in matchClients)
                             {
                                 Log(client.Name);
+                            }
+                            break;
+
+                        case "kick":
+                            if (cmd.Content.Trim() == string.Empty)
+                            {
+                                Log("Usage: kick [client name/part of name]");
+                            }
+                            else
+                            {
+                                List<MatchClientState> matching = SearchClients(cmd.Content);
+                                if (matching.Count == 0)
+                                {
+                                    Log("No clients match your search.");
+                                }
+                                else if (matching.Count == 1)
+                                {
+                                    NetConnection conn = matchClientConnections.FirstOrDefault(a => a.Value == matching[0]).Key;
+                                    Log("Kicked client " + matching[0].Name);
+                                    conn.Disconnect("Kicked by server");
+                                }
+                                else
+                                {
+                                    Log("More than one client matches your search:");
+                                    foreach (MatchClientState client in matching)
+                                    {
+                                        Log(client.Name);
+                                    }
+                                }
+                            }
+                            break;
+
+                        case "loadsettings":
+                        case "reloadsettings":
+                        case "loadmatchsettings":
+                        case "reloadmatchsettings":
+                        case "reload":
+                            bool success = false;
+                            if (cmd.Content.Trim() != string.Empty)
+                            {
+                                success = LoadMatchSettings(cmd.Content.Trim());
+                            }
+                            else
+                            {
+                                success = LoadMatchSettings();
+                            }
+                            if (success)
+                            {
+                                SendToAll(new SettingsChangedMessage(matchSettings));
                             }
                             break;
 
@@ -453,12 +513,15 @@ namespace SanicballServerLib
 
         public void Dispose()
         {
-            Log("Saving match settings");
+            Log("Saving match settings...");
             using (StreamWriter sw = new StreamWriter(SETTINGS_FILENAME))
             {
                 sw.Write(JsonConvert.SerializeObject(matchSettings));
             }
             netServer.Shutdown("Server was closed.");
+            Log("The server has been closed.");
+
+            //Write server log
             Directory.CreateDirectory("Logs\\");
             using (StreamWriter writer = new StreamWriter("Logs\\" + DateTime.Now.ToString("MM-dd-yyyy_HH-mm-ss") + ".txt"))
             {
@@ -489,6 +552,11 @@ namespace SanicballServerLib
             LogEntry entry = new LogEntry(DateTime.Now, message.ToString(), type);
             OnLog?.Invoke(this, new LogArgs(entry));
             log.Add(entry);
+        }
+
+        private List<MatchClientState> SearchClients(string name)
+        {
+            return matchClients.Where(a => a.Name.Contains(name)).ToList();
         }
     }
 }

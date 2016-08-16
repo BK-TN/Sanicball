@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -15,8 +16,12 @@ namespace Sanicball.UI
         }
     }
 
+    [RequireComponent(typeof(CanvasGroup))]
     public class Chat : MonoBehaviour
     {
+        private const float MAX_VISIBLE_TIME = 4f;
+        private const float FADE_TIME = 0.2f;
+
         [SerializeField]
         private Text chatMessagePrefab = null;
 
@@ -28,12 +33,16 @@ namespace Sanicball.UI
 
         private GameObject prevSelectedObject;
         private bool shouldEnableInput = false;
+        private CanvasGroup canvasGroup;
+        private float visibleTime = 0;
 
         public event System.EventHandler<ChatMessageArgs> MessageSent;
 
         private void Start()
         {
             DontDestroyOnLoad(gameObject);
+            canvasGroup = GetComponent<CanvasGroup>();
+            canvasGroup.alpha = 0;
         }
 
         public void Update()
@@ -48,9 +57,21 @@ namespace Sanicball.UI
                 }
             }
 
-            if (es.currentSelectedGameObject == messageInputField.gameObject && Input.GetKeyDown(KeyCode.Return))
+            if (transform.GetComponentsInChildren<RectTransform>().Any(a => a.gameObject == es.currentSelectedGameObject))
             {
-                SendMessage();
+                visibleTime = MAX_VISIBLE_TIME;
+                if (Input.GetKeyDown(KeyCode.Return))
+                    SendMessage();
+            }
+
+            if (visibleTime > 0)
+            {
+                visibleTime -= Time.deltaTime;
+                canvasGroup.alpha = 1;
+            }
+            else if (canvasGroup.alpha > 0)
+            {
+                canvasGroup.alpha = Mathf.Max(canvasGroup.alpha - Time.deltaTime / FADE_TIME, 0);
             }
         }
 
@@ -69,6 +90,8 @@ namespace Sanicball.UI
 
             messageObj.transform.SetParent(chatMessageContainer, false);
             messageObj.text = string.Format("<color=#0000ff><b>{0}</b></color>: {1}", from, text);
+
+            visibleTime = MAX_VISIBLE_TIME;
         }
 
         public void DisableInput()
