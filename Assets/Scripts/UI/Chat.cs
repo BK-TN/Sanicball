@@ -31,6 +31,9 @@ namespace Sanicball.UI
         [SerializeField]
         private InputField messageInputField = null;
 
+        [SerializeField]
+        private RectTransform hoverArea = null;
+
         private GameObject prevSelectedObject;
         private bool shouldEnableInput = false;
         private CanvasGroup canvasGroup;
@@ -57,11 +60,16 @@ namespace Sanicball.UI
                 }
             }
 
-            if (transform.GetComponentsInChildren<RectTransform>().Any(a => a.gameObject == es.currentSelectedGameObject))
+            if (es.currentSelectedGameObject == messageInputField.gameObject)
             {
                 visibleTime = MAX_VISIBLE_TIME;
                 if (Input.GetKeyDown(KeyCode.Return))
                     SendMessage();
+            }
+
+            if (Input.mousePosition.x < hoverArea.sizeDelta.x && Input.mousePosition.y < hoverArea.sizeDelta.y)
+            {
+                visibleTime = MAX_VISIBLE_TIME;
             }
 
             if (visibleTime > 0)

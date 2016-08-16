@@ -260,10 +260,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Padding:
-    m_Left: 0
-    m_Right: 0
-    m_Top: 0
-    m_Bottom: 0
+    m_Left: 5
+    m_Right: 5
+    m_Top: 5
+    m_Bottom: 5
   m_ChildAlignment: 6
   m_Spacing: 0
   m_ChildForceExpandWidth: 1
@@ -301,15 +301,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0, b: 0, a: 0.78431374}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: 2523923facd046c47a017d25da786bce, type: 3}
-  m_Type: 0
+  m_Sprite: {fileID: 21300000, guid: 6334a335edf69c34794a21c0f57a438d, type: 3}
+  m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
@@ -484,6 +484,7 @@ MonoBehaviour:
   chatMessagePrefab: {fileID: 11417702, guid: 2611df2f6b961134299e9122b7a9d3cd, type: 2}
   chatMessageContainer: {fileID: 22441156}
   messageInputField: {fileID: 11407212}
+  hoverArea: {fileID: 22408600}
 --- !u!114 &11497056
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -659,7 +660,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 15}
-  m_SizeDelta: {x: -10, y: -40}
+  m_SizeDelta: {x: 0, y: -30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &22486168
 RectTransform:
