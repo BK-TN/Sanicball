@@ -198,7 +198,7 @@ namespace Sanicball
                     cam.AddBall(this);
                 }
             }
-            if ((type == BallType.Player || type == BallType.LobbyPlayer))
+            if ((type == BallType.Player || type == BallType.LobbyPlayer) && ctrlType != ControlType.None)
             {
                 //Create input component
                 input = gameObject.AddComponent<BallControlInput>();
