@@ -34,6 +34,8 @@ namespace Sanicball.Match
         private RaceManager raceManagerPrefab;
         [SerializeField]
         private UI.Popup disconnectedPopupPrefab;
+        [SerializeField]
+        private Marker markerPrefab = null;
 
         #endregion Exposed fields
 
@@ -531,7 +533,19 @@ namespace Sanicball.Match
                 player.BallObject.CreateRemovalParticles();
                 Destroy(player.BallObject.gameObject);
             }
-            player.BallObject = spawner.SpawnBall(Data.PlayerType.Normal, (player.ClientGuid == myGuid) ? player.CtrlType : ControlType.Remote, player.CharacterId, "Player");
+
+            string name = clients.First(a => a.Guid == player.ClientGuid).Name + " (" + GameInput.GetControlTypeName(player.CtrlType) + ")";
+
+            player.BallObject = spawner.SpawnBall(Data.PlayerType.Normal, (player.ClientGuid == myGuid) ? player.CtrlType : ControlType.Remote, player.CharacterId, name);
+
+            if (player.ClientGuid != myGuid)
+            {
+                Marker marker = Instantiate(markerPrefab);
+                marker.transform.SetParent(LobbyReferences.Active.MarkerContainer, false);
+                marker.Color = Color.clear;
+                marker.Text = name;
+                marker.Target = player.BallObject.transform;
+            }
         }
     }
 }

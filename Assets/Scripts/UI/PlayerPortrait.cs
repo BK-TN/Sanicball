@@ -31,10 +31,13 @@ namespace Sanicball.UI
         {
             trans = GetComponent<RectTransform>();
 
-            TargetPlayer.Destroyed += (sender, e) =>
-            {
-                Destroy(gameObject);
-            };
+            TargetPlayer.Destroyed += DestroyedCallback;
+        }
+
+        private void DestroyedCallback(object sender, System.EventArgs e)
+        {
+            Destroy(gameObject);
+            TargetPlayer.Destroyed -= DestroyedCallback;
         }
 
         // Update is called once per frame

@@ -19,6 +19,9 @@ namespace Sanicball
         [SerializeField]
         private UnityEngine.UI.Text countdownField = null;
 
+        [SerializeField]
+        private RectTransform markerContainer = null;
+
         public static LobbyReferences Active
         {
             get; private set;
@@ -29,6 +32,7 @@ namespace Sanicball
         public UI.MatchSettingsPanel MatchSettingsPanel { get { return matchSettingsPanel; } }
         public LobbyBallSpawner BallSpawner { get { return ballSpawner; } }
         public UnityEngine.UI.Text CountdownField { get { return countdownField; } }
+        public RectTransform MarkerContainer { get { return markerContainer; } }
 
         private void Awake()
         {

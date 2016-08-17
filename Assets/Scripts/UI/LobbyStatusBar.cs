@@ -7,10 +7,10 @@ namespace Sanicball.UI
 {
     public class LobbyStatusBar : MonoBehaviour
     {
-        public string serverName;
-
-        public Text leftText;
-        public Text rightText;
+        [SerializeField]
+        private Text leftText = null;
+        [SerializeField]
+        private Text rightText = null;
 
         [SerializeField]
         private RectTransform clientList = null;
@@ -40,7 +40,15 @@ namespace Sanicball.UI
 
             int clients = manager.Clients.Count;
             int players = manager.Players.Count;
-            leftText.text = serverName;
+
+            if (manager.Players.Count > 0)
+            {
+                leftText.text = "The race will start when all players are ready";
+            }
+            else
+            {
+                leftText.text = "Press " + GameInput.GetKeyCodeName(Data.ActiveData.Keybinds[Data.Keybind.Menu]) + " (Y on joystick) to join the match!";
+            }
             rightText.text = clients + " " + (clients != 1 ? "clients" : "client") + " connected playing with " + players + " " + (players != 1 ? "players" : "player");
 
             foreach (ClientListEntry entry in curClientListEntries)
