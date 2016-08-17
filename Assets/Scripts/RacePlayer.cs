@@ -79,8 +79,9 @@ namespace Sanicball
         public event EventHandler FinishLinePassed;
 
         public bool IsLocalPlayer { get { return ball.Type == BallType.LobbyPlayer || ball.Type == BallType.Player; } }
-        public string Name { get { return ball.name; } }
+        public string Name { get { return ball.Nickname; } }
         public int Character { get { return ball.CharacterId; } }
+        public Transform Transform { get { return ball.transform; } }
         public int Lap { get { return lap; } }
 
         public int Position

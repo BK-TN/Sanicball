@@ -5,7 +5,7 @@ namespace Sanicball.UI
 {
     public class PlayerPortrait : MonoBehaviour
     {
-        private const int spacing = 64 + 10;
+        private const int spacing = 64;
 
         private int targetPosition = 0;
 
@@ -13,7 +13,7 @@ namespace Sanicball.UI
         private Text positionField;
 
         [SerializeField]
-        private Image icon;
+        private Image characterImage;
 
         [SerializeField]
         private Text nameField;
@@ -42,12 +42,10 @@ namespace Sanicball.UI
                 positionField.text = targetPosition + GetPostfix(targetPosition);
                 if (TargetPlayer.RaceFinished) positionField.color = new Color(0f, 0.5f, 1f);
                 //Ball icon
-                icon.sprite = Data.ActiveData.Characters[TargetPlayer.Character].icon;
+                //icon.sprite = Data.ActiveData.Characters[TargetPlayer.Character].icon;
+                characterImage.color = Data.ActiveData.Characters[TargetPlayer.Character].color;
                 //Name field
-                if (TargetPlayer.CtrlType != ControlType.None)
-                    nameField.text = Utils.CtrlTypeStr(TargetPlayer.CtrlType);
-                else
-                    nameField.text = "";
+                nameField.text = TargetPlayer.Name;
             }
 
             float y = trans.anchoredPosition.y;

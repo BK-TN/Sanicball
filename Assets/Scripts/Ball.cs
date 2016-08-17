@@ -105,6 +105,7 @@ namespace Sanicball
         public Vector3 DirectionVector { get; set; }
         public Vector3 Up { get; set; }
         public bool Brake { get; set; }
+        public string Nickname { get { return nickname; } }
 
         //Component caches
         private Rigidbody rb;
