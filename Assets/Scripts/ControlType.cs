@@ -5,7 +5,7 @@
     /// </summary>
     public enum ControlType
     {
-        None = -1,
+        Remote = -1,
         Keyboard = 0,
         Joystick1 = 1,
         Joystick2 = 2,

@@ -120,6 +120,11 @@ namespace Sanicball
             //ALL created listeners should be removed from the messenger here
             //Otherwise the race manager won't get destroyed properly
             messenger.RemoveListener<Match.StartRaceMessage>(StartRaceCallback);
+
+            foreach (RacePlayer p in players)
+            {
+                p.RemoveMessageListeners();
+            }
         }
 
         private void StartRaceCallback(Match.StartRaceMessage msg)
@@ -151,16 +156,17 @@ namespace Sanicball
             //Create all player balls
             for (int i = 0; i < matchManager.Players.Count; i++)
             {
-                var player = matchManager.Players[i];
+                var matchPlayer = matchManager.Players[i];
 
-                bool local = player.ClientGuid == matchManager.LocalClientGuid;
+                bool local = matchPlayer.ClientGuid == matchManager.LocalClientGuid;
 
                 //Create ball
-                player.BallObject = FindObjectOfType<RaceBallSpawner>().SpawnBall(nextPos, BallType.Player, local ? player.CtrlType : ControlType.None, player.CharacterId, "Ball - " + Utils.CtrlTypeStr(player.CtrlType));
-                player.BallObject.CanMove = false;
+                string name = matchManager.Clients.FirstOrDefault(a => a.Guid == matchPlayer.ClientGuid).Name;
+                matchPlayer.BallObject = FindObjectOfType<RaceBallSpawner>().SpawnBall(nextPos, BallType.Player, local ? matchPlayer.CtrlType : ControlType.Remote, matchPlayer.CharacterId, name + " (" + Utils.CtrlTypeStr(matchPlayer.CtrlType) + ")");
+                matchPlayer.BallObject.CanMove = false;
 
                 //Create race player
-                var racePlayer = new RacePlayer(player.BallObject);
+                var racePlayer = new RacePlayer(matchPlayer.BallObject, messenger, matchPlayer);
                 players.Add(racePlayer);
                 racePlayer.LapRecordsEnabled = enableLapRecords && local;
                 racePlayer.FinishLinePassed += RacePlayer_FinishLinePassed;
@@ -174,7 +180,7 @@ namespace Sanicball
 
                     //Connect UI to camera (when the camera has been instanced)
                     int persistentIndex = nextLocalPlayerIndex;
-                    player.BallObject.CameraCreated += (sender, e) =>
+                    matchPlayer.BallObject.CameraCreated += (sender, e) =>
                     {
                         playerUI.TargetCamera = e.CameraCreated.AttachedCamera;
                         var splitter = e.CameraCreated.AttachedCamera.GetComponent<CameraSplitter>();
@@ -192,11 +198,11 @@ namespace Sanicball
             for (int i = 0; i < settings.AICount; i++)
             {
                 //Spawn ball object
-                var aiBall = FindObjectOfType<RaceBallSpawner>().SpawnBall(nextPos, BallType.AI, ControlType.None, settings.GetAICharacter(i), "AI #" + i);
+                var aiBall = FindObjectOfType<RaceBallSpawner>().SpawnBall(nextPos, BallType.AI, ControlType.Remote, settings.GetAICharacter(i), "AI #" + i);
                 aiBall.CanMove = false;
 
                 //Create race player
-                var racePlayer = new RacePlayer(aiBall);
+                var racePlayer = new RacePlayer(aiBall, messenger, null);
                 players.Add(racePlayer);
                 racePlayer.FinishLinePassed += RacePlayer_FinishLinePassed;
 
@@ -214,8 +220,9 @@ namespace Sanicball
 
                 Debug.LogWarning("oooo shit, a player has finished! Elapsed time: " + RaceTime);
 
-                //Display scoreboard when local players have finished
-                if (!players.Any(a => a.IsLocalPlayer && !a.RaceFinished))
+                //Display scoreboard when all players have finished
+                //TODO: Make proper scoreboard and have it trigger when only local players have finished
+                if (!players.Any(a => a.IsPlayer && !a.RaceFinished))
                 {
                     raceUI.ShowFinishedText();
                 }

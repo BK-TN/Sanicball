@@ -472,6 +472,20 @@ namespace SanicballServerLib
                                         SendToAll(matchMessage);
                                     }
 
+                                    if (matchMessage is LoadLobbyMessage)
+                                    {
+                                        Log("Returned to lobby");
+
+                                        SendToAll(matchMessage);
+                                    }
+
+                                    if (matchMessage is CheckpointPassedMessage)
+                                    {
+                                        var castedMsg = (CheckpointPassedMessage)matchMessage;
+                                        Log("Player entered checkpoint with lap time " + castedMsg.LapTime);
+                                        SendToAll(matchMessage);
+                                    }
+
                                     if (matchMessage is PlayerMovementMessage)
                                     {
                                         SendToAll(matchMessage);

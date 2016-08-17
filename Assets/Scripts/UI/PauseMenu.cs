@@ -83,7 +83,7 @@ namespace Sanicball.UI
             var matchManager = FindObjectOfType<Match.MatchManager>();
             if (matchManager)
             {
-                matchManager.GoToLobby();
+                matchManager.RequestLoadLobby();
             }
             else
             {

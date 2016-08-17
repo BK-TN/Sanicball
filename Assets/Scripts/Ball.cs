@@ -169,7 +169,7 @@ namespace Sanicball
             //Create objects and components based on ball type
             if (type == BallType.Player)
             {
-                if (ctrlType != ControlType.None)
+                if (ctrlType != ControlType.Remote)
                 {
                     IBallCamera camera;
                     //Create camera
@@ -198,7 +198,7 @@ namespace Sanicball
                     cam.AddBall(this);
                 }
             }
-            if ((type == BallType.Player || type == BallType.LobbyPlayer) && ctrlType != ControlType.None)
+            if ((type == BallType.Player || type == BallType.LobbyPlayer) && ctrlType != ControlType.Remote)
             {
                 //Create input component
                 input = gameObject.AddComponent<BallControlInput>();

@@ -52,9 +52,17 @@ namespace Sanicball
 
         private StageReferences sr;
 
-        public RacePlayer(Ball ball)
+        private Match.MatchMessenger matchMessenger;
+        private Match.MatchPlayer associatedMatchPlayer;
+        private bool waitingForCheckpointMessage;
+
+        public RacePlayer(Ball ball, Match.MatchMessenger matchMessenger, Match.MatchPlayer associatedMatchPlayer)
         {
             sr = StageReferences.Active;
+
+            this.matchMessenger = matchMessenger;
+            this.associatedMatchPlayer = associatedMatchPlayer;
+            matchMessenger.CreateListener<Match.CheckpointPassedMessage>(CheckpointPassedHandler);
 
             lap = 1;
 
@@ -78,7 +86,7 @@ namespace Sanicball
         public event EventHandler<NextCheckpointPassArgs> NextCheckpointPassed;
         public event EventHandler FinishLinePassed;
 
-        public bool IsLocalPlayer { get { return ball.Type == BallType.LobbyPlayer || ball.Type == BallType.Player; } }
+        public bool IsPlayer { get { return ball.Type == BallType.Player; } }
         public string Name { get { return ball.Nickname; } }
         public int Character { get { return ball.CharacterId; } }
         public Transform Transform { get { return ball.transform; } }
@@ -162,46 +170,76 @@ namespace Sanicball
         {
             if (e.CheckpointPassed == nextCheckpoint)
             {
-                checkpointTimes[currentCheckpointIndex] = lapTime;
-
-                //Call NextCheckpointPassed BEFORE doing anything else. This ensures things like lap records work correctly.
-                if (NextCheckpointPassed != null)
-                    NextCheckpointPassed(this, new NextCheckpointPassArgs(e.CheckpointPassed, currentCheckpointIndex, TimeSpan.FromSeconds(lapTime)));
-
-                currentCheckpointIndex = (currentCheckpointIndex + 1) % sr.checkpoints.Length;
-                currentCheckpointPos = e.CheckpointPassed.transform.position;
-
-                if (currentCheckpointIndex == 0)
+                if (ball.Type == BallType.Player && ball.CtrlType != ControlType.Remote)
                 {
-                    lap++;
-
-                    if (FinishLinePassed != null)
-                        FinishLinePassed(this, EventArgs.Empty);
-
-                    if (LapRecordsEnabled)
+                    if (!waitingForCheckpointMessage)
                     {
-                        bool hyperspeed = ActiveData.Characters[Character].hyperspeed;
-                        string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
-                        int stage = ActiveData.Stages.Where(a => a.sceneName == sceneName).First().id;
+                        //Send a match message for local players
+                        matchMessenger.SendMessage(new Match.CheckpointPassedMessage(associatedMatchPlayer.ClientGuid, ball.CtrlType, lapTime));
 
-                        ActiveData.RaceRecords.Add(new RaceRecord(
-                            hyperspeed ? RecordType.HyperspeedLap : RecordType.Lap,
-                            lapTime,
-                            DateTime.Now,
-                            stage,
-                            Character,
-                            checkpointTimes
-                            ));
-
-                        Debug.Log("Saved lap record (" + TimeSpan.FromSeconds(lapTime) + ")");
+                        waitingForCheckpointMessage = true;
                     }
+                }
+                else if (ball.Type == BallType.AI)
+                {
+                    //Invoke PassNextCheckpoint directly for AI balls
+                    PassNextCheckpoint(lapTime);
+                }
+            }
+        }
 
-                    lapTime = 0;
-                    checkpointTimes = new float[StageReferences.Active.checkpoints.Length];
+        private void CheckpointPassedHandler(Match.CheckpointPassedMessage msg)
+        {
+            if (msg.ClientGuid == associatedMatchPlayer.ClientGuid && msg.CtrlType == associatedMatchPlayer.CtrlType)
+            {
+                PassNextCheckpoint(msg.LapTime);
+
+                waitingForCheckpointMessage = false;
+            }
+        }
+
+        private void PassNextCheckpoint(float lapTime)
+        {
+            checkpointTimes[currentCheckpointIndex] = lapTime;
+
+            //Call NextCheckpointPassed BEFORE doing anything else. This ensures things like lap records work correctly.
+            if (NextCheckpointPassed != null)
+                NextCheckpointPassed(this, new NextCheckpointPassArgs(nextCheckpoint, currentCheckpointIndex, TimeSpan.FromSeconds(lapTime)));
+
+            currentCheckpointIndex = (currentCheckpointIndex + 1) % sr.checkpoints.Length;
+            currentCheckpointPos = nextCheckpoint.transform.position;
+
+            if (currentCheckpointIndex == 0)
+            {
+                lap++;
+
+                if (FinishLinePassed != null)
+                    FinishLinePassed(this, EventArgs.Empty);
+
+                if (LapRecordsEnabled)
+                {
+                    bool hyperspeed = ActiveData.Characters[Character].hyperspeed;
+                    string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+                    int stage = ActiveData.Stages.Where(a => a.sceneName == sceneName).First().id;
+
+                    ActiveData.RaceRecords.Add(new RaceRecord(
+                        hyperspeed ? RecordType.HyperspeedLap : RecordType.Lap,
+                        lapTime,
+                        DateTime.Now,
+                        stage,
+                        Character,
+                        checkpointTimes
+                        ));
+
+                    Debug.Log("Saved lap record (" + TimeSpan.FromSeconds(lapTime) + ")");
                 }
 
-                SetNextCheckpoint();
+                //Reset lap time
+                this.lapTime = 0 + (this.lapTime - lapTime);
+                checkpointTimes = new float[StageReferences.Active.checkpoints.Length];
             }
+
+            SetNextCheckpoint();
         }
 
         private void Ball_RespawnRequested(object sender, EventArgs e)
@@ -230,6 +268,11 @@ namespace Sanicball
         public void UpdateTimer(float dt)
         {
             lapTime += dt;
+        }
+
+        public void RemoveMessageListeners()
+        {
+            matchMessenger.RemoveListener<Match.CheckpointPassedMessage>(CheckpointPassedHandler);
         }
     }
 }

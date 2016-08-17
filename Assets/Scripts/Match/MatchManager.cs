@@ -110,27 +110,32 @@ namespace Sanicball.Match
 
         public void RequestSettingsChange(Data.MatchSettings newSettings)
         {
-            messenger.SendMessage(new Match.SettingsChangedMessage(newSettings));
+            messenger.SendMessage(new SettingsChangedMessage(newSettings));
         }
 
         public void RequestPlayerJoin(ControlType ctrlType, int initialCharacter)
         {
-            messenger.SendMessage(new Match.PlayerJoinedMessage(myGuid, ctrlType, initialCharacter));
+            messenger.SendMessage(new PlayerJoinedMessage(myGuid, ctrlType, initialCharacter));
         }
 
         public void RequestPlayerLeave(ControlType ctrlType)
         {
-            messenger.SendMessage(new Match.PlayerLeftMessage(myGuid, ctrlType));
+            messenger.SendMessage(new PlayerLeftMessage(myGuid, ctrlType));
         }
 
         public void RequestCharacterChange(ControlType ctrlType, int newCharacter)
         {
-            messenger.SendMessage(new Match.CharacterChangedMessage(myGuid, ctrlType, newCharacter));
+            messenger.SendMessage(new CharacterChangedMessage(myGuid, ctrlType, newCharacter));
         }
 
         public void RequestReadyChange(ControlType ctrlType, bool ready)
         {
-            messenger.SendMessage(new Match.ChangedReadyMessage(myGuid, ctrlType, ready));
+            messenger.SendMessage(new ChangedReadyMessage(myGuid, ctrlType, ready));
+        }
+
+        public void RequestLoadLobby()
+        {
+            messenger.SendMessage(new LoadLobbyMessage());
         }
 
         #endregion State changing methods
@@ -243,6 +248,11 @@ namespace Sanicball.Match
                 activeChat.ShowMessage(msg.From, msg.Text);
         }
 
+        private void LoadLobbyCallback(LoadLobbyMessage msg)
+        {
+            GoToLobby();
+        }
+
         private void PlayerMovementCallback(PlayerMovementMessage msg)
         {
             if (msg.ClientGuid == myGuid) return;
@@ -324,6 +334,7 @@ namespace Sanicball.Match
             messenger.CreateListener<ChangedReadyMessage>(ChangedReadyCallback);
             messenger.CreateListener<LoadRaceMessage>(LoadRaceCallback);
             messenger.CreateListener<ChatMessage>(ChatCallback);
+            messenger.CreateListener<LoadLobbyMessage>(LoadLobbyCallback);
             messenger.CreateListener<PlayerMovementMessage>(PlayerMovementCallback);
 
             //Create this client
@@ -425,7 +436,7 @@ namespace Sanicball.Match
 
         #region Scene changing / race loading
 
-        public void GoToLobby()
+        private void GoToLobby()
         {
             if (inLobby) return;
 
@@ -434,7 +445,7 @@ namespace Sanicball.Match
             UnityEngine.SceneManagement.SceneManager.LoadScene(lobbySceneName);
         }
 
-        public void GoToStage()
+        private void GoToStage()
         {
             var targetStage = Data.ActiveData.Stages[currentSettings.StageId];
 
@@ -520,7 +531,7 @@ namespace Sanicball.Match
                 player.BallObject.CreateRemovalParticles();
                 Destroy(player.BallObject.gameObject);
             }
-            player.BallObject = spawner.SpawnBall(Data.PlayerType.Normal, (player.ClientGuid == myGuid) ? player.CtrlType : ControlType.None, player.CharacterId, "Player");
+            player.BallObject = spawner.SpawnBall(Data.PlayerType.Normal, (player.ClientGuid == myGuid) ? player.CtrlType : ControlType.Remote, player.CharacterId, "Player");
         }
     }
 }
