@@ -113,6 +113,7 @@ namespace Sanicball
             this.messenger = messenger;
 
             messenger.CreateListener<Match.StartRaceMessage>(StartRaceCallback);
+            messenger.CreateListener<Match.ClientLeftMessage>(ClientLeftCallback);
         }
 
         public void OnDestroy()
@@ -120,16 +121,29 @@ namespace Sanicball
             //ALL created listeners should be removed from the messenger here
             //Otherwise the race manager won't get destroyed properly
             messenger.RemoveListener<Match.StartRaceMessage>(StartRaceCallback);
+            messenger.RemoveListener<Match.ClientLeftMessage>(ClientLeftCallback);
 
             foreach (RacePlayer p in players)
             {
-                p.RemoveMessageListeners();
+                p.Destroy();
             }
         }
 
         private void StartRaceCallback(Match.StartRaceMessage msg)
         {
             CurrentState = RaceState.Countdown;
+        }
+
+        private void ClientLeftCallback(Match.ClientLeftMessage msg)
+        {
+            foreach (RacePlayer racePlayer in players.ToList())
+            {
+                if (racePlayer.AssociatedMatchPlayer.ClientGuid == msg.ClientGuid)
+                {
+                    racePlayer.Destroy();
+                    players.Remove(racePlayer);
+                }
+            }
         }
 
         private void Start()

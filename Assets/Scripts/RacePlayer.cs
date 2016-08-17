@@ -85,12 +85,14 @@ namespace Sanicball
 
         public event EventHandler<NextCheckpointPassArgs> NextCheckpointPassed;
         public event EventHandler FinishLinePassed;
+        public event EventHandler Destroyed;
 
         public bool IsPlayer { get { return ball.Type == BallType.Player; } }
         public string Name { get { return ball.Nickname; } }
         public int Character { get { return ball.CharacterId; } }
         public Transform Transform { get { return ball.transform; } }
         public int Lap { get { return lap; } }
+        public Match.MatchPlayer AssociatedMatchPlayer { get { return associatedMatchPlayer; } }
 
         public int Position
         {
@@ -270,9 +272,12 @@ namespace Sanicball
             lapTime += dt;
         }
 
-        public void RemoveMessageListeners()
+        public void Destroy()
         {
             matchMessenger.RemoveListener<Match.CheckpointPassedMessage>(CheckpointPassedHandler);
+
+            if (Destroyed != null)
+                Destroyed(this, EventArgs.Empty);
         }
     }
 }

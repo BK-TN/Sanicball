@@ -26,17 +26,15 @@ namespace Sanicball.Match
         public const string APP_ID = "Sanicball";
 
         private NetClient client;
-        private NetConnection serverConnection;
 
         //Settings to use for both serializing and deserializing messages
         private Newtonsoft.Json.JsonSerializerSettings serializerSettings;
 
         public event EventHandler<DisconnectArgs> Disconnected;
 
-        public OnlineMatchMessenger(NetClient client, NetConnection serverConnection)
+        public OnlineMatchMessenger(NetClient client)
         {
             this.client = client;
-            this.serverConnection = serverConnection;
 
             serializerSettings = new Newtonsoft.Json.JsonSerializerSettings();
             serializerSettings.TypeNameHandling = Newtonsoft.Json.TypeNameHandling.All;

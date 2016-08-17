@@ -30,23 +30,25 @@ namespace Sanicball.UI
         private void Start()
         {
             trans = GetComponent<RectTransform>();
+
+            TargetPlayer.Destroyed += (sender, e) =>
+            {
+                Destroy(gameObject);
+            };
         }
 
         // Update is called once per frame
         private void Update()
         {
-            if (TargetPlayer != null)
-            {
-                targetPosition = TargetPlayer.RaceFinished ? (TargetPlayer.FinishReport.Position) : (TargetPlayer.Position);
-                //Position field
-                positionField.text = targetPosition + GetPostfix(targetPosition);
-                if (TargetPlayer.RaceFinished) positionField.color = new Color(0f, 0.5f, 1f);
-                //Ball icon
-                //icon.sprite = Data.ActiveData.Characters[TargetPlayer.Character].icon;
-                characterImage.color = Data.ActiveData.Characters[TargetPlayer.Character].color;
-                //Name field
-                nameField.text = TargetPlayer.Name;
-            }
+            targetPosition = TargetPlayer.RaceFinished ? (TargetPlayer.FinishReport.Position) : (TargetPlayer.Position);
+            //Position field
+            positionField.text = targetPosition + GetPostfix(targetPosition);
+            if (TargetPlayer.RaceFinished) positionField.color = new Color(0f, 0.5f, 1f);
+            //Ball icon
+            //icon.sprite = Data.ActiveData.Characters[TargetPlayer.Character].icon;
+            characterImage.color = Data.ActiveData.Characters[TargetPlayer.Character].color;
+            //Name field
+            nameField.text = TargetPlayer.Name;
 
             float y = trans.anchoredPosition.y;
 

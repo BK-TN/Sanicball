@@ -16,9 +16,8 @@ namespace Sanicball.Match
 
         private UI.PopupConnecting activeConnectingPopup;
 
-        //NetClient and -Connection for when joining online matches
+        //NetClient for when joining online matches
         private NetClient joiningClient;
-        private NetConnection joiningServerConnection;
 
         private void Update()
         {
@@ -117,7 +116,7 @@ namespace Sanicball.Match
         private void BeginOnlineGame(MatchState matchState)
         {
             MatchManager manager = Instantiate(matchManagerPrefab);
-            manager.InitOnlineMatch(joiningClient, joiningServerConnection, matchState);
+            manager.InitOnlineMatch(joiningClient, matchState);
         }
     }
 }

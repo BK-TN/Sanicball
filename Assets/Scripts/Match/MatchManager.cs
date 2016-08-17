@@ -278,7 +278,7 @@ namespace Sanicball.Match
             GoToLobby();
         }
 
-        public void InitOnlineMatch(Lidgren.Network.NetClient client, Lidgren.Network.NetConnection serverConnection, MatchState matchState)
+        public void InitOnlineMatch(Lidgren.Network.NetClient client, MatchState matchState)
         {
             //Create existing clients
             foreach (var clientInfo in matchState.Clients)
@@ -303,7 +303,7 @@ namespace Sanicball.Match
             currentSettings = matchState.Settings;
 
             //Create messenger
-            messenger = new OnlineMatchMessenger(client, serverConnection);
+            messenger = new OnlineMatchMessenger(client);
             ((OnlineMatchMessenger)messenger).Disconnected += (sender, e) =>
             {
                 QuitMatch(e.Reason);

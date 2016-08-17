@@ -34,7 +34,11 @@ public class Marker : MonoBehaviour
 
     private void Update()
     {
-        if (!target) return;
+        if (!target)
+        {
+            Destroy(gameObject);
+            return;
+        }
 
         var cam = Camera.main;
         if (CameraToUse) cam = CameraToUse;
