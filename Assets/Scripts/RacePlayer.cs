@@ -177,9 +177,8 @@ namespace Sanicball
                     if (!waitingForCheckpointMessage)
                     {
                         //Send a match message for local players
-                        matchMessenger.SendMessage(new Match.CheckpointPassedMessage(associatedMatchPlayer.ClientGuid, ball.CtrlType, lapTime));
-
                         waitingForCheckpointMessage = true;
+                        matchMessenger.SendMessage(new Match.CheckpointPassedMessage(associatedMatchPlayer.ClientGuid, ball.CtrlType, lapTime));
                     }
                 }
                 else if (ball.Type == BallType.AI)
@@ -195,7 +194,6 @@ namespace Sanicball
             if (associatedMatchPlayer != null && msg.ClientGuid == associatedMatchPlayer.ClientGuid && msg.CtrlType == associatedMatchPlayer.CtrlType)
             {
                 PassNextCheckpoint(msg.LapTime);
-
                 waitingForCheckpointMessage = false;
             }
         }
