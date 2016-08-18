@@ -206,8 +206,11 @@ namespace Sanicball.UI
             checkpointMarker.Target = TargetPlayer.NextCheckpoint.transform;
             checkpointMarker.CameraToUse = TargetCamera;
 
-            foreach (Marker m in playerMarkers)
+            playerMarkers.RemoveAll(a => a == null); //Remove destroyed markers from the list (Markers are destroyed if the player they're following leaves)
+            foreach (Marker m in playerMarkers.ToList())
+            {
                 m.CameraToUse = TargetCamera;
+            }
         }
 
         private string GetTimeString(System.TimeSpan timeToUse)
