@@ -203,7 +203,10 @@ namespace Sanicball.UI
             timeField.text = GetTimeString(timeToUse);
 
             //Checkpoint marker
-            checkpointMarker.Target = TargetPlayer.NextCheckpoint.transform;
+            if (TargetPlayer.NextCheckpoint != null)
+                checkpointMarker.Target = TargetPlayer.NextCheckpoint.transform;
+            else
+                checkpointMarker.Target = null;
             checkpointMarker.CameraToUse = TargetCamera;
 
             playerMarkers.RemoveAll(a => a == null); //Remove destroyed markers from the list (Markers are destroyed if the player they're following leaves)

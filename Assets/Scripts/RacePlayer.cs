@@ -138,6 +138,7 @@ namespace Sanicball
             if (finishReport == null)
             {
                 finishReport = report;
+                //Stop movement of AI balls
                 if (ball.Type == BallType.AI)
                     ball.CanMove = false;
                 //Set layer to Racer Ghost to block collision with racing players
@@ -155,10 +156,17 @@ namespace Sanicball
         {
             //This function returns race progress as laps done (1..*) + progress to next lap (0..1)
 
+            //If the race is finished, ignore lap progress and just return the current lap (Which would be 1 above the number of laps in the race)
+            if (RaceFinished)
+            {
+                return Lap;
+            }
+
             float progPerCheckpoint = 1f / sr.checkpoints.Length;
 
-            float ballToNext = Vector3.Distance(ball.transform.position, nextCheckpoint.transform.position);
-            float currToNext = Vector3.Distance(currentCheckpointPos, nextCheckpoint.transform.position);
+            Vector3 nextPos = nextCheckpoint.transform.position;
+            float ballToNext = Vector3.Distance(ball.transform.position, nextPos);
+            float currToNext = Vector3.Distance(currentCheckpointPos, nextPos);
 
             float distToNextPercentile = 1f - Mathf.Clamp(ballToNext / currToNext, 0f, 1f);
 
@@ -255,7 +263,11 @@ namespace Sanicball
 
         private void SetNextCheckpoint()
         {
-            if (currentCheckpointIndex == sr.checkpoints.Length - 1)
+            if (RaceFinished)
+            {
+                nextCheckpoint = null;
+            }
+            else if (currentCheckpointIndex == sr.checkpoints.Length - 1)
             {
                 nextCheckpoint = sr.checkpoints[0];
             }
