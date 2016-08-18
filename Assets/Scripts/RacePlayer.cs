@@ -192,7 +192,7 @@ namespace Sanicball
 
         private void CheckpointPassedHandler(Match.CheckpointPassedMessage msg)
         {
-            if (msg.ClientGuid == associatedMatchPlayer.ClientGuid && msg.CtrlType == associatedMatchPlayer.CtrlType)
+            if (associatedMatchPlayer != null && msg.ClientGuid == associatedMatchPlayer.ClientGuid && msg.CtrlType == associatedMatchPlayer.CtrlType)
             {
                 PassNextCheckpoint(msg.LapTime);
 

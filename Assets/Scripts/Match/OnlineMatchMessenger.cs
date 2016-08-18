@@ -118,6 +118,8 @@ namespace Sanicball.Match
 
         private void RecieveMessage<T>(T message) where T : MatchMessage
         {
+            if (message.Reliable)
+                Debug.Log("Recieved message of type " + typeof(T));
             for (int i = 0; i < listeners.Count; i++)
             {
                 MatchMessageListener listener = listeners[i];

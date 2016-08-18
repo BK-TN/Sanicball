@@ -68,6 +68,7 @@ namespace Sanicball.Match
         private bool inLobby = false; //Are we in the lobby or in a race?
         private bool loadingLobby = false;
         private bool loadingStage = false;
+        private bool joiningRaceInProgress = false; //If true, RaceManager will be created as if a race was already in progress.
         private bool showSettingsOnLobbyLoad = false; //If true, the match settings window will pop up when the lobby scene is entered.
 
         #endregion Scenes and scene initializing
@@ -240,8 +241,11 @@ namespace Sanicball.Match
 
         private void LoadRaceCallback(LoadRaceMessage msg)
         {
-            GoToStage();
             StopLobbyTimer();
+            CameraFade.StartAlphaFade(Color.black, false, 0.3f, 0.05f, () =>
+            {
+                GoToStage();
+            });
         }
 
         private void ChatCallback(ChatMessage msg)
@@ -315,9 +319,17 @@ namespace Sanicball.Match
             activeChat = Instantiate(chatPrefab);
             activeChat.MessageSent += LocalChatMessageSent;
 
-            //Enter the lobby
-            showSettingsOnLobbyLoad = true;
-            GoToLobby();
+            //Enter the lobby or stage
+            if (matchState.InRace)
+            {
+                joiningRaceInProgress = true;
+                GoToStage();
+            }
+            else
+            {
+                //showSettingsOnLobbyLoad = true;
+                GoToLobby();
+            }
         }
 
         #endregion Match initializing
@@ -454,10 +466,13 @@ namespace Sanicball.Match
             loadingStage = true;
             loadingLobby = false;
 
-            CameraFade.StartAlphaFade(Color.black, false, 0.3f, 0.05f, () =>
+            foreach (var p in Players)
             {
-                UnityEngine.SceneManagement.SceneManager.LoadScene(targetStage.sceneName);
-            });
+                p.ReadyToRace = false;
+            }
+
+            UnityEngine.SceneManagement.SceneManager.LoadScene(targetStage.sceneName);
+            ;
         }
 
         //Check if we were loading the lobby or the race
@@ -467,21 +482,11 @@ namespace Sanicball.Match
             {
                 InitLobby();
                 loadingLobby = false;
-                if (showSettingsOnLobbyLoad)
-                {
-                    //Let the player pick settings first time entering the lobby
-                    LobbyReferences.Active.MatchSettingsPanel.Show();
-                    showSettingsOnLobbyLoad = false;
-                }
             }
             if (loadingStage)
             {
                 InitRace();
                 loadingStage = false;
-                foreach (var p in Players)
-                {
-                    p.ReadyToRace = false;
-                }
             }
         }
 
@@ -489,9 +494,17 @@ namespace Sanicball.Match
         private void InitLobby()
         {
             inLobby = true;
+
             foreach (var p in Players)
             {
                 SpawnLobbyBall(p);
+            }
+
+            if (showSettingsOnLobbyLoad)
+            {
+                //Let the player pick settings first time entering the lobby
+                LobbyReferences.Active.MatchSettingsPanel.Show();
+                showSettingsOnLobbyLoad = false;
             }
         }
 
@@ -499,8 +512,10 @@ namespace Sanicball.Match
         private void InitRace()
         {
             inLobby = false;
+
             var raceManager = Instantiate(raceManagerPrefab);
-            raceManager.Init(currentSettings, this, messenger);
+            raceManager.Init(currentSettings, this, messenger, joiningRaceInProgress);
+            joiningRaceInProgress = false;
         }
 
         public void QuitMatch(string reason = null)

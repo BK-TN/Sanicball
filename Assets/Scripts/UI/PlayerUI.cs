@@ -40,6 +40,7 @@ namespace Sanicball.UI
         private RectTransform markerContainer;
 
         private Marker checkpointMarker;
+        private List<Marker> playerMarkers = new List<Marker>();
 
         private RacePlayer targetPlayer;
         private RaceManager targetManager;
@@ -141,8 +142,10 @@ namespace Sanicball.UI
                 Data.CharacterInfo character = ActiveData.Characters[p.Character];
                 //playerMarker.Sprite = character.icon;
                 Color c = character.color;
-                c.a = 0.5f;
+                c.a = 0.2f;
                 playerMarker.Color = c;
+
+                playerMarkers.Add(playerMarker);
             }
         }
 
@@ -202,6 +205,9 @@ namespace Sanicball.UI
             //Checkpoint marker
             checkpointMarker.Target = TargetPlayer.NextCheckpoint.transform;
             checkpointMarker.CameraToUse = TargetCamera;
+
+            foreach (Marker m in playerMarkers)
+                m.CameraToUse = TargetCamera;
         }
 
         private string GetTimeString(System.TimeSpan timeToUse)

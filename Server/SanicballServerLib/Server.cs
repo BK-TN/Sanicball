@@ -59,6 +59,7 @@ namespace SanicballServerLib
         private List<MatchClientState> matchClients = new List<MatchClientState>();
         private List<MatchPlayerState> matchPlayers = new List<MatchPlayerState>();
         private MatchSettings matchSettings;
+        private bool inRace;
 
         //Lobby timer
         private System.Diagnostics.Stopwatch lobbyTimer = new System.Diagnostics.Stopwatch();
@@ -138,6 +139,12 @@ namespace SanicballServerLib
                         lobbyTimer.Reset();
                         Log("Lobby timer reached goal time, sending LoadRaceMessage", LogType.Debug);
                         SendToAll(new LoadRaceMessage());
+                        inRace = true;
+                        for (int i = 0; i < matchPlayers.Count; i++)
+                        {
+                            MatchPlayerState player = matchPlayers[i];
+                            matchPlayers[i] = new MatchPlayerState(player.ClientGuid, player.CtrlType, false, player.CharacterId);
+                        }
                         //Wait for clients to load the stage
                         clientsLoadingStage.AddRange(matchClients);
                         stageLoadingTimeoutTimer.Start();
@@ -237,6 +244,11 @@ namespace SanicballServerLib
                             }
                             break;
 
+                        case "returntolobby":
+                        case "backtolobby":
+                            ReturnToLobby();
+                            break;
+
                         default:
                             Log("Unknown command \"" + cmd.Name + "\"");
                             break;
@@ -275,6 +287,13 @@ namespace SanicballServerLib
                                         //Remove all players created by this client
                                         matchPlayers.RemoveAll(a => a.ClientGuid == associatedClient.Guid);
 
+                                        //If no players are left and we're in a race, return to lobby
+                                        if (matchPlayers.Count == 0 && inRace)
+                                        {
+                                            Log("No players left in race.");
+                                            ReturnToLobby();
+                                        }
+
                                         //Remove the client
                                         matchClients.Remove(associatedClient);
                                         matchClientConnections.Remove(msg.SenderConnection);
@@ -304,7 +323,7 @@ namespace SanicballServerLib
                                 //Approve for being nice
                                 NetOutgoingMessage hailMsg = netServer.CreateMessage();
 
-                                MatchState info = new MatchState(new List<MatchClientState>(matchClients), new List<MatchPlayerState>(matchPlayers), matchSettings);
+                                MatchState info = new MatchState(new List<MatchClientState>(matchClients), new List<MatchPlayerState>(matchPlayers), matchSettings, inRace);
                                 string infoStr = JsonConvert.SerializeObject(info);
 
                                 hailMsg.Write(infoStr);
@@ -395,7 +414,8 @@ namespace SanicballServerLib
                                             MatchPlayerState player = matchPlayers.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
                                             if (player != null)
                                             {
-                                                player = new MatchPlayerState(player.ClientGuid, player.CtrlType, player.ReadyToRace, castedMsg.NewCharacter);
+                                                int index = matchPlayers.IndexOf(player);
+                                                matchPlayers[index] = new MatchPlayerState(player.ClientGuid, player.CtrlType, player.ReadyToRace, castedMsg.NewCharacter);
                                             }
                                             Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " set character to " + castedMsg.NewCharacter, LogType.Debug);
 
@@ -452,15 +472,18 @@ namespace SanicballServerLib
 
                                     if (matchMessage is StartRaceMessage)
                                     {
-                                        MatchClientState client = matchClientConnections[msg.SenderConnection];
-                                        clientsLoadingStage.Remove(client);
-                                        Log("Waiting for " + clientsLoadingStage.Count + " client(s) to load");
-
-                                        if (clientsLoadingStage.Count == 0)
+                                        if (clientsLoadingStage.Count > 0)
                                         {
-                                            Log("Starting race!", LogType.Debug);
-                                            SendToAll(new StartRaceMessage());
-                                            stageLoadingTimeoutTimer.Reset();
+                                            MatchClientState client = matchClientConnections[msg.SenderConnection];
+                                            clientsLoadingStage.Remove(client);
+                                            Log("Waiting for " + clientsLoadingStage.Count + " client(s) to load");
+
+                                            if (clientsLoadingStage.Count == 0)
+                                            {
+                                                Log("Starting race!", LogType.Debug);
+                                                SendToAll(new StartRaceMessage());
+                                                stageLoadingTimeoutTimer.Reset();
+                                            }
                                         }
                                     }
 
@@ -474,9 +497,7 @@ namespace SanicballServerLib
 
                                     if (matchMessage is LoadLobbyMessage)
                                     {
-                                        Log("Returned to lobby");
-
-                                        SendToAll(matchMessage);
+                                        ReturnToLobby();
                                     }
 
                                     if (matchMessage is CheckpointPassedMessage)
@@ -507,10 +528,26 @@ namespace SanicballServerLib
             }
         }
 
+        private void ReturnToLobby()
+        {
+            if (inRace)
+            {
+                Log("Returned to lobby");
+                inRace = false;
+                SendToAll(new LoadLobbyMessage());
+            }
+            else
+            {
+                Log("Already in lobby");
+            }
+        }
+
         private void SendToAll(MatchMessage matchMsg)
         {
             if (matchMsg.Reliable)
-                Log("Forwarding message of type " + matchMsg.GetType(), LogType.Debug);
+            {
+                Log("Sending message of type " + matchMsg.GetType() + " to " + netServer.Connections.Count + " connection(s)", LogType.Debug);
+            }
             if (netServer.ConnectionsCount == 0) return;
             string matchMsgSerialized = JsonConvert.SerializeObject(matchMsg, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
 

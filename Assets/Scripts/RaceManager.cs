@@ -106,7 +106,7 @@ namespace Sanicball
             CurrentState = RaceState.Racing;
         }
 
-        public void Init(Data.MatchSettings settings, Match.MatchManager matchManager, Match.MatchMessenger messenger)
+        public void Init(Data.MatchSettings settings, Match.MatchManager matchManager, Match.MatchMessenger messenger, bool raceIsInProgress)
         {
             this.settings = settings;
             this.matchManager = matchManager;
@@ -114,6 +114,12 @@ namespace Sanicball
 
             messenger.CreateListener<Match.StartRaceMessage>(StartRaceCallback);
             messenger.CreateListener<Match.ClientLeftMessage>(ClientLeftCallback);
+
+            if (raceIsInProgress)
+            {
+                Debug.Log("Starting race in progress");
+                CreateBallObjects();
+            }
         }
 
         public void OnDestroy()
@@ -138,7 +144,7 @@ namespace Sanicball
         {
             foreach (RacePlayer racePlayer in players.ToList())
             {
-                if (racePlayer.AssociatedMatchPlayer.ClientGuid == msg.ClientGuid)
+                if (racePlayer.AssociatedMatchPlayer != null && racePlayer.AssociatedMatchPlayer.ClientGuid == msg.ClientGuid)
                 {
                     racePlayer.Destroy();
                     players.Remove(racePlayer);

@@ -23,7 +23,6 @@ namespace Sanicball.Match
     {
         private Guid clientGuid;
         private ControlType ctrlType;
-        private bool readyToRace;
         private DateTime latestMovementMessageTime = DateTime.Now;
 
         public MatchPlayer(Guid clientGuid, ControlType ctrlType, int initialCharacterId)
@@ -33,22 +32,11 @@ namespace Sanicball.Match
             CharacterId = initialCharacterId;
         }
 
-        public event EventHandler ChangedReady;
-
         public Guid ClientGuid { get { return clientGuid; } }
         public ControlType CtrlType { get { return ctrlType; } }
         public int CharacterId { get; set; }
         public Ball BallObject { get; set; }
-        public bool ReadyToRace
-        {
-            get { return readyToRace; }
-            set
-            {
-                readyToRace = value;
-                if (ChangedReady != null)
-                    ChangedReady(this, EventArgs.Empty);
-            }
-        }
+        public bool ReadyToRace { get; set; }
 
         public void ProcessMovementMessage(PlayerMovementMessage msg)
         {

@@ -36,7 +36,8 @@ namespace Sanicball.UI
 
         private void DestroyedCallback(object sender, System.EventArgs e)
         {
-            Destroy(gameObject);
+            if (this)
+                Destroy(gameObject);
             TargetPlayer.Destroyed -= DestroyedCallback;
         }
 

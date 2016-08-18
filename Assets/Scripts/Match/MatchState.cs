@@ -9,12 +9,14 @@ namespace Sanicball.Match
         public List<MatchClientState> Clients { get; private set; }
         public List<MatchPlayerState> Players { get; private set; }
         public Data.MatchSettings Settings { get; private set; }
+        public bool InRace { get; private set; }
 
-        public MatchState(List<MatchClientState> clients, List<MatchPlayerState> players, Data.MatchSettings settings)
+        public MatchState(List<MatchClientState> clients, List<MatchPlayerState> players, Data.MatchSettings settings, bool inRace)
         {
             Clients = clients;
             Players = players;
             Settings = settings;
+            InRace = inRace;
         }
     }
 
