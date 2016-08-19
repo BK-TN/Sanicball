@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Sanicball.Logic;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Sanicball.UI
@@ -25,7 +26,7 @@ namespace Sanicball.UI
                 if (port >= LOWEST_PORT_NUM && port <= HIGHEST_PORT_NUM)
                 {
                     //Success, start the server
-                    Match.MatchStarter matchStarter = FindObjectOfType<Match.MatchStarter>();
+                    MatchStarter matchStarter = FindObjectOfType<MatchStarter>();
                     matchStarter.JoinOnlineGame(ipInput.text, port);
                 }
                 else

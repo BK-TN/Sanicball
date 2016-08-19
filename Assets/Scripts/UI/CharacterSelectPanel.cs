@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using Sanicball.Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -38,7 +39,7 @@ namespace Sanicball.UI
 
         private IEnumerator Start()
         {
-            var charList = Data.ActiveData.Characters;
+            var charList = ActiveData.Characters;
 
             ballIcons = new RectTransform[charList.Length + 1];
 
@@ -48,26 +49,26 @@ namespace Sanicball.UI
 
             for (int i = 0; i < charList.Length; i++)
             {
-				if(!charList[i].hyperspeed)
-				{
-					RectTransform ballIcon = Instantiate(characterIconPrefab);
+                if (!charList[i].hyperspeed)
+                {
+                    RectTransform ballIcon = Instantiate(characterIconPrefab);
 
-					ballIcon.GetComponent<Image>().sprite = charList[i].icon;
-					ballIcon.transform.SetParent(characterIconContainer.transform, false);
-					ballIcons[i + 1] = ballIcon;
-				}
+                    ballIcon.GetComponent<Image>().sprite = charList[i].icon;
+                    ballIcon.transform.SetParent(characterIconContainer.transform, false);
+                    ballIcons[i + 1] = ballIcon;
+                }
             }
-			for (int i = 0; i < charList.Length; i++)
-			{
-				if(charList[i].hyperspeed)
-				{
-					RectTransform ballIcon = Instantiate(characterIconPrefab);
+            for (int i = 0; i < charList.Length; i++)
+            {
+                if (charList[i].hyperspeed)
+                {
+                    RectTransform ballIcon = Instantiate(characterIconPrefab);
 
-					ballIcon.GetComponent<Image>().sprite = charList[i].icon;
-					ballIcon.transform.SetParent(characterIconContainer.transform, false);
-					ballIcons[i + 1] = ballIcon;
-				}
-			}
+                    ballIcon.GetComponent<Image>().sprite = charList[i].icon;
+                    ballIcon.transform.SetParent(characterIconContainer.transform, false);
+                    ballIcons[i + 1] = ballIcon;
+                }
+            }
 
             //Wait a single frame before selecting the first character.
             yield return null;
@@ -76,25 +77,24 @@ namespace Sanicball.UI
 
         public void NextCharacter()
         {
-			if (selected == 13)
-				Select (15);
-			else if (selected == Data.ActiveData.Characters.Length)
-				Select (14);
-			else if (selected == 14)
-				Select (selected);
-			else if (selected < ballIcons.Length - 1 && (selected != 13 || selected != Data.ActiveData.Characters.Length))
-				Select (selected + 1);
+            if (selected == 13)
+                Select(15);
+            else if (selected == ActiveData.Characters.Length)
+                Select(14);
+            else if (selected == 14)
+                Select(selected);
+            else if (selected < ballIcons.Length - 1 && (selected != 13 || selected != ActiveData.Characters.Length))
+                Select(selected + 1);
         }
 
         public void PrevCharacter()
         {
-			if (selected == 15)
-				Select (13);
-			else if (selected == 14)
-				Select (Data.ActiveData.Characters.Length);
-			else if (selected > 0) 
-				Select(selected - 1);
-			
+            if (selected == 15)
+                Select(13);
+            else if (selected == 14)
+                Select(ActiveData.Characters.Length);
+            else if (selected > 0)
+                Select(selected - 1);
         }
 
         private void Select(int newSelection)
@@ -102,7 +102,7 @@ namespace Sanicball.UI
             if (newSelection == 0)
                 characterNameLabel.text = "Leave match";
             else
-				characterNameLabel.text = Data.ActiveData.Characters[newSelection - 1].name /*+ " (ID: " + newSelection.ToString() + ")"*/;
+                characterNameLabel.text = ActiveData.Characters[newSelection - 1].name /*+ " (ID: " + newSelection.ToString() + ")"*/;
 
             selected = newSelection;
         }

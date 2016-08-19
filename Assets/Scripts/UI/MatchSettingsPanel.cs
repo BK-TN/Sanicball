@@ -1,4 +1,5 @@
 ﻿using Sanicball.Data;
+using Sanicball.Logic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -39,7 +40,7 @@ namespace Sanicball.UI
 
         public void RevertSettings()
         {
-            var manager = FindObjectOfType<Match.MatchManager>();
+            var manager = FindObjectOfType<MatchManager>();
             if (manager)
             {
                 tempSettings = manager.CurrentSettings;
@@ -49,7 +50,7 @@ namespace Sanicball.UI
 
         public void SaveSettings()
         {
-            var manager = FindObjectOfType<Match.MatchManager>();
+            var manager = FindObjectOfType<MatchManager>();
             if (manager)
             {
                 manager.RequestSettingsChange(tempSettings);

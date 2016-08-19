@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using Sanicball.Data;
+using Sanicball.Logic;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Sanicball.UI
@@ -48,9 +50,8 @@ namespace Sanicball.UI
             //Position field
             positionField.text = targetPosition + GetPostfix(targetPosition);
             if (TargetPlayer.RaceFinished) positionField.color = new Color(0f, 0.5f, 1f);
-            //Ball icon
-            //icon.sprite = Data.ActiveData.Characters[TargetPlayer.Character].icon;
-            characterImage.color = Data.ActiveData.Characters[TargetPlayer.Character].color;
+            //Image representing character
+            characterImage.color = ActiveData.Characters[TargetPlayer.Character].color;
             //Name field
             nameField.text = TargetPlayer.Name;
 

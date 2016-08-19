@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Sanicball.Data;
+using Sanicball.Logic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,22 +12,22 @@ namespace Sanicball.UI
     public class LocalPlayerManager : MonoBehaviour
     {
         public LocalPlayerPanel localPlayerPanelPrefab;
-        public event System.EventHandler<Match.MatchPlayerEventArgs> LocalPlayerJoined;
+        public event System.EventHandler<MatchPlayerEventArgs> LocalPlayerJoined;
 
         private const int maxPlayers = 4;
-        private Match.MatchManager manager;
+        private MatchManager manager;
         private List<ControlType> usedControls = new List<ControlType>();
 
         private void Start()
         {
-            manager = FindObjectOfType<Match.MatchManager>();
+            manager = FindObjectOfType<MatchManager>();
 
             if (manager)
             {
                 //Create local player panels for players already in the game
                 foreach (var p in manager.Players)
                 {
-                    if (p.ClientGuid == manager.LocalClientGuid && p.CtrlType != ControlType.Remote)
+                    if (p.ClientGuid == manager.LocalClientGuid && p.CtrlType != ControlType.None)
                     {
                         var panel = CreatePanelForControlType(p.CtrlType, true);
                         panel.AssignedPlayer = p;
@@ -82,7 +83,7 @@ namespace Sanicball.UI
             //return newPlayer;
         }
 
-        private void Manager_MatchPlayerAdded(object sender, Match.MatchPlayerEventArgs e)
+        private void Manager_MatchPlayerAdded(object sender, MatchPlayerEventArgs e)
         {
             if (e.IsLocal)
             {
@@ -91,12 +92,12 @@ namespace Sanicball.UI
             }
         }
 
-        public void SetCharacter(Match.MatchPlayer player, int c)
+        public void SetCharacter(MatchPlayer player, int c)
         {
             manager.RequestCharacterChange(player.CtrlType, c);
         }
 
-        public void SetReady(Match.MatchPlayer player, bool ready)
+        public void SetReady(MatchPlayer player, bool ready)
         {
             manager.RequestReadyChange(player.CtrlType, ready);
         }
@@ -106,7 +107,7 @@ namespace Sanicball.UI
             usedControls.Remove(ctrlType);
         }
 
-        public void LeaveMatch(Match.MatchPlayer player)
+        public void LeaveMatch(MatchPlayer player)
         {
             manager.RequestPlayerLeave(player.CtrlType);
             usedControls.Remove(player.CtrlType);

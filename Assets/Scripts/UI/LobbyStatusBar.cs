@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
-using Sanicball.Match;
+using Sanicball.Data;
+using Sanicball.Logic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -47,7 +48,7 @@ namespace Sanicball.UI
             }
             else
             {
-                leftText.text = "Press " + GameInput.GetKeyCodeName(Data.ActiveData.Keybinds[Data.Keybind.Menu]) + " (Y on joystick) to join the match!";
+                leftText.text = "Press " + GameInput.GetKeyCodeName(ActiveData.Keybinds[Keybind.Menu]) + " (Y on joystick) to join the match!";
             }
             rightText.text = clients + " " + (clients != 1 ? "clients" : "client") + " connected playing with " + players + " " + (players != 1 ? "players" : "player");
 

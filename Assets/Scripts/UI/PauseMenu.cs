@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Sanicball.Logic;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -80,7 +81,7 @@ namespace Sanicball.UI
 
         public void BackToLobby()
         {
-            var matchManager = FindObjectOfType<Match.MatchManager>();
+            var matchManager = FindObjectOfType<MatchManager>();
             if (matchManager)
             {
                 matchManager.RequestLoadLobby();
@@ -93,7 +94,7 @@ namespace Sanicball.UI
 
         public void QuitMatch()
         {
-            var matchManager = FindObjectOfType<Match.MatchManager>();
+            var matchManager = FindObjectOfType<MatchManager>();
             if (matchManager)
             {
                 matchManager.QuitMatch();

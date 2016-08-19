@@ -1,4 +1,5 @@
 ﻿using Sanicball.Data;
+using Sanicball.Logic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -24,7 +25,7 @@ namespace Sanicball.UI
 
         private void Start()
         {
-            var manager = FindObjectOfType<Match.MatchManager>();
+            var manager = FindObjectOfType<MatchManager>();
             if (manager)
             {
                 manager.MatchSettingsChanged += Manager_MatchSettingsChanged;
@@ -34,7 +35,7 @@ namespace Sanicball.UI
 
         private void Manager_MatchSettingsChanged(object sender, System.EventArgs e)
         {
-            var manager = FindObjectOfType<Match.MatchManager>();
+            var manager = FindObjectOfType<MatchManager>();
             if (manager)
             {
                 MatchSettings s = manager.CurrentSettings;
