@@ -29,12 +29,16 @@ namespace Sanicball
         private Quaternion currentDirection = Quaternion.Euler(0, 0, 0);
         private Quaternion currentDirectionWithOffset = Quaternion.Euler(0, 0, 0);
         private Vector3 up = Vector3.up;
-
+		private bool looperMode= false;
         public void SetDirection(Quaternion dir)
         {
             currentDirection = dir;
         }
-
+		public void Start(){
+			if(UnityEngine.SceneManagement.SceneManager.GetActiveScene().name== "Track_Looper"){
+				looperMode= true;
+			}
+		}
         private void Update()
         {
             //Input
@@ -65,8 +69,11 @@ namespace Sanicball
                 const float maxTrans = 20f;
                 Quaternion finalTargetDir = Quaternion.Slerp(currentDirection, towardsVelocity, Mathf.Max(0, Mathf.Min(-10 + Target.velocity.magnitude, maxTrans) / maxTrans));
 
-                //Lerp towards the final rotation
-                currentDirection = Quaternion.Slerp(currentDirection, finalTargetDir, Time.deltaTime * 2);
+				//looper mode setup for Sanic Loops Track
+				if(looperMode)
+					currentDirection = Quaternion.Slerp(currentDirection, finalTargetDir, Time.deltaTime * 10);
+				else
+					currentDirection = Quaternion.Slerp(currentDirection, finalTargetDir, Time.deltaTime * 2);
 
                 //Look for a BallControlInput and set its look direction
                 BallControlInput bci = Target.GetComponent<BallControlInput>();
@@ -77,9 +84,14 @@ namespace Sanicball
 
                 //Set camera FOV to get higher with more velocity
                 AttachedCamera.fieldOfView = Mathf.Lerp(AttachedCamera.fieldOfView, Mathf.Min(60f + (Target.velocity.magnitude), 100f), Time.deltaTime * 4);
+				if(looperMode){
+					currentDirectionWithOffset = Quaternion.Slerp(currentDirectionWithOffset, currentDirection * targetDirectionOffset, Time.deltaTime * 10);
+					transform.position = Target.transform.position + (Vector3.up + (transform.up*2)) * orbitHeight + currentDirectionWithOffset * (Vector3.back * orbitDistance);
+				}else{
+					currentDirectionWithOffset = Quaternion.Slerp(currentDirectionWithOffset, currentDirection * targetDirectionOffset, Time.deltaTime * 2);
+					transform.position = Target.transform.position + Vector3.up * orbitHeight + currentDirectionWithOffset * (Vector3.back * orbitDistance);
+				}
 
-                currentDirectionWithOffset = Quaternion.Slerp(currentDirectionWithOffset, currentDirection * targetDirectionOffset, Time.deltaTime * 2);
-                transform.position = Target.transform.position + Vector3.up * orbitHeight + currentDirectionWithOffset * (Vector3.back * orbitDistance);
                 transform.rotation = currentDirectionWithOffset;
             }
         }
