@@ -42,7 +42,11 @@ namespace Sanicball.UI
             int clients = manager.Clients.Count;
             int players = manager.Players.Count;
 
-            if (manager.Players.Count > 0)
+            if (manager.AutoStartTimerOn)
+            {
+                leftText.text = "Race starts in " + GetTimeString(System.TimeSpan.FromSeconds(manager.AutoStartTimer));
+            }
+            else if (manager.Players.Count > 0)
             {
                 leftText.text = "The race will start when all players are ready";
             }
@@ -71,6 +75,11 @@ namespace Sanicball.UI
         private void Update()
         {
             UpdateText();
+        }
+
+        private string GetTimeString(System.TimeSpan timeToUse)
+        {
+            return string.Format("{0:00}:{1:00}", timeToUse.Minutes, timeToUse.Seconds);
         }
     }
 }

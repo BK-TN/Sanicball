@@ -61,6 +61,11 @@ namespace Sanicball.UI
             }
         }
 
+        private void OnDestroy()
+        {
+            manager.MatchPlayerAdded -= Manager_MatchPlayerAdded;
+        }
+
         private LocalPlayerPanel CreatePanelForControlType(ControlType ctrlType, bool alreadyJoined)
         {
             usedControls.Add(ctrlType);

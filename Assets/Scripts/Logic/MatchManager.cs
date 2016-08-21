@@ -61,6 +61,10 @@ namespace Sanicball.Logic
         private const float lobbyTimerMax = 3;
         private float lobbyTimer = lobbyTimerMax;
 
+        //Auto start timer
+        private bool autoStartTimerOn = false;
+        private float autoStartTimer = 0;
+
         #endregion Match state
 
         #region Scenes and scene initializing
@@ -107,6 +111,9 @@ namespace Sanicball.Logic
         public MatchSettings CurrentSettings { get { return currentSettings; } }
 
         public Guid LocalClientGuid { get { return myGuid; } }
+
+        public bool AutoStartTimerOn { get { return autoStartTimerOn; } }
+        public float AutoStartTimer { get { return autoStartTimer; } }
 
         #endregion Properties
 
@@ -181,10 +188,16 @@ namespace Sanicball.Logic
                 SpawnLobbyBall(p);
             }
 
-            StopLobbyTimer(); //TODO: look into moving this (make the server trigger it while somehow still having it work in local play)
+            StopLobbyTimer();
 
             if (MatchPlayerAdded != null)
                 MatchPlayerAdded(this, new MatchPlayerEventArgs(p, msg.ClientGuid == myGuid));
+
+            if (players.Count >= 1)
+            {
+                autoStartTimer = currentSettings.AutoStartTime;
+                autoStartTimerOn = true;
+            }
         }
 
         private void PlayerLeftCallback(PlayerLeftMessage msg)
@@ -202,6 +215,11 @@ namespace Sanicball.Logic
 
                 if (MatchPlayerRemoved != null)
                     MatchPlayerRemoved(this, new MatchPlayerEventArgs(player, msg.ClientGuid == myGuid)); //TODO: determine if removed player was local
+
+                if (players.Count < 1)
+                {
+                    autoStartTimerOn = false;
+                }
             }
         }
 
@@ -243,6 +261,7 @@ namespace Sanicball.Logic
         private void LoadRaceCallback(LoadRaceMessage msg)
         {
             StopLobbyTimer();
+            autoStartTimerOn = false;
             CameraFade.StartAlphaFade(Color.black, false, 0.3f, 0.05f, () =>
             {
                 GoToStage();
@@ -395,6 +414,16 @@ namespace Sanicball.Logic
                 }
             }
 
+            if (autoStartTimerOn && inLobby)
+            {
+                autoStartTimer -= Time.deltaTime;
+
+                if (autoStartTimer <= 0 && !OnlineMode)
+                {
+                    messenger.SendMessage(new LoadRaceMessage());
+                }
+            }
+
             if (OnlineMode)
             {
                 netUpdateTimer -= Time.deltaTime;
@@ -506,6 +535,12 @@ namespace Sanicball.Logic
                 //Let the player pick settings first time entering the lobby
                 LobbyReferences.Active.MatchSettingsPanel.Show();
                 showSettingsOnLobbyLoad = false;
+            }
+
+            if (players.Count >= 1)
+            {
+                autoStartTimer = currentSettings.AutoStartTime;
+                autoStartTimerOn = true;
             }
         }
 

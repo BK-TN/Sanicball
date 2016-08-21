@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -7,7 +8,7 @@ using System.Threading;
 using Lidgren.Network;
 using Newtonsoft.Json;
 using Sanicball.Data;
-using Sanicball.Match;
+using Sanicball.Logic;
 
 namespace SanicballServerLib
 {
@@ -62,12 +63,14 @@ namespace SanicballServerLib
         private bool inRace;
 
         //Lobby timer
-        private System.Diagnostics.Stopwatch lobbyTimer = new System.Diagnostics.Stopwatch();
+        private Stopwatch lobbyTimer = new Stopwatch();
         private const float lobbyTimerGoal = 3;
+        //Autostart timer
+        private Stopwatch autoStartTimer = new Stopwatch();
 
         //List of clients that haven't loaded a stage yet
         private List<MatchClientState> clientsLoadingStage = new List<MatchClientState>();
-        private System.Diagnostics.Stopwatch stageLoadingTimeoutTimer = new System.Diagnostics.Stopwatch();
+        private Stopwatch stageLoadingTimeoutTimer = new Stopwatch();
         private const float stageLoadingTimeoutTimerGoal = 20;
 
         //Associates connections with the match client they create (To identify which client is sending a message)
@@ -136,18 +139,8 @@ namespace SanicballServerLib
                 {
                     if (lobbyTimer.Elapsed.TotalSeconds >= lobbyTimerGoal)
                     {
-                        lobbyTimer.Reset();
-                        Log("Lobby timer reached goal time, sending LoadRaceMessage", LogType.Debug);
-                        SendToAll(new LoadRaceMessage());
-                        inRace = true;
-                        for (int i = 0; i < matchPlayers.Count; i++)
-                        {
-                            MatchPlayerState player = matchPlayers[i];
-                            matchPlayers[i] = new MatchPlayerState(player.ClientGuid, player.CtrlType, false, player.CharacterId);
-                        }
-                        //Wait for clients to load the stage
-                        clientsLoadingStage.AddRange(matchClients);
-                        stageLoadingTimeoutTimer.Start();
+                        Log("The race has been started by all players being ready.");
+                        LoadRace();
                     }
                 }
 
@@ -159,6 +152,16 @@ namespace SanicballServerLib
                         Log("Some players are still loading the race, starting anyway", LogType.Debug);
                         SendToAll(new StartRaceMessage());
                         stageLoadingTimeoutTimer.Reset();
+                    }
+                }
+
+                //Check auto start timer
+                if (autoStartTimer.IsRunning)
+                {
+                    if (autoStartTimer.Elapsed.TotalSeconds >= matchSettings.AutoStartTime)
+                    {
+                        Log("The race has been automatically started.");
+                        LoadRace();
                     }
                 }
 
@@ -287,11 +290,20 @@ namespace SanicballServerLib
                                         //Remove all players created by this client
                                         matchPlayers.RemoveAll(a => a.ClientGuid == associatedClient.Guid);
 
-                                        //If no players are left and we're in a race, return to lobby
-                                        if (matchPlayers.Count == 0 && inRace)
+                                        if (matchPlayers.Count == 0)
                                         {
-                                            Log("No players left in race.");
-                                            ReturnToLobby();
+                                            //If no players are left and we're in a race, return to lobby
+                                            if (inRace)
+                                            {
+                                                Log("No players left in race.");
+                                                ReturnToLobby();
+                                            }
+                                            //If we're in the lobby, stop the auto start timer
+                                            else if (autoStartTimer.IsRunning)
+                                            {
+                                                Log("No players left, autoStartTimer stopped", LogType.Debug);
+                                                autoStartTimer.Reset();
+                                            }
                                         }
 
                                         //Remove the client
@@ -380,6 +392,12 @@ namespace SanicballServerLib
                                             matchPlayers.Add(new MatchPlayerState(castedMsg.ClientGuid, castedMsg.CtrlType, false, castedMsg.InitialCharacter));
                                             Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " joined", LogType.Debug);
                                             SendToAll(matchMessage);
+
+                                            if (!autoStartTimer.IsRunning && matchSettings.AutoStartTime > 0)
+                                            {
+                                                Log("First player joined, starting autoStartTimer", LogType.Debug);
+                                                autoStartTimer.Start();
+                                            }
                                         }
                                     }
 
@@ -397,6 +415,12 @@ namespace SanicballServerLib
                                             matchPlayers.RemoveAll(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
                                             Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " left", LogType.Debug);
                                             SendToAll(matchMessage);
+
+                                            if (matchPlayers.Count == 0 && autoStartTimer.IsRunning)
+                                            {
+                                                Log("No players left, autoStartTimer stopped", LogType.Debug);
+                                                autoStartTimer.Reset();
+                                            }
                                         }
                                     }
 
@@ -528,6 +552,22 @@ namespace SanicballServerLib
             }
         }
 
+        private void LoadRace()
+        {
+            lobbyTimer.Reset();
+            autoStartTimer.Reset();
+            SendToAll(new LoadRaceMessage());
+            inRace = true;
+            for (int i = 0; i < matchPlayers.Count; i++)
+            {
+                MatchPlayerState player = matchPlayers[i];
+                matchPlayers[i] = new MatchPlayerState(player.ClientGuid, player.CtrlType, false, player.CharacterId);
+            }
+            //Wait for clients to load the stage
+            clientsLoadingStage.AddRange(matchClients);
+            stageLoadingTimeoutTimer.Start();
+        }
+
         private void ReturnToLobby()
         {
             if (inRace)
@@ -535,6 +575,12 @@ namespace SanicballServerLib
                 Log("Returned to lobby");
                 inRace = false;
                 SendToAll(new LoadLobbyMessage());
+
+                if (matchPlayers.Count > 0 && matchSettings.AutoStartTime > 0)
+                {
+                    autoStartTimer.Start();
+                    Log("There are still players, autoStartTimer started", LogType.Debug);
+                }
             }
             else
             {

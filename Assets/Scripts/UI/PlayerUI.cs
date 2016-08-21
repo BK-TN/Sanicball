@@ -217,7 +217,7 @@ namespace Sanicball.UI
             }
         }
 
-        private string GetTimeString(System.TimeSpan timeToUse)
+        private string GetTimeString(TimeSpan timeToUse)
         {
             return string.Format("{0:00}:{1:00}.{2:000}", timeToUse.Minutes, timeToUse.Seconds, timeToUse.Milliseconds);
         }
