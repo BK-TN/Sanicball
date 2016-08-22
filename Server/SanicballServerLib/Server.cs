@@ -335,7 +335,13 @@ namespace SanicballServerLib
                                 //Approve for being nice
                                 NetOutgoingMessage hailMsg = netServer.CreateMessage();
 
-                                MatchState info = new MatchState(new List<MatchClientState>(matchClients), new List<MatchPlayerState>(matchPlayers), matchSettings, inRace);
+                                float autoStartTime = 0;
+                                if (autoStartTimer.IsRunning)
+                                {
+                                    autoStartTime = matchSettings.AutoStartTime - (float)autoStartTimer.Elapsed.TotalSeconds;
+                                }
+
+                                MatchState info = new MatchState(new List<MatchClientState>(matchClients), new List<MatchPlayerState>(matchPlayers), matchSettings, inRace, autoStartTime);
                                 string infoStr = JsonConvert.SerializeObject(info);
 
                                 hailMsg.Write(infoStr);

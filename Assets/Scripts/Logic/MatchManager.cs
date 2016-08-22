@@ -193,7 +193,7 @@ namespace Sanicball.Logic
             if (MatchPlayerAdded != null)
                 MatchPlayerAdded(this, new MatchPlayerEventArgs(p, msg.ClientGuid == myGuid));
 
-            if (players.Count >= 1)
+            if (players.Count >= 1 && !autoStartTimerOn)
             {
                 autoStartTimer = currentSettings.AutoStartTime;
                 autoStartTimerOn = true;
@@ -327,6 +327,10 @@ namespace Sanicball.Logic
 
             //Set settings
             currentSettings = matchState.Settings;
+
+            //Set auto start timer
+            autoStartTimerOn = matchState.CurAutoStartTime != 0;
+            autoStartTimer = matchState.CurAutoStartTime;
 
             //Create messenger
             messenger = new OnlineMatchMessenger(client);
@@ -537,7 +541,7 @@ namespace Sanicball.Logic
                 showSettingsOnLobbyLoad = false;
             }
 
-            if (players.Count >= 1)
+            if (players.Count >= 1 && !autoStartTimerOn)
             {
                 autoStartTimer = currentSettings.AutoStartTime;
                 autoStartTimerOn = true;

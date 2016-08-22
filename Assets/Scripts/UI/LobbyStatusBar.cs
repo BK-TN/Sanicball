@@ -44,11 +44,11 @@ namespace Sanicball.UI
 
             if (manager.AutoStartTimerOn)
             {
-                leftText.text = "Race starts in " + GetTimeString(System.TimeSpan.FromSeconds(manager.AutoStartTimer));
+                leftText.text = "Match will automatically start in " + GetTimeString(System.TimeSpan.FromSeconds(manager.AutoStartTimer));
             }
             else if (manager.Players.Count > 0)
             {
-                leftText.text = "The race will start when all players are ready";
+                leftText.text = "Match starts when all players are ready";
             }
             else
             {

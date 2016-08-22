@@ -11,13 +11,15 @@ namespace Sanicball.Logic
         public List<MatchPlayerState> Players { get; private set; }
         public MatchSettings Settings { get; private set; }
         public bool InRace { get; private set; }
+        public float CurAutoStartTime { get; private set; }
 
-        public MatchState(List<MatchClientState> clients, List<MatchPlayerState> players, MatchSettings settings, bool inRace)
+        public MatchState(List<MatchClientState> clients, List<MatchPlayerState> players, MatchSettings settings, bool inRace, float curAutoStartTime)
         {
             Clients = clients;
             Players = players;
             Settings = settings;
             InRace = inRace;
+            CurAutoStartTime = curAutoStartTime;
         }
     }
 

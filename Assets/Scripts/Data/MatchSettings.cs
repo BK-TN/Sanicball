@@ -48,7 +48,7 @@ namespace Sanicball.Data
                 AISkill = AISkillLevel.Average,
                 aiCharacters = "1,2,3,4,5,6,7,8,9,10,11,12",
 
-                AutoStartTime = 5,
+                AutoStartTime = 30,
                 AutoReturnTime = 60,
                 StageRotationMode = StageRotationMode.None
             };
