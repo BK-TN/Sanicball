@@ -316,7 +316,8 @@ namespace SanicballServerLib
                                         //Tell connected clients to remove the client+players
                                         SendToAll(new ClientLeftMessage(associatedClient.Guid));
 
-                                        Log("Client " + associatedClient.Guid + " disconnected (" + statusMsg + ")");
+                                        Log("Client " + associatedClient.Name + " disconnected (" + statusMsg + ")");
+                                        Log("(Guid: " + associatedClient.Guid + ")", LogType.Debug);
                                         Broadcast(associatedClient.Name + " has left the match");
                                     }
                                     else
@@ -382,7 +383,8 @@ namespace SanicballServerLib
                                         matchClients.Add(newClient);
                                         matchClientConnections.Add(msg.SenderConnection, newClient);
 
-                                        Log("Client " + castedMsg.ClientGuid + " joined");
+                                        Log("Client " + castedMsg.ClientName + " joined");
+                                        Log("(Guid: " + castedMsg.ClientGuid + ")", LogType.Debug);
                                         Broadcast(castedMsg.ClientName + " has joined the match");
                                         SendToAll(matchMessage);
                                     }
