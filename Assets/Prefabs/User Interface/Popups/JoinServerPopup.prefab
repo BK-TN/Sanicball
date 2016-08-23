@@ -275,7 +275,7 @@ GameObject:
   - 114: {fileID: 11459500}
   - 114: {fileID: 11463534}
   m_Layer: 5
-  m_Name: Next button
+  m_Name: Connect button
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -364,7 +364,7 @@ MonoBehaviour:
   m_Navigation:
     m_Mode: 4
     m_SelectOnUp: {fileID: 11463534}
-    m_SelectOnDown: {fileID: 11463534}
+    m_SelectOnDown: {fileID: 11462480}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
   m_Transition: 1
@@ -657,7 +657,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 4
-    m_SelectOnUp: {fileID: 11404778}
+    m_SelectOnUp: {fileID: 11462480}
     m_SelectOnDown: {fileID: 11404778}
     m_SelectOnLeft: {fileID: 11463534}
     m_SelectOnRight: {fileID: 11463534}
@@ -829,7 +829,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 4
-    m_SelectOnUp: {fileID: 11463534}
+    m_SelectOnUp: {fileID: 11404778}
     m_SelectOnDown: {fileID: 11463534}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
@@ -892,7 +892,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Navigation:
     m_Mode: 4
-    m_SelectOnUp: {fileID: 11404778}
+    m_SelectOnUp: {fileID: 11462480}
     m_SelectOnDown: {fileID: 11404778}
     m_SelectOnLeft: {fileID: 11438810}
     m_SelectOnRight: {fileID: 11438810}
