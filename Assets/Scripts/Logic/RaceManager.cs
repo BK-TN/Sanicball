@@ -28,6 +28,8 @@ namespace Sanicball.Logic
         private UI.PlayerUI playerUIPrefab = null;
         [SerializeField]
         private UI.RaceUI raceUIPrefab = null;
+        [SerializeField]
+        private SpectatorView spectatorViewPrefab = null;
 
         //Race state
         private List<RacePlayer> players = new List<RacePlayer>();
@@ -86,12 +88,26 @@ namespace Sanicball.Logic
                         break;
 
                     case RaceState.Countdown:
+                        //Create countdown
                         var countdown = Instantiate(raceCountdownPrefab);
                         countdown.ApplyOffset(countdownOffset);
                         countdown.OnCountdownFinished += Countdown_OnCountdownFinished;
+
+                        //Create race UI
                         raceUI = Instantiate(raceUIPrefab);
                         raceUI.TargetManager = this;
+
+                        //Create all balls
                         CreateBallObjects();
+
+                        //If there are no local players, create a spectator camera
+                        if (!matchManager.Players.Any(a => a.ClientGuid == matchManager.LocalClientGuid))
+                        {
+                            var specView = Instantiate(spectatorViewPrefab);
+                            specView.TargetManager = this;
+                            specView.Target = players[0];
+                        }
+
                         break;
 
                     case RaceState.Racing:

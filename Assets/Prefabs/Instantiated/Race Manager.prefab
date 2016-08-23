@@ -121,6 +121,8 @@ MonoBehaviour:
     type: 2}
   playerUIPrefab: {fileID: 11499260, guid: 448b8e41f02717c4994e9e5e4925dc5c, type: 2}
   raceUIPrefab: {fileID: 11414870, guid: 034bad3d6621fb342a42f46f2c211703, type: 2}
+  spectatorViewPrefab: {fileID: 11495830, guid: 1b1e937c51c6e4d44b995125a35246aa,
+    type: 2}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
