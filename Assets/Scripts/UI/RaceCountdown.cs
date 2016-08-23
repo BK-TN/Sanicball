@@ -5,7 +5,7 @@ namespace Sanicball.UI
     public class RaceCountdown : MonoBehaviour
     {
         private int countdown = 5;
-        private float timer = 2f;
+        private float timer = 4f;
 
         private float currentFontSize = 60;
         private float targetFontSize = 60;
@@ -21,12 +21,13 @@ namespace Sanicball.UI
 
         public event System.EventHandler OnCountdownFinished;
 
-        // Use this for initialization
-        private void Start()
+        public void ApplyOffset(float time)
         {
+            //Since offset time is very likely below 4 seconds, I don't see a need to compensate for it ever being above.
+            //If it ends up happening sometimes, causing players to start the race at different times, this method should be rewritten.
+            timer -= time;
         }
 
-        // Update is called once per frame
         private void Update()
         {
             timer -= Time.deltaTime;

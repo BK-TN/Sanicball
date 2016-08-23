@@ -359,6 +359,7 @@ namespace SanicballServerLib
                             {
                                 case MessageType.MatchMessage:
 
+                                    double timestamp = msg.ReadTime(false);
                                     MatchMessage matchMessage = null;
                                     try
                                     {
@@ -605,6 +606,7 @@ namespace SanicballServerLib
 
             NetOutgoingMessage netMsg = netServer.CreateMessage();
             netMsg.Write(MessageType.MatchMessage);
+            netMsg.WriteTime(false);
             netMsg.Write(matchMsgSerialized);
             netServer.SendMessage(netMsg, netServer.Connections, NetDeliveryMethod.ReliableOrdered, 0);
         }

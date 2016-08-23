@@ -179,7 +179,7 @@ namespace Sanicball.Logic
             }
         }
 
-        private void CheckpointPassedHandler(CheckpointPassedMessage msg)
+        private void CheckpointPassedHandler(CheckpointPassedMessage msg, float travelTime)
         {
             if (associatedMatchPlayer != null && msg.ClientGuid == associatedMatchPlayer.ClientGuid && msg.CtrlType == associatedMatchPlayer.CtrlType)
             {

@@ -44,6 +44,7 @@ namespace Sanicball.Logic
         private double raceTimer = 0f;
         private bool raceTimerOn = false;
         private UI.RaceUI raceUI;
+        private float countdownOffset;
 
         //Properties
         public System.TimeSpan RaceTime { get { return System.TimeSpan.FromSeconds(raceTimer); } }
@@ -86,6 +87,7 @@ namespace Sanicball.Logic
 
                     case RaceState.Countdown:
                         var countdown = Instantiate(raceCountdownPrefab);
+                        countdown.ApplyOffset(countdownOffset);
                         countdown.OnCountdownFinished += Countdown_OnCountdownFinished;
                         raceUI = Instantiate(raceUIPrefab);
                         raceUI.TargetManager = this;
@@ -130,12 +132,13 @@ namespace Sanicball.Logic
             }
         }
 
-        private void StartRaceCallback(StartRaceMessage msg)
+        private void StartRaceCallback(StartRaceMessage msg, float travelTime)
         {
+            countdownOffset = travelTime;
             CurrentState = RaceState.Countdown;
         }
 
-        private void ClientLeftCallback(ClientLeftMessage msg)
+        private void ClientLeftCallback(ClientLeftMessage msg, float travelTime)
         {
             //Find and remove all RacePlayers associated with players from this client
             //TODO: Find some way to still have the player in the race, although disabled - so that players leaving while finished don't just disappear

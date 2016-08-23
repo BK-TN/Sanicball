@@ -153,32 +153,32 @@ namespace Sanicball.Logic
 
         #region Match message callbacks
 
-        private void SettingsChangedCallback(SettingsChangedMessage msg)
+        private void SettingsChangedCallback(SettingsChangedMessage msg, float travelTime)
         {
             currentSettings = msg.NewMatchSettings;
             if (MatchSettingsChanged != null)
                 MatchSettingsChanged(this, EventArgs.Empty);
         }
 
-        private void ClientJoinedCallback(ClientJoinedMessage msg)
+        private void ClientJoinedCallback(ClientJoinedMessage msg, float travelTime)
         {
             clients.Add(new MatchClient(msg.ClientGuid, msg.ClientName));
             Debug.Log("New client " + msg.ClientName);
         }
 
-        private void ClientLeftCallback(ClientLeftMessage msg)
+        private void ClientLeftCallback(ClientLeftMessage msg, float travelTime)
         {
             //Remove all players added by this client
             List<MatchPlayer> playersToRemove = players.Where(a => a.ClientGuid == msg.ClientGuid).ToList();
             foreach (MatchPlayer player in playersToRemove)
             {
-                PlayerLeftCallback(new PlayerLeftMessage(player.ClientGuid, player.CtrlType));
+                PlayerLeftCallback(new PlayerLeftMessage(player.ClientGuid, player.CtrlType), travelTime);
             }
             //Remove the client
             clients.RemoveAll(a => a.Guid == msg.ClientGuid);
         }
 
-        private void PlayerJoinedCallback(PlayerJoinedMessage msg)
+        private void PlayerJoinedCallback(PlayerJoinedMessage msg, float travelTime)
         {
             var p = new MatchPlayer(msg.ClientGuid, msg.CtrlType, msg.InitialCharacter);
             players.Add(p);
@@ -195,12 +195,12 @@ namespace Sanicball.Logic
 
             if (players.Count >= 1 && !autoStartTimerOn)
             {
-                autoStartTimer = currentSettings.AutoStartTime;
+                autoStartTimer = currentSettings.AutoStartTime - travelTime;
                 autoStartTimerOn = true;
             }
         }
 
-        private void PlayerLeftCallback(PlayerLeftMessage msg)
+        private void PlayerLeftCallback(PlayerLeftMessage msg, float travelTime)
         {
             var player = players.FirstOrDefault(a => a.ClientGuid == msg.ClientGuid && a.CtrlType == msg.CtrlType);
             if (player != null)
@@ -223,7 +223,7 @@ namespace Sanicball.Logic
             }
         }
 
-        private void CharacterChangedCallback(CharacterChangedMessage msg)
+        private void CharacterChangedCallback(CharacterChangedMessage msg, float travelTime)
         {
             if (!inLobby)
             {
@@ -238,7 +238,7 @@ namespace Sanicball.Logic
             }
         }
 
-        private void ChangedReadyCallback(ChangedReadyMessage msg)
+        private void ChangedReadyCallback(ChangedReadyMessage msg, float travelTime)
         {
             var player = players.FirstOrDefault(a => a.ClientGuid == msg.ClientGuid && a.CtrlType == msg.CtrlType);
             if (player != null)
@@ -249,7 +249,7 @@ namespace Sanicball.Logic
                 var allReady = players.TrueForAll(a => a.ReadyToRace);
                 if (allReady && !lobbyTimerOn)
                 {
-                    StartLobbyTimer();
+                    StartLobbyTimer(travelTime);
                 }
                 if (!allReady && lobbyTimerOn)
                 {
@@ -258,7 +258,7 @@ namespace Sanicball.Logic
             }
         }
 
-        private void LoadRaceCallback(LoadRaceMessage msg)
+        private void LoadRaceCallback(LoadRaceMessage msg, float travelTime)
         {
             StopLobbyTimer();
             autoStartTimerOn = false;
@@ -268,18 +268,18 @@ namespace Sanicball.Logic
             });
         }
 
-        private void ChatCallback(ChatMessage msg)
+        private void ChatCallback(ChatMessage msg, float travelTime)
         {
             if (activeChat)
                 activeChat.ShowMessage(msg.From, msg.Text);
         }
 
-        private void LoadLobbyCallback(LoadLobbyMessage msg)
+        private void LoadLobbyCallback(LoadLobbyMessage msg, float travelTime)
         {
             GoToLobby();
         }
 
-        private void PlayerMovementCallback(PlayerMovementMessage msg)
+        private void PlayerMovementCallback(PlayerMovementMessage msg, float travelTime)
         {
             if (msg.ClientGuid == myGuid) return;
 
@@ -420,12 +420,7 @@ namespace Sanicball.Logic
 
             if (autoStartTimerOn && inLobby)
             {
-                autoStartTimer -= Time.deltaTime;
-
-                if (autoStartTimer <= 0 && !OnlineMode)
-                {
-                    messenger.SendMessage(new LoadRaceMessage());
-                }
+                autoStartTimer = Mathf.Max(0, autoStartTimer - Time.deltaTime);
             }
 
             if (OnlineMode)
@@ -467,9 +462,10 @@ namespace Sanicball.Logic
 
         #region Players ready and lobby timer
 
-        private void StartLobbyTimer()
+        private void StartLobbyTimer(float offset = 0)
         {
             lobbyTimerOn = true;
+            lobbyTimer -= offset;
             LobbyReferences.Active.CountdownField.enabled = true;
         }
 

@@ -14,7 +14,7 @@ namespace Sanicball.Logic
                 MatchMessageListener listener = listeners[i];
                 if (listener.MessageType == message.GetType())
                 {
-                    ((MatchMessageHandler<T>)listener.Handler).Invoke(message);
+                    ((MatchMessageHandler<T>)listener.Handler).Invoke(message, 0);
                 }
             }
         }

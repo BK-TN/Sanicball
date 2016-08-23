@@ -81,7 +81,7 @@ namespace Sanicball.Data
         {
             Load("GameSettings.json", ref gameSettings);
             Load("GameKeybinds.json", ref keybinds);
-            Load("RaceSettings.json", ref matchSettings);
+            Load("MatchSettings.json", ref matchSettings);
             Load("Records.json", ref raceRecords);
         }
 
