@@ -227,6 +227,12 @@ namespace SanicballServerLib
                             }
                             break;
 
+                        case "showsettings":
+                        case "settings":
+                        case "matchsettings":
+                            Log(JsonConvert.SerializeObject(matchSettings, Formatting.Indented));
+                            break;
+
                         case "loadsettings":
                         case "reloadsettings":
                         case "loadmatchsettings":
@@ -290,20 +296,17 @@ namespace SanicballServerLib
                                         //Remove all players created by this client
                                         matchPlayers.RemoveAll(a => a.ClientGuid == associatedClient.Guid);
 
-                                        if (matchPlayers.Count == 0)
+                                        //If no players are left and we're in a race, return to lobby
+                                        if (matchPlayers.Count == 0 && inRace)
                                         {
-                                            //If no players are left and we're in a race, return to lobby
-                                            if (inRace)
-                                            {
-                                                Log("No players left in race.");
-                                                ReturnToLobby();
-                                            }
-                                            //If we're in the lobby, stop the auto start timer
-                                            else if (autoStartTimer.IsRunning)
-                                            {
-                                                Log("No players left, autoStartTimer stopped", LogType.Debug);
-                                                autoStartTimer.Reset();
-                                            }
+                                            Log("No players left in race.");
+                                            ReturnToLobby();
+                                        }
+
+                                        //If there are now less players than AutoStartMinPlayers, stop the auto start timer
+                                        if (matchPlayers.Count < matchSettings.AutoStartMinPlayers && autoStartTimer.IsRunning)
+                                        {
+                                            Log("Player count now below AutoStartMinPlayers, autoStartTimer stopped", LogType.Debug);
                                         }
 
                                         //Remove the client
@@ -335,13 +338,13 @@ namespace SanicballServerLib
                                 //Approve for being nice
                                 NetOutgoingMessage hailMsg = netServer.CreateMessage();
 
-                                float autoStartTime = 0;
+                                float autoStartTimeLeft = 0;
                                 if (autoStartTimer.IsRunning)
                                 {
-                                    autoStartTime = matchSettings.AutoStartTime - (float)autoStartTimer.Elapsed.TotalSeconds;
+                                    autoStartTimeLeft = matchSettings.AutoStartTime - (float)autoStartTimer.Elapsed.TotalSeconds;
                                 }
 
-                                MatchState info = new MatchState(new List<MatchClientState>(matchClients), new List<MatchPlayerState>(matchPlayers), matchSettings, inRace, autoStartTime);
+                                MatchState info = new MatchState(new List<MatchClientState>(matchClients), new List<MatchPlayerState>(matchPlayers), matchSettings, inRace, autoStartTimeLeft);
                                 string infoStr = JsonConvert.SerializeObject(info);
 
                                 hailMsg.Write(infoStr);
@@ -400,10 +403,10 @@ namespace SanicballServerLib
                                             Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " joined", LogType.Debug);
                                             SendToAll(matchMessage);
 
-                                            if (!autoStartTimer.IsRunning && matchSettings.AutoStartTime > 0)
+                                            if (matchPlayers.Count >= matchSettings.AutoStartMinPlayers && !autoStartTimer.IsRunning && matchSettings.AutoStartTime > 0)
                                             {
-                                                Log("First player joined, starting autoStartTimer", LogType.Debug);
-                                                autoStartTimer.Start();
+                                                Log("Player count is now above AutoStartMinPlayers, autoStartTimer started", LogType.Debug);
+                                                StartAutoStartTimer();
                                             }
                                         }
                                     }
@@ -423,10 +426,10 @@ namespace SanicballServerLib
                                             Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " left", LogType.Debug);
                                             SendToAll(matchMessage);
 
-                                            if (matchPlayers.Count == 0 && autoStartTimer.IsRunning)
+                                            if (matchPlayers.Count < matchSettings.AutoStartMinPlayers && autoStartTimer.IsRunning)
                                             {
-                                                Log("No players left, autoStartTimer stopped", LogType.Debug);
-                                                autoStartTimer.Reset();
+                                                Log("Player count is now below AutoStartMinPlayers, autoStartTimer stopped", LogType.Debug);
+                                                StopAutoStartTimer();
                                             }
                                         }
                                     }
@@ -562,7 +565,7 @@ namespace SanicballServerLib
         private void LoadRace()
         {
             lobbyTimer.Reset();
-            autoStartTimer.Reset();
+            StopAutoStartTimer();
             SendToAll(new LoadRaceMessage());
             inRace = true;
             for (int i = 0; i < matchPlayers.Count; i++)
@@ -583,16 +586,29 @@ namespace SanicballServerLib
                 inRace = false;
                 SendToAll(new LoadLobbyMessage());
 
-                if (matchPlayers.Count > 0 && matchSettings.AutoStartTime > 0)
+                if (matchPlayers.Count >= matchSettings.AutoStartMinPlayers && matchSettings.AutoStartTime > 0)
                 {
-                    autoStartTimer.Start();
                     Log("There are still players, autoStartTimer started", LogType.Debug);
+                    StartAutoStartTimer();
                 }
             }
             else
             {
                 Log("Already in lobby");
             }
+        }
+
+        private void StartAutoStartTimer()
+        {
+            autoStartTimer.Reset();
+            autoStartTimer.Start();
+            SendToAll(new AutoStartTimerMessage(true));
+        }
+
+        private void StopAutoStartTimer()
+        {
+            autoStartTimer.Reset();
+            SendToAll(new AutoStartTimerMessage(false));
         }
 
         private void SendToAll(MatchMessage matchMsg)

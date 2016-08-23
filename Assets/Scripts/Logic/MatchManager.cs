@@ -61,7 +61,7 @@ namespace Sanicball.Logic
         private const float lobbyTimerMax = 3;
         private float lobbyTimer = lobbyTimerMax;
 
-        //Auto start timer
+        //Auto start timer (Only used in online mode)
         private bool autoStartTimerOn = false;
         private float autoStartTimer = 0;
 
@@ -192,12 +192,6 @@ namespace Sanicball.Logic
 
             if (MatchPlayerAdded != null)
                 MatchPlayerAdded(this, new MatchPlayerEventArgs(p, msg.ClientGuid == myGuid));
-
-            if (players.Count >= 1 && !autoStartTimerOn)
-            {
-                autoStartTimer = currentSettings.AutoStartTime - travelTime;
-                autoStartTimerOn = true;
-            }
         }
 
         private void PlayerLeftCallback(PlayerLeftMessage msg, float travelTime)
@@ -215,11 +209,6 @@ namespace Sanicball.Logic
 
                 if (MatchPlayerRemoved != null)
                     MatchPlayerRemoved(this, new MatchPlayerEventArgs(player, msg.ClientGuid == myGuid)); //TODO: determine if removed player was local
-
-                if (players.Count < 1)
-                {
-                    autoStartTimerOn = false;
-                }
             }
         }
 
@@ -261,7 +250,6 @@ namespace Sanicball.Logic
         private void LoadRaceCallback(LoadRaceMessage msg, float travelTime)
         {
             StopLobbyTimer();
-            autoStartTimerOn = false;
             CameraFade.StartAlphaFade(Color.black, false, 0.3f, 0.05f, () =>
             {
                 GoToStage();
@@ -277,6 +265,12 @@ namespace Sanicball.Logic
         private void LoadLobbyCallback(LoadLobbyMessage msg, float travelTime)
         {
             GoToLobby();
+        }
+
+        private void AutoStartTimerCallback(AutoStartTimerMessage msg, float travelTime)
+        {
+            autoStartTimerOn = msg.Enabled;
+            autoStartTimer = currentSettings.AutoStartTime - travelTime;
         }
 
         private void PlayerMovementCallback(PlayerMovementMessage msg, float travelTime)
@@ -329,6 +323,7 @@ namespace Sanicball.Logic
             currentSettings = matchState.Settings;
 
             //Set auto start timer
+            //TODO Get and apply travel time
             autoStartTimerOn = matchState.CurAutoStartTime != 0;
             autoStartTimer = matchState.CurAutoStartTime;
 
@@ -373,6 +368,7 @@ namespace Sanicball.Logic
             messenger.CreateListener<LoadRaceMessage>(LoadRaceCallback);
             messenger.CreateListener<ChatMessage>(ChatCallback);
             messenger.CreateListener<LoadLobbyMessage>(LoadLobbyCallback);
+            messenger.CreateListener<AutoStartTimerMessage>(AutoStartTimerCallback);
             messenger.CreateListener<PlayerMovementMessage>(PlayerMovementCallback);
 
             //Create this client
@@ -535,12 +531,6 @@ namespace Sanicball.Logic
                 //Let the player pick settings first time entering the lobby
                 LobbyReferences.Active.MatchSettingsPanel.Show();
                 showSettingsOnLobbyLoad = false;
-            }
-
-            if (players.Count >= 1 && !autoStartTimerOn)
-            {
-                autoStartTimer = currentSettings.AutoStartTime;
-                autoStartTimerOn = true;
             }
         }
 
