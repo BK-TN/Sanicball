@@ -5,6 +5,8 @@ using System.Text;
 
 namespace SanicballServerLib
 {
+    public delegate void CommandHandler(Command cmd);
+
     public class Command
     {
         public string Name { get; }

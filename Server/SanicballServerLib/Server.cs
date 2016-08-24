@@ -52,9 +52,11 @@ namespace SanicballServerLib
         public event EventHandler<LogArgs> OnLog;
 
         private List<LogEntry> log = new List<LogEntry>();
+        private Dictionary<string, CommandHandler> commandHandlers = new Dictionary<string, CommandHandler>();
         private NetServer netServer;
         private bool running;
         private CommandQueue commandQueue;
+        private Random random = new Random();
 
         //Match state
         private List<MatchClientState> matchClients = new List<MatchClientState>();
@@ -81,10 +83,99 @@ namespace SanicballServerLib
         public Server(CommandQueue commandQueue)
         {
             this.commandQueue = commandQueue;
+
+            AddCommandHandler("help", cmd =>
+            {
+                Log("Available commands:");
+                foreach (string name in commandHandlers.Keys)
+                {
+                    Log(name);
+                }
+            });
+            AddCommandHandler("stop", cmd =>
+            {
+                running = false;
+            });
+            AddCommandHandler("say", cmd =>
+            {
+                if (cmd.Content.Trim() == string.Empty)
+                {
+                    Log("Usage: say [message]");
+                }
+                else
+                {
+                    SendToAll(new ChatMessage("Server", ChatMessageType.User, cmd.Content));
+                    Log("Chat message sent");
+                }
+            });
+            AddCommandHandler("clients", cmd =>
+            {
+                Log(matchClients.Count + " connected client(s)");
+                foreach (MatchClientState client in matchClients)
+                {
+                    Log(client.Name);
+                }
+            });
+            AddCommandHandler("kick", cmd =>
+            {
+                if (cmd.Content.Trim() == string.Empty)
+                {
+                    Log("Usage: kick [client name/part of name]");
+                }
+                else
+                {
+                    List<MatchClientState> matching = SearchClients(cmd.Content);
+                    if (matching.Count == 0)
+                    {
+                        Log("No clients match your search.");
+                    }
+                    else if (matching.Count == 1)
+                    {
+                        NetConnection conn = matchClientConnections.FirstOrDefault(a => a.Value == matching[0]).Key;
+                        Log("Kicked client " + matching[0].Name);
+                        conn.Disconnect("Kicked by server");
+                    }
+                    else
+                    {
+                        Log("More than one client matches your search:");
+                        foreach (MatchClientState client in matching)
+                        {
+                            Log(client.Name);
+                        }
+                    }
+                }
+            });
+            AddCommandHandler("showsettings", cmd =>
+            {
+                Log(JsonConvert.SerializeObject(matchSettings, Formatting.Indented));
+            });
+            AddCommandHandler("loadsettings", cmd =>
+            {
+                bool success = false;
+                if (cmd.Content.Trim() != string.Empty)
+                {
+                    success = LoadMatchSettings(cmd.Content.Trim());
+                }
+                else
+                {
+                    success = LoadMatchSettings();
+                }
+                if (success)
+                {
+                    SendToAll(new SettingsChangedMessage(matchSettings));
+                }
+            });
+            AddCommandHandler("returntolobby", cmd =>
+            {
+                ReturnToLobby();
+            });
         }
 
         public void Start(int port)
         {
+            //Welcome message
+            Log("Welcome! Type 'help' for a list of commands. Type 'stop' to shut down the server.");
+
             if (!LoadMatchSettings())
                 matchSettings = MatchSettings.CreateDefault();
 
@@ -169,98 +260,14 @@ namespace SanicballServerLib
                 Command cmd;
                 while ((cmd = commandQueue.ReadNext()) != null)
                 {
-                    switch (cmd.Name)
+                    CommandHandler handler;
+                    if (commandHandlers.TryGetValue(cmd.Name, out handler))
                     {
-                        case "stop":
-                        case "close":
-                        case "disconnect":
-                        case "quit":
-                            running = false;
-                            break;
-
-                        case "say":
-                            if (cmd.Content.Trim() == string.Empty)
-                            {
-                                Log("Usage: say [message]");
-                            }
-                            else
-                            {
-                                SendToAll(new ChatMessage("Server", ChatMessageType.User, cmd.Content));
-                                Log("Chat message sent");
-                            }
-                            break;
-
-                        case "clients":
-                            Log(matchClients.Count + " connected client(s)");
-                            foreach (MatchClientState client in matchClients)
-                            {
-                                Log(client.Name);
-                            }
-                            break;
-
-                        case "kick":
-                            if (cmd.Content.Trim() == string.Empty)
-                            {
-                                Log("Usage: kick [client name/part of name]");
-                            }
-                            else
-                            {
-                                List<MatchClientState> matching = SearchClients(cmd.Content);
-                                if (matching.Count == 0)
-                                {
-                                    Log("No clients match your search.");
-                                }
-                                else if (matching.Count == 1)
-                                {
-                                    NetConnection conn = matchClientConnections.FirstOrDefault(a => a.Value == matching[0]).Key;
-                                    Log("Kicked client " + matching[0].Name);
-                                    conn.Disconnect("Kicked by server");
-                                }
-                                else
-                                {
-                                    Log("More than one client matches your search:");
-                                    foreach (MatchClientState client in matching)
-                                    {
-                                        Log(client.Name);
-                                    }
-                                }
-                            }
-                            break;
-
-                        case "showsettings":
-                        case "settings":
-                        case "matchsettings":
-                            Log(JsonConvert.SerializeObject(matchSettings, Formatting.Indented));
-                            break;
-
-                        case "loadsettings":
-                        case "reloadsettings":
-                        case "loadmatchsettings":
-                        case "reloadmatchsettings":
-                        case "reload":
-                            bool success = false;
-                            if (cmd.Content.Trim() != string.Empty)
-                            {
-                                success = LoadMatchSettings(cmd.Content.Trim());
-                            }
-                            else
-                            {
-                                success = LoadMatchSettings();
-                            }
-                            if (success)
-                            {
-                                SendToAll(new SettingsChangedMessage(matchSettings));
-                            }
-                            break;
-
-                        case "returntolobby":
-                        case "backtolobby":
-                            ReturnToLobby();
-                            break;
-
-                        default:
-                            Log("Unknown command \"" + cmd.Name + "\"");
-                            break;
+                        handler(cmd);
+                    }
+                    else
+                    {
+                        Log("Command '" + cmd.Name + "' not found.");
                     }
                 }
 
@@ -588,6 +595,26 @@ namespace SanicballServerLib
                 inRace = false;
                 SendToAll(new LoadLobbyMessage());
 
+                //Stage rotation
+                const int stageCount = 5; //Hardcoded stage count for now.. can't recieve the actual count since it's part of a Unity prefab.
+                switch (matchSettings.StageRotationMode)
+                {
+                    case StageRotationMode.Random:
+                        Log("Picking random stage");
+                        int newStage = random.Next(stageCount);
+                        matchSettings.StageId = newStage;
+                        SendToAll(new SettingsChangedMessage(matchSettings));
+                        break;
+
+                    case StageRotationMode.Sequenced:
+                        Log("Picking next stage");
+                        int nextStage = matchSettings.StageId + 1;
+                        if (nextStage >= stageCount) nextStage = 0;
+                        matchSettings.StageId = nextStage;
+                        SendToAll(new SettingsChangedMessage(matchSettings));
+                        break;
+                }
+
                 if (matchPlayers.Count >= matchSettings.AutoStartMinPlayers && matchSettings.AutoStartTime > 0)
                 {
                     Log("There are still players, autoStartTimer started", LogType.Debug);
@@ -680,6 +707,11 @@ namespace SanicballServerLib
         private List<MatchClientState> SearchClients(string name)
         {
             return matchClients.Where(a => a.Name.Contains(name)).ToList();
+        }
+
+        public void AddCommandHandler(string commandName, CommandHandler handler)
+        {
+            commandHandlers.Add(commandName, handler);
         }
     }
 }
