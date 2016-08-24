@@ -14,6 +14,9 @@ namespace Sanicball.UI
         public LocalPlayerPanel localPlayerPanelPrefab;
         public event System.EventHandler<MatchPlayerEventArgs> LocalPlayerJoined;
 
+        [SerializeField]
+        private Text matchJoiningHelpField = null;
+
         private const int maxPlayers = 4;
         private MatchManager manager;
         private List<ControlType> usedControls = new List<ControlType>();
@@ -41,6 +44,8 @@ namespace Sanicball.UI
             {
                 Debug.LogWarning("Game manager not found - players cannot be added");
             }
+
+            UpdateHelpText();
         }
 
         private void Update()
@@ -69,6 +74,7 @@ namespace Sanicball.UI
         private LocalPlayerPanel CreatePanelForControlType(ControlType ctrlType, bool alreadyJoined)
         {
             usedControls.Add(ctrlType);
+            UpdateHelpText();
 
             //Create a new panel and assign the joining control type
             var panel = Instantiate(localPlayerPanelPrefab);
@@ -110,12 +116,30 @@ namespace Sanicball.UI
         public void RemoveControlType(ControlType ctrlType)
         {
             usedControls.Remove(ctrlType);
+            UpdateHelpText();
         }
 
         public void LeaveMatch(MatchPlayer player)
         {
             manager.RequestPlayerLeave(player.CtrlType);
             usedControls.Remove(player.CtrlType);
+            UpdateHelpText();
+        }
+
+        private void UpdateHelpText()
+        {
+            bool anyLeft = usedControls.Count < maxPlayers;
+            bool hasKeyboard = usedControls.Contains(ControlType.Keyboard);
+
+            matchJoiningHelpField.text = "";
+            if (anyLeft)
+            {
+                if (!hasKeyboard)
+                {
+                    matchJoiningHelpField.text += "Press <b>" + GameInput.GetKeyCodeName(ActiveData.Keybinds[Keybind.Menu]) + "</b> to join with a keyboard. ";
+                }
+                matchJoiningHelpField.text += "Press <b>Y</b> to join with a joystick.";
+            }
         }
     }
 }

@@ -44,15 +44,15 @@ namespace Sanicball.UI
 
             if (manager.AutoStartTimerOn)
             {
-                leftText.text = "Match will automatically start in " + GetTimeString(System.TimeSpan.FromSeconds(manager.AutoStartTimer));
+                leftText.text = "Match will start in " + GetTimeString(System.TimeSpan.FromSeconds(manager.AutoStartTimer)) + ", or when all players are ready.";
             }
             else if (manager.Players.Count > 0)
             {
-                leftText.text = "Match starts when all players are ready";
+                leftText.text = "Match starts when all players are ready.";
             }
             else
             {
-                leftText.text = "Press " + GameInput.GetKeyCodeName(ActiveData.Keybinds[Keybind.Menu]) + " (Y on joystick) to join the match!";
+                leftText.text = "Match will not start without players.";
             }
             rightText.text = clients + " " + (clients != 1 ? "clients" : "client") + " connected playing with " + players + " " + (players != 1 ? "players" : "player");
 

@@ -336,6 +336,7 @@ namespace SanicballServerLib
                                         if (matchPlayers.Count < matchSettings.AutoStartMinPlayers && autoStartTimer.IsRunning)
                                         {
                                             Log("Player count now below AutoStartMinPlayers, autoStartTimer stopped", LogType.Debug);
+                                            StopAutoStartTimer();
                                         }
 
                                         //Remove the client
