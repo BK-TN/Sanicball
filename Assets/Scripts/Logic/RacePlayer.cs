@@ -125,6 +125,12 @@ namespace Sanicball.Logic
                     ball.CanMove = false;
                 //Set layer to Racer Ghost to block collision with racing players
                 ball.gameObject.layer = LayerMask.NameToLayer("Racer Ghost");
+
+                //Send a done racing message if this is a local player
+                if (ball.Type == BallType.Player && ball.CtrlType != ControlType.None)
+                {
+                    matchMessenger.SendMessage(new DoneRacingMessage(associatedMatchPlayer.ClientGuid, associatedMatchPlayer.CtrlType));
+                }
             }
             else
             {

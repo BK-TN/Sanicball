@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading;
 using Lidgren.Network;
 using Newtonsoft.Json;
+using Sanicball;
 using Sanicball.Data;
 using Sanicball.Logic;
 
@@ -74,6 +75,13 @@ namespace SanicballServerLib
         private List<MatchClientState> clientsLoadingStage = new List<MatchClientState>();
         private Stopwatch stageLoadingTimeoutTimer = new Stopwatch();
         private const float stageLoadingTimeoutTimerGoal = 20;
+
+        //List of players that are still racing
+        private List<MatchPlayerState> playersStillRacing = new List<MatchPlayerState>();
+
+        //Timer for going back to lobby at the end of a race
+        private Stopwatch backToLobbyTimer = new Stopwatch();
+        private const float backToLobbyTimerGoal = 15;
 
         //Associates connections with the match client they create (To identify which client is sending a message)
         private Dictionary<NetConnection, MatchClientState> matchClientConnections = new Dictionary<NetConnection, MatchClientState>();
@@ -256,6 +264,16 @@ namespace SanicballServerLib
                     }
                 }
 
+                //Check back to lobby timer
+                if (backToLobbyTimer.IsRunning)
+                {
+                    if (backToLobbyTimer.Elapsed.TotalSeconds >= backToLobbyTimerGoal)
+                    {
+                        ReturnToLobby();
+                        backToLobbyTimer.Reset();
+                    }
+                }
+
                 //Check command queue
                 Command cmd;
                 while ((cmd = commandQueue.ReadNext()) != null)
@@ -340,28 +358,43 @@ namespace SanicballServerLib
                             break;
 
                         case NetIncomingMessageType.ConnectionApproval:
-                            string text = msg.ReadString();
-                            if (text.Contains("please"))
+                            ClientInfo clientInfo = null;
+                            bool approved = false;
+                            try
                             {
-                                //Approve for being nice
-                                NetOutgoingMessage hailMsg = netServer.CreateMessage();
-
-                                float autoStartTimeLeft = 0;
-                                if (autoStartTimer.IsRunning)
-                                {
-                                    autoStartTimeLeft = matchSettings.AutoStartTime - (float)autoStartTimer.Elapsed.TotalSeconds;
-                                }
-
-                                MatchState info = new MatchState(new List<MatchClientState>(matchClients), new List<MatchPlayerState>(matchPlayers), matchSettings, inRace, autoStartTimeLeft);
-                                string infoStr = JsonConvert.SerializeObject(info);
-
-                                hailMsg.Write(infoStr);
-                                msg.SenderConnection.Approve(hailMsg);
+                                clientInfo = JsonConvert.DeserializeObject<ClientInfo>(msg.ReadString());
+                                approved = true;
                             }
-                            else
+                            catch (JsonException ex)
                             {
-                                msg.SenderConnection.Deny();
+                                Log("Error reading client connection approval: \"" + ex.Message + "\". Client rejected.");
                             }
+                            if (!approved)
+                            {
+                                msg.SenderConnection.Deny("Invalid client info!");
+                                break;
+                            }
+
+                            if (clientInfo.Version != GameVersion.AS_FLOAT || clientInfo.IsTesting != GameVersion.IS_TESTING)
+                            {
+                                msg.SenderConnection.Deny("Wrong game version.");
+                                break;
+                            }
+
+                            //Create hail message with match state
+                            NetOutgoingMessage hailMsg = netServer.CreateMessage();
+
+                            float autoStartTimeLeft = 0;
+                            if (autoStartTimer.IsRunning)
+                            {
+                                autoStartTimeLeft = matchSettings.AutoStartTime - (float)autoStartTimer.Elapsed.TotalSeconds;
+                            }
+
+                            MatchState info = new MatchState(new List<MatchClientState>(matchClients), new List<MatchPlayerState>(matchPlayers), matchSettings, inRace, autoStartTimeLeft);
+                            string infoStr = JsonConvert.SerializeObject(info);
+
+                            hailMsg.Write(infoStr);
+                            msg.SenderConnection.Approve(hailMsg);
                             break;
 
                         case NetIncomingMessageType.Data:
@@ -526,6 +559,7 @@ namespace SanicballServerLib
                                                 Log("Starting race!", LogType.Debug);
                                                 SendToAll(new StartRaceMessage());
                                                 stageLoadingTimeoutTimer.Reset();
+                                                playersStillRacing.AddRange(matchPlayers);
                                             }
                                         }
                                     }
@@ -546,13 +580,31 @@ namespace SanicballServerLib
                                     if (matchMessage is CheckpointPassedMessage)
                                     {
                                         var castedMsg = (CheckpointPassedMessage)matchMessage;
-                                        Log("Player entered checkpoint with lap time " + castedMsg.LapTime);
+                                        Log("Player entered checkpoint with lap time " + castedMsg.LapTime, LogType.Debug);
                                         SendToAll(matchMessage);
                                     }
 
                                     if (matchMessage is PlayerMovementMessage)
                                     {
                                         SendToAll(matchMessage);
+                                    }
+
+                                    if (matchMessage is DoneRacingMessage)
+                                    {
+                                        var castedMsg = (DoneRacingMessage)matchMessage;
+                                        MatchPlayerState player = playersStillRacing.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
+                                        if (player != null)
+                                        {
+                                            playersStillRacing.Remove(player);
+
+                                            Log(playersStillRacing.Count + " players(s) still racing");
+
+                                            if (playersStillRacing.Count == 0)
+                                            {
+                                                Log("All players are done racing, returning to lobby in " + backToLobbyTimerGoal + " seconds");
+                                                backToLobbyTimer.Start();
+                                            }
+                                        }
                                     }
 
                                     break;

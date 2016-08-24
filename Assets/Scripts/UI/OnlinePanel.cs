@@ -48,7 +48,7 @@ namespace Sanicball.UI
 
         private void Awake()
         {
-            masterServerGameName = "sanicball" + GameVersion.AsFloat;
+            masterServerGameName = "sanicball" + GameVersion.AS_FLOAT;
             errorField.enabled = false;
         }
 

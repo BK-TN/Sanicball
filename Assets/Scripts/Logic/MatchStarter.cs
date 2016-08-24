@@ -57,7 +57,7 @@ namespace Sanicball.Logic
                                     if (msg.SenderConnection.RemoteHailMessage != null)
                                     {
                                         string hailMsg = msg.SenderConnection.RemoteHailMessage.ReadString();
-                                        Debug.Log("Server said: " + hailMsg);
+                                        Debug.Log("Server's hail message: " + hailMsg);
                                         MatchState matchInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<MatchState>(hailMsg);
                                         BeginOnlineGame(matchInfo);
                                     }
@@ -68,8 +68,7 @@ namespace Sanicball.Logic
                                     break;
 
                                 case NetConnectionStatus.Disconnected:
-                                    Debug.Log("Disconnected, shit");
-                                    activeConnectingPopup.Failed("Connection timed out.");
+                                    activeConnectingPopup.Failed(msg.ReadString());
                                     break;
 
                                 default:
@@ -103,7 +102,9 @@ namespace Sanicball.Logic
 
             //Create approval message
             NetOutgoingMessage approval = joiningClient.CreateMessage();
-            approval.Write("Approve me please");
+
+            ClientInfo info = new ClientInfo(GameVersion.AS_FLOAT, GameVersion.IS_TESTING);
+            approval.Write(Newtonsoft.Json.JsonConvert.SerializeObject(info));
 
             joiningClient.Connect(ip, port, approval);
 
