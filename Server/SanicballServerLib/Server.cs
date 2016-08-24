@@ -83,6 +83,9 @@ namespace SanicballServerLib
         private Stopwatch backToLobbyTimer = new Stopwatch();
         private const float backToLobbyTimerGoal = 15;
 
+        //List of clients wanting to return to lobby
+        private List<MatchClientState> clientsWantingToReturn = new List<MatchClientState>();
+
         //Associates connections with the match client they create (To identify which client is sending a message)
         private Dictionary<NetConnection, MatchClientState> matchClientConnections = new Dictionary<NetConnection, MatchClientState>();
 
@@ -320,6 +323,7 @@ namespace SanicballServerLib
                                     {
                                         //Remove all players created by this client
                                         matchPlayers.RemoveAll(a => a.ClientGuid == associatedClient.Guid);
+                                        playersStillRacing.RemoveAll(a => a.ClientGuid == associatedClient.Guid);
 
                                         //If no players are left and we're in a race, return to lobby
                                         if (matchPlayers.Count == 0 && inRace)
@@ -337,13 +341,14 @@ namespace SanicballServerLib
                                         //Remove the client
                                         matchClients.Remove(associatedClient);
                                         matchClientConnections.Remove(msg.SenderConnection);
+                                        clientsWantingToReturn.Remove(associatedClient);
+                                        clientsLoadingStage.Remove(associatedClient);
 
                                         //Tell connected clients to remove the client+players
                                         SendToAll(new ClientLeftMessage(associatedClient.Guid));
 
-                                        Log("Client " + associatedClient.Name + " disconnected (" + statusMsg + ")");
-                                        Log("(Guid: " + associatedClient.Guid + ")", LogType.Debug);
                                         Broadcast(associatedClient.Name + " has left the match");
+                                        Log("(Guid: " + associatedClient.Guid + ", reason: " + statusMsg + ")", LogType.Debug);
                                     }
                                     else
                                     {
@@ -423,9 +428,8 @@ namespace SanicballServerLib
                                         matchClients.Add(newClient);
                                         matchClientConnections.Add(msg.SenderConnection, newClient);
 
-                                        Log("Client " + castedMsg.ClientName + " joined");
-                                        Log("(Guid: " + castedMsg.ClientGuid + ")", LogType.Debug);
                                         Broadcast(castedMsg.ClientName + " has joined the match");
+                                        Log("(Guid: " + castedMsg.ClientGuid + ")", LogType.Debug);
                                         SendToAll(matchMessage);
                                     }
 
@@ -464,7 +468,9 @@ namespace SanicballServerLib
                                         }
                                         else
                                         {
-                                            matchPlayers.RemoveAll(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
+                                            MatchPlayerState player = matchPlayers.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
+                                            matchPlayers.Remove(player);
+                                            playersStillRacing.Remove(player);
                                             Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " left", LogType.Debug);
                                             SendToAll(matchMessage);
 
@@ -574,7 +580,22 @@ namespace SanicballServerLib
 
                                     if (matchMessage is LoadLobbyMessage)
                                     {
-                                        ReturnToLobby();
+                                        MatchClientState client = matchClientConnections[msg.SenderConnection];
+                                        if (!clientsWantingToReturn.Contains(client))
+                                        {
+                                            clientsWantingToReturn.Add(client);
+
+                                            if (clientsWantingToReturn.Count >= matchClients.Count)
+                                            {
+                                                Broadcast("All clients have voted to return to the lobby.");
+                                                ReturnToLobby();
+                                            }
+                                            else
+                                            {
+                                                int clientsNeeded = matchClients.Count - clientsWantingToReturn.Count;
+                                                Broadcast(client.Name + " wants to return to the lobby. " + clientsNeeded + " more vote(s)needed.");
+                                            }
+                                        }
                                     }
 
                                     if (matchMessage is CheckpointPassedMessage)
@@ -647,6 +668,9 @@ namespace SanicballServerLib
                 inRace = false;
                 SendToAll(new LoadLobbyMessage());
 
+                playersStillRacing.Clear();
+                clientsWantingToReturn.Clear();
+
                 //Stage rotation
                 const int stageCount = 5; //Hardcoded stage count for now.. can't recieve the actual count since it's part of a Unity prefab.
                 switch (matchSettings.StageRotationMode)
@@ -708,8 +732,13 @@ namespace SanicballServerLib
             netServer.SendMessage(netMsg, netServer.Connections, NetDeliveryMethod.ReliableOrdered, 0);
         }
 
+        /// <summary>
+        /// Logs a string and sends it as a chat message to all clients.
+        /// </summary>
+        /// <param name="text"></param>
         private void Broadcast(string text)
         {
+            Log(text);
             SendToAll(new ChatMessage("Server", ChatMessageType.System, text));
         }
 

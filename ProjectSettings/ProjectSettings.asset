@@ -335,7 +335,10 @@ PlayerSettings:
   psp2UseDebugIl2cppLibs: 0
   psmSplashimage: {fileID: 0}
   spritePackerPolicy: 
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    1: 
+    2: 
+    13: 
   metroPackageName: Sanicball
   metroPackageVersion: 
   metroCertificatePath: 
