@@ -85,6 +85,7 @@ namespace Sanicball.UI
             if (matchManager)
             {
                 matchManager.RequestLoadLobby();
+                Close();
             }
             else
             {

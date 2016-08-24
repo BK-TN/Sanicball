@@ -593,7 +593,7 @@ namespace SanicballServerLib
                                             else
                                             {
                                                 int clientsNeeded = matchClients.Count - clientsWantingToReturn.Count;
-                                                Broadcast(client.Name + " wants to return to the lobby. " + clientsNeeded + " more vote(s)needed.");
+                                                Broadcast(client.Name + " wants to return to the lobby. " + clientsNeeded + " more vote(s) needed.");
                                             }
                                         }
                                     }
