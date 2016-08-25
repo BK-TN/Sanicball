@@ -89,7 +89,7 @@ namespace Sanicball.Data
         {
             Save("GameSettings.json", gameSettings);
             Save("GameKeybinds.json", keybinds);
-            Save("RaceSettings.json", matchSettings);
+            Save("MatchSettings.json", matchSettings);
             Save("Records.json", raceRecords);
         }
 

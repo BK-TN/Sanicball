@@ -24,7 +24,7 @@ namespace Sanicball.UI
         {
             discoveryClient.DiscoverLocalPeers(25000);
 
-            serverCountField.text = "Refreshing...";
+            serverCountField.text = "0 servers";
             errorField.enabled = false;
 
             //Clear old servers
