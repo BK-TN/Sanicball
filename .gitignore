@@ -34,3 +34,6 @@ Server/SanicballServerLib/obj/
 !Server/*.sln
 !Server/SanicballServer/*.csproj
 !Server/SanicballServerLib/*.csproj
+
+#Ignore server nuget packages tho
+/Server/packages/

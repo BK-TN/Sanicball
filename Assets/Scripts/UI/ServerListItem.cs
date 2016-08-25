@@ -20,9 +20,9 @@ namespace Sanicball.UI
 
         public void Init(ServerInfo info, System.Net.IPEndPoint endpoint, int pingMs)
         {
-            serverNameText.text = info.ServerName;
+            serverNameText.text = info.Config.ServerName;
             serverStatusText.text = info.InRace ? "In race" : "In lobby";
-            playerCountText.text = info.Players + "/" + info.MaxPlayers;
+            playerCountText.text = info.Players + "/" + info.Config.MaxPlayers;
             pingText.text = pingMs + "ms";
 
             this.endpoint = endpoint;

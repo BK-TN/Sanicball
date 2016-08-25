@@ -45,7 +45,7 @@ namespace SanicballServer
                 Thread inputThread = new Thread(InputLoop);
                 inputThread.Start();
 
-                serv.Start(25000);
+                serv.Start();
 
                 //Wait until server closes
 

@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Lidgren.Network;
 using Newtonsoft.Json;
 using Sanicball;
@@ -47,23 +49,31 @@ namespace SanicballServerLib
 
     public class Server : IDisposable
     {
+        public const string CONFIG_FILENAME = "ServerConfig.json";
         private const string SETTINGS_FILENAME = "MatchSettings.json";
         private const int TICKRATE = 20;
 
         public event EventHandler<LogArgs> OnLog;
 
+        //Server utilities
         private List<LogEntry> log = new List<LogEntry>();
         private Dictionary<string, CommandHandler> commandHandlers = new Dictionary<string, CommandHandler>();
         private NetServer netServer;
-        private bool running;
         private CommandQueue commandQueue;
         private Random random = new Random();
 
-        //Match state
+        //Associates connections with the match client they create (To identify which client is sending a message)
+        private Dictionary<NetConnection, MatchClientState> matchClientConnections = new Dictionary<NetConnection, MatchClientState>();
+
+        //Server state
+        private bool running;
+        private ServerConfig serverConfig;
         private List<MatchClientState> matchClients = new List<MatchClientState>();
         private List<MatchPlayerState> matchPlayers = new List<MatchPlayerState>();
         private MatchSettings matchSettings;
         private bool inRace;
+
+        #region Timers and temporary state
 
         //Lobby timer
         private Stopwatch lobbyTimer = new Stopwatch();
@@ -86,8 +96,7 @@ namespace SanicballServerLib
         //List of clients wanting to return to lobby
         private List<MatchClientState> clientsWantingToReturn = new List<MatchClientState>();
 
-        //Associates connections with the match client they create (To identify which client is sending a message)
-        private Dictionary<NetConnection, MatchClientState> matchClientConnections = new Dictionary<NetConnection, MatchClientState>();
+        #endregion Timers and temporary state
 
         public bool Running { get { return running; } }
 
@@ -180,30 +189,135 @@ namespace SanicballServerLib
             {
                 ReturnToLobby();
             });
+
+            if (!File.Exists(CONFIG_FILENAME))
+            {
+                Console.WriteLine("No server configuration (" + CONFIG_FILENAME + ") found. ");
+
+                ServerConfig newConfig = new ServerConfig();
+
+                while (string.IsNullOrEmpty(newConfig.ServerName))
+                {
+                    Console.Write("Enter a server name: ");
+                    newConfig.ServerName = Console.ReadLine().Trim();
+                }
+
+                while (newConfig.PrivatePort == 0)
+                {
+                    Console.Write("Enter a port to use (Leave blank to use 25000): ");
+
+                    string input = Console.ReadLine();
+                    if (input.Trim() == string.Empty)
+                    {
+                        newConfig.PrivatePort = 25000;
+                    }
+                    else
+                    {
+                        int inputInt;
+                        if (int.TryParse(input, out inputInt) && inputInt >= System.Net.IPEndPoint.MinPort && inputInt <= System.Net.IPEndPoint.MaxPort)
+                        {
+                            newConfig.PrivatePort = inputInt;
+                        }
+                    }
+                }
+
+                while (newConfig.MaxPlayers <= 0 || newConfig.MaxPlayers > 64)
+                {
+                    Console.Write("Enter max players (1-64): ");
+                    string input = Console.ReadLine();
+
+                    int inputInt;
+                    if (int.TryParse(input, out inputInt) && inputInt >= System.Net.IPEndPoint.MinPort && inputInt <= System.Net.IPEndPoint.MaxPort)
+                    {
+                        newConfig.MaxPlayers = inputInt;
+                    }
+                }
+                while (string.IsNullOrEmpty(newConfig.PublicIP))
+                {
+                    Console.Write("Enter the public IP adress to use when connecting from the server browser: ");
+                    newConfig.PublicIP = Console.ReadLine().Trim();
+                }
+
+                while (newConfig.PublicPort == 0)
+                {
+                    Console.Write("Enter the public port use when connecting from the server browser (Leave blank to use private port): ");
+
+                    string input = Console.ReadLine();
+                    if (input.Trim() == string.Empty)
+                    {
+                        newConfig.PublicPort = newConfig.PrivatePort;
+                    }
+                    else
+                    {
+                        int inputInt;
+                        if (int.TryParse(input, out inputInt) && inputInt >= System.Net.IPEndPoint.MinPort && inputInt <= System.Net.IPEndPoint.MaxPort)
+                        {
+                            newConfig.PublicPort = inputInt;
+                        }
+                    }
+                }
+
+                using (StreamWriter sw = new StreamWriter(CONFIG_FILENAME))
+                {
+                    sw.Write(JsonConvert.SerializeObject(newConfig));
+                    Console.WriteLine("Config saved!");
+                }
+            }
         }
 
-        public void Start(int port)
+        public void Start()
         {
-            //Welcome message
-            Log("Welcome! Type 'help' for a list of commands. Type 'stop' to shut down the server.");
+            if (!LoadServerConfig())
+                return;
 
             if (!LoadMatchSettings())
                 matchSettings = MatchSettings.CreateDefault();
 
+            //Welcome message
+            Log("Welcome! Type 'help' for a list of commands. Type 'stop' to shut down the server.");
+
             running = true;
 
             NetPeerConfiguration config = new NetPeerConfiguration(OnlineMatchMessenger.APP_ID);
-            config.Port = 25000;
+            config.Port = serverConfig.PrivatePort;
+            config.MaximumConnections = serverConfig.MaxPlayers;
             config.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
             config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
 
             netServer = new NetServer(config);
             netServer.Start();
 
-            Log("Server started on port " + port + "!");
+            Log("Server started on port " + serverConfig.PrivatePort + "!");
+
+            AddToServerBrowser();
 
             //Thread messageThread = new Thread(MessageLoop);
             MessageLoop();
+        }
+
+        private bool LoadServerConfig()
+        {
+            if (File.Exists(CONFIG_FILENAME))
+            {
+                using (StreamReader sr = new StreamReader(CONFIG_FILENAME))
+                {
+                    try
+                    {
+                        serverConfig = JsonConvert.DeserializeObject<ServerConfig>(sr.ReadToEnd());
+                        Log("Loaded server config from " + CONFIG_FILENAME);
+                        return true;
+                    }
+                    catch (JsonException ex)
+                    {
+                        Log("Failed to load " + CONFIG_FILENAME + ", server cannot start. (" + ex.Message + ")", LogType.Error);
+                    }
+                }
+            }
+            else
+            {
+                Log("Server config at " + CONFIG_FILENAME + " not found. Please create a server config.", LogType.Error);
+            }
+            return false;
         }
 
         private bool LoadMatchSettings(string path = SETTINGS_FILENAME)
@@ -220,7 +334,7 @@ namespace SanicballServerLib
                     }
                     catch (JsonException ex)
                     {
-                        Log("Failed to load " + path + ": " + ex.Message);
+                        Log("Failed to load " + path + ", using default settings (" + ex.Message + ")", LogType.Warning);
                     }
                 }
             }
@@ -229,6 +343,30 @@ namespace SanicballServerLib
                 Log("File " + path + " not found");
             }
             return false;
+        }
+
+        private async Task AddToServerBrowser()
+        {
+            using (var client = new HttpClient())
+            {
+                var values = new Dictionary<string, string>
+                {
+                    { "ip", serverConfig.PublicIP },
+                    { "port", serverConfig.PublicPort.ToString() }
+                };
+
+                var content = new FormUrlEncodedContent(values);
+
+                var response = await client.PostAsync("http://sanicball.com/servers/add", content);
+                if (response.IsSuccessStatusCode)
+                {
+                    Log(await response.Content.ReadAsStringAsync());
+                }
+                else
+                {
+                    Log("Failed adding server to server browser - " + response.ReasonPhrase, LogType.Warning);
+                }
+            }
         }
 
         private void MessageLoop()
@@ -313,7 +451,11 @@ namespace SanicballServerLib
                             break;
 
                         case NetIncomingMessageType.DiscoveryRequest:
-                            ServerInfo info = new ServerInfo(DateTime.UtcNow, "A server", netServer.ConnectionsCount, 99, inRace);
+                            ServerInfo info = new ServerInfo();
+                            info.Config = serverConfig;
+                            info.Timestamp = DateTime.UtcNow;
+                            info.Players = netServer.ConnectionsCount;
+                            info.InRace = inRace;
                             NetOutgoingMessage responseMessage = netServer.CreateMessage();
                             responseMessage.Write(JsonConvert.SerializeObject(info));
                             netServer.SendDiscoveryResponse(responseMessage, msg.SenderEndPoint);
@@ -754,12 +896,21 @@ namespace SanicballServerLib
 
         public void Dispose()
         {
+            /*Log("Saving server config...");
+            using (StreamWriter sw = new StreamWriter(CONFIG_FILENAME))
+            {
+                sw.Write(JsonConvert.SerializeObject(serverConfig));
+            }
+            */
+
             Log("Saving match settings...");
             using (StreamWriter sw = new StreamWriter(SETTINGS_FILENAME))
             {
                 sw.Write(JsonConvert.SerializeObject(matchSettings));
             }
-            netServer.Shutdown("Server was closed.");
+
+            if (netServer != null)
+                netServer.Shutdown("Server was closed.");
             Log("The server has been closed.");
 
             //Write server log
