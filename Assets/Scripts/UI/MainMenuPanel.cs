@@ -1,9 +1,15 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 
 namespace Sanicball.UI
 {
     public class MainMenuPanel : MonoBehaviour
     {
+        [SerializeField]
+        private Text versionNameField = null;
+        [SerializeField]
+        private Text taglineField = null;
+
         private SlideCanvasGroup activePanel;
 
         public void SetActivePanel(SlideCanvasGroup panel)
@@ -35,6 +41,12 @@ namespace Sanicball.UI
         {
             activePanel.Close();
             activePanel = null;
+        }
+
+        private void Start()
+        {
+            versionNameField.text = GameVersion.AS_STRING;
+            taglineField.text = GameVersion.TAGLINE;
         }
 
         private void Update()

@@ -96,6 +96,11 @@ namespace Sanicball.Logic
 
         public void JoinOnlineGame(string ip = "127.0.0.1", int port = 25000)
         {
+            JoinOnlineGame(new System.Net.IPEndPoint(System.Net.IPAddress.Parse(ip), port));
+        }
+
+        public void JoinOnlineGame(System.Net.IPEndPoint endpoint)
+        {
             NetPeerConfiguration conf = new NetPeerConfiguration(APP_ID);
             joiningClient = new NetClient(conf);
             joiningClient.Start();
@@ -106,7 +111,7 @@ namespace Sanicball.Logic
             ClientInfo info = new ClientInfo(GameVersion.AS_FLOAT, GameVersion.IS_TESTING);
             approval.Write(Newtonsoft.Json.JsonConvert.SerializeObject(info));
 
-            joiningClient.Connect(ip, port, approval);
+            joiningClient.Connect(endpoint, approval);
 
             popupHandler.OpenPopup(connectingPopupPrefab);
 

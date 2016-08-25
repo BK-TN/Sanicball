@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using Lidgren.Network;
+using Sanicball.Logic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,49 +10,39 @@ namespace Sanicball.UI
     public class OnlinePanel : MonoBehaviour
     {
         public Transform targetServerListContainer;
-        public Image spinnerImage;
         public Text errorField;
         public Text serverCountField;
         public ServerListItem serverListItemPrefab;
         public Selectable aboveList;
         public Selectable belowList;
-        private string masterServerGameName = "sanicball";
-        private bool refreshing = false;
 
         private List<ServerListItem> servers = new List<ServerListItem>();
 
+        private NetClient discoveryClient;
+
         public void RefreshServers()
         {
-            if (refreshing) return;
-
-            Debug.Log("Connecting to master server...");
+            discoveryClient.DiscoverLocalPeers(25000);
 
             serverCountField.text = "Refreshing...";
-            spinnerImage.enabled = true;
-            refreshing = true;
             errorField.enabled = false;
+
             //Clear old servers
             foreach (var serv in servers)
             {
                 Destroy(serv.gameObject);
             }
             servers.Clear();
-            MasterServer.RequestHostList(masterServerGameName);
-        }
-
-        public void OnFailedToConnectToMasterServer(NetworkConnectionError error)
-        {
-            spinnerImage.enabled = false;
-            refreshing = false;
-            errorField.enabled = true;
-            errorField.text = "Could not get server list! Try again later.";
-            serverCountField.text = servers.Count + (servers.Count == 1 ? " server" : " servers");
         }
 
         private void Awake()
         {
-            masterServerGameName = "sanicball" + GameVersion.AS_FLOAT;
             errorField.enabled = false;
+
+            NetPeerConfiguration config = new NetPeerConfiguration(OnlineMatchMessenger.APP_ID);
+            config.EnableMessageType(NetIncomingMessageType.DiscoveryResponse);
+            discoveryClient = new NetClient(config);
+            discoveryClient.Start();
         }
 
         private void Update()
@@ -59,65 +52,69 @@ namespace Sanicball.UI
             {
                 RefreshServers();
             }
+
+            //Check for messages on the discovery client
+            NetIncomingMessage msg;
+            while ((msg = discoveryClient.ReadMessage()) != null)
+            {
+                switch (msg.MessageType)
+                {
+                    case NetIncomingMessageType.DiscoveryResponse:
+                        ServerInfo info = Newtonsoft.Json.JsonConvert.DeserializeObject<ServerInfo>(msg.ReadString());
+
+                        double timeDiff = (DateTime.UtcNow - info.Timestamp).TotalMilliseconds;
+
+                        var server = Instantiate(serverListItemPrefab);
+                        server.transform.SetParent(targetServerListContainer, false);
+                        server.Init(info, msg.SenderEndPoint, (int)timeDiff);
+                        servers.Add(server);
+                        RefreshNavigation();
+
+                        serverCountField.text = servers.Count + (servers.Count == 1 ? " server" : " servers");
+
+                        break;
+
+                    default:
+                        Debug.Log("Server discovery client recieved an unhandled NetMessage (" + msg.MessageType + ")");
+                        break;
+                }
+            }
         }
 
-        private void OnMasterServerEvent(MasterServerEvent e)
+        private void RefreshNavigation()
         {
-            if (e == MasterServerEvent.HostListReceived)
+            for (var i = 0; i < servers.Count; i++)
             {
-                spinnerImage.enabled = false;
-                refreshing = false;
-                //Create new servers
-                var hostList = MasterServer.PollHostList();
-                Debug.Log(hostList.Length + " servers recieved.");
-                serverCountField.text = hostList.Length + (hostList.Length == 1 ? " server" : " servers");
-                if (hostList.Length == 0)
+                var button = servers[i].GetComponent<Button>();
+                if (button)
                 {
-                    errorField.enabled = true;
-                    errorField.text = @"No servers ¯\_(ツ)_/¯";
-                }
-                errorField.enabled = hostList.Length == 0;
-                foreach (var host in hostList)
-                {
-                    var server = Instantiate(serverListItemPrefab);
-                    server.transform.SetParent(targetServerListContainer, false);
-                    server.SetData(host);
-                    servers.Add(server);
-                }
-                //Add navigation links
-                for (var i = 0; i < servers.Count; i++)
-                {
-                    var button = servers[i].GetComponent<Button>();
-                    if (button)
+                    var nav = new Navigation() { mode = Navigation.Mode.Explicit };
+                    //Up navigation
+                    if (i == 0)
                     {
-                        var nav = new Navigation() { mode = Navigation.Mode.Explicit };
-                        //Up navigation
-                        if (i == 0)
-                        {
-                            nav.selectOnUp = aboveList;
-                            var nav2 = aboveList.navigation;
-                            nav2.selectOnDown = button;
-                            aboveList.navigation = nav2;
-                        }
-                        else
-                        {
-                            nav.selectOnUp = servers[i - 1].GetComponent<Button>();
-                        }
-                        //Down navigation
-                        if (i == servers.Count - 1)
-                        {
-                            nav.selectOnDown = belowList;
-                            var nav2 = belowList.navigation;
-                            nav2.selectOnUp = button;
-                            belowList.navigation = nav2;
-                        }
-                        else
-                        {
-                            nav.selectOnDown = servers[i + 1].GetComponent<Button>();
-                        }
-
-                        button.navigation = nav;
+                        nav.selectOnUp = aboveList;
+                        var nav2 = aboveList.navigation;
+                        nav2.selectOnDown = button;
+                        aboveList.navigation = nav2;
                     }
+                    else
+                    {
+                        nav.selectOnUp = servers[i - 1].GetComponent<Button>();
+                    }
+                    //Down navigation
+                    if (i == servers.Count - 1)
+                    {
+                        nav.selectOnDown = belowList;
+                        var nav2 = belowList.navigation;
+                        nav2.selectOnUp = button;
+                        belowList.navigation = nav2;
+                    }
+                    else
+                    {
+                        nav.selectOnDown = servers[i + 1].GetComponent<Button>();
+                    }
+
+                    button.navigation = nav;
                 }
             }
         }

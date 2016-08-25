@@ -195,6 +195,7 @@ namespace SanicballServerLib
             NetPeerConfiguration config = new NetPeerConfiguration(OnlineMatchMessenger.APP_ID);
             config.Port = 25000;
             config.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
+            config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
 
             netServer = new NetServer(config);
             netServer.Start();
@@ -311,6 +312,14 @@ namespace SanicballServerLib
                             Log(msg.ReadString(), LogType.Error);
                             break;
 
+                        case NetIncomingMessageType.DiscoveryRequest:
+                            ServerInfo info = new ServerInfo(DateTime.UtcNow, "A server", netServer.ConnectionsCount, 99, inRace);
+                            NetOutgoingMessage responseMessage = netServer.CreateMessage();
+                            responseMessage.Write(JsonConvert.SerializeObject(info));
+                            netServer.SendDiscoveryResponse(responseMessage, msg.SenderEndPoint);
+                            Log("Sent discovery response to " + msg.SenderEndPoint, LogType.Debug);
+                            break;
+
                         case NetIncomingMessageType.StatusChanged:
                             NetConnectionStatus status = (NetConnectionStatus)msg.ReadByte();
 
@@ -396,8 +405,8 @@ namespace SanicballServerLib
                                 autoStartTimeLeft = matchSettings.AutoStartTime - (float)autoStartTimer.Elapsed.TotalSeconds;
                             }
 
-                            MatchState info = new MatchState(new List<MatchClientState>(matchClients), new List<MatchPlayerState>(matchPlayers), matchSettings, inRace, autoStartTimeLeft);
-                            string infoStr = JsonConvert.SerializeObject(info);
+                            MatchState state = new MatchState(new List<MatchClientState>(matchClients), new List<MatchPlayerState>(matchPlayers), matchSettings, inRace, autoStartTimeLeft);
+                            string infoStr = JsonConvert.SerializeObject(state);
 
                             hailMsg.Write(infoStr);
                             msg.SenderConnection.Approve(hailMsg);

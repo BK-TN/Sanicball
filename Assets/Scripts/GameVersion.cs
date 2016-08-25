@@ -14,6 +14,6 @@ namespace Sanicball
         public const string AS_STRING = "alpha v0.7.2";
 
         //Something stupid, usually unique for every version
-        public const string SLOGAN = "& MULTIPLAYER";
+        public const string TAGLINE = "& MULTIPLAYER";
     }
 }

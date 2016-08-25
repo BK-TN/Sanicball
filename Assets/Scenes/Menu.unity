@@ -411,7 +411,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 175151495}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
@@ -1566,10 +1566,9 @@ RectTransform:
   m_Children:
   - {fileID: 66073543}
   - {fileID: 935100019}
-  - {fileID: 1707573278}
   - {fileID: 26805789}
   m_Father: {fileID: 410813830}
-  m_RootOrder: 9
+  m_RootOrder: 10
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -399.99994, y: 0}
@@ -1688,13 +1687,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetServerListContainer: {fileID: 682994373}
-  spinnerImage: {fileID: 1707573279}
   errorField: {fileID: 26805790}
   serverCountField: {fileID: 1457552935}
   serverListItemPrefab: {fileID: 11455762, guid: df101d6f9feaf8f46a33ab09a8b08307,
     type: 2}
   aboveList: {fileID: 305453975}
-  belowList: {fileID: 0}
+  belowList: {fileID: 995322934}
 --- !u!1001 &198814377
 Prefab:
   m_ObjectHideFlags: 0
@@ -4110,8 +4108,8 @@ RectTransform:
   - {fileID: 94267168}
   - {fileID: 1150019079}
   - {fileID: 317431629}
-  - {fileID: 175151495}
   - {fileID: 1172321369}
+  - {fileID: 175151495}
   - {fileID: 1014635071}
   m_Father: {fileID: 130951524}
   m_RootOrder: 0
@@ -5663,7 +5661,7 @@ GameObject:
   - 222: {fileID: 610053053}
   - 114: {fileID: 610053052}
   m_Layer: 5
-  m_Name: Title
+  m_Name: VersionName
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5713,13 +5711,13 @@ MonoBehaviour:
     m_BestFit: 1
     m_MinSize: 10
     m_MaxSize: 100
-    m_Alignment: 0
+    m_Alignment: 3
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: alpha v0.7
+  m_Text: '[Version name]'
 --- !u!222 &610053053
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -9327,6 +9325,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bb6138dfc80f607448104a9bcbfb7a63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  versionNameField: {fileID: 610053052}
+  taglineField: {fileID: 1747010110}
 --- !u!114 &1014635075
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -10793,7 +10793,7 @@ RectTransform:
   - {fileID: 1276829583}
   - {fileID: 1494246743}
   m_Father: {fileID: 410813830}
-  m_RootOrder: 10
+  m_RootOrder: 9
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -400, y: 0}
@@ -14489,98 +14489,6 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1685344829}
---- !u!1 &1707573277
-GameObject:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 4
-  m_Component:
-  - 224: {fileID: 1707573278}
-  - 222: {fileID: 1707573280}
-  - 114: {fileID: 1707573279}
-  - 114: {fileID: 1707573281}
-  m_Layer: 5
-  m_Name: ServerListLoading
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &1707573278
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1707573277}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_Children: []
-  m_Father: {fileID: 175151495}
-  m_RootOrder: 2
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 100, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1707573279
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1707573277}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -765806418, guid: f5f67c52d1564df4a8936ccd202a3bd8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
-      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 21300000, guid: e9b38a7d4d385144db44883e4f57baca, type: 3}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
---- !u!222 &1707573280
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1707573277}
---- !u!114 &1707573281
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1707573277}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 717f82c746d9e2c4090cb59d5c6c84ce, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  sprites:
-  - {fileID: 21300000, guid: e9b38a7d4d385144db44883e4f57baca, type: 3}
-  - {fileID: 21300002, guid: e9b38a7d4d385144db44883e4f57baca, type: 3}
-  - {fileID: 21300004, guid: e9b38a7d4d385144db44883e4f57baca, type: 3}
-  - {fileID: 21300006, guid: e9b38a7d4d385144db44883e4f57baca, type: 3}
-  - {fileID: 21300008, guid: e9b38a7d4d385144db44883e4f57baca, type: 3}
-  - {fileID: 21300010, guid: e9b38a7d4d385144db44883e4f57baca, type: 3}
-  - {fileID: 21300012, guid: e9b38a7d4d385144db44883e4f57baca, type: 3}
-  - {fileID: 21300014, guid: e9b38a7d4d385144db44883e4f57baca, type: 3}
-  switchTime: 0.1
-  pickRandomly: 0
-  destroyOnEnd: 0
 --- !u!114 &1742382241 stripped
 MonoBehaviour:
   m_PrefabParentObject: {fileID: 11480510, guid: 77af82ed99a824045a652fbca65e44a3,
@@ -14673,7 +14581,7 @@ GameObject:
   - 114: {fileID: 1747010110}
   - 114: {fileID: 1747010112}
   m_Layer: 5
-  m_Name: Subtitle
+  m_Name: Tagline
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -14729,7 +14637,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: '& KNACKLES'
+  m_Text: '[Tagline]'
 --- !u!222 &1747010111
 CanvasRenderer:
   m_ObjectHideFlags: 0

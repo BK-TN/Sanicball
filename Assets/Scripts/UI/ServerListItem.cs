@@ -1,95 +1,44 @@
-﻿using UnityEngine;
+﻿using Sanicball.Logic;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Sanicball.UI
 {
     public class ServerListItem : MonoBehaviour
     {
-        public Text serverNameText;
-        public Text serverStatusText;
-        public Text playerCountText;
-        public Text pingText;
-        public Image pingLoadingImage;
+        [SerializeField]
+        private Text serverNameText = null;
+        [SerializeField]
+        private Text serverStatusText = null;
+        [SerializeField]
+        private Text playerCountText = null;
+        [SerializeField]
+        private Text pingText = null;
 
-        [HideInInspector]
-        public ServerInfo info;
+        private ServerInfo info;
+        private System.Net.IPEndPoint endpoint;
 
-        private bool pingDone = false;
-        private float pingTimeout = 8f;
-
-        public void SetData(HostData data)
+        public void Init(ServerInfo info, System.Net.IPEndPoint endpoint, int pingMs)
         {
-            info = new ServerInfo(data);
-            serverNameText.text = info.GameName;
-            serverStatusText.text = info.Status;
-            if (info.UseNAT)
-            {
-                serverStatusText.text += " - uses NAT punching";
-            }
-            playerCountText.text = info.ConnectedPlayers + "/" + info.PlayerLimit;
+            serverNameText.text = info.ServerName;
+            serverStatusText.text = info.InRace ? "In race" : "In lobby";
+            playerCountText.text = info.Players + "/" + info.MaxPlayers;
+            pingText.text = pingMs + "ms";
+
+            this.endpoint = endpoint;
         }
 
-        private void Update()
+        public void Join()
         {
-            if (info == null || pingDone) return;
-
-            if (pingTimeout > 0f)
+            MatchStarter starter = FindObjectOfType<MatchStarter>();
+            if (starter)
             {
-                pingTimeout -= Time.deltaTime;
-                if (pingTimeout <= 0f)
-                {
-                    pingLoadingImage.enabled = false;
-                    pingText.text = "?";
-                    pingDone = true;
-                }
+                starter.JoinOnlineGame(endpoint);
             }
-
-            if (info.ping.isDone)
-            {
-                pingLoadingImage.enabled = false;
-                pingText.text = info.ping.time + "ms";
-                pingDone = true;
-            }
-        }
-    }
-
-    public class ServerInfo
-    {
-        public string Status;
-        public float VersionFloat;
-        public string VersionString;
-        public bool UseNAT;
-        public int RealPort;
-        public Ping ping;
-        private HostData rawHostData;
-
-        //The port recieved via host data is sometimes incorrect
-        public ServerInfo(HostData data)
-        {
-            string[] comment = data.comment.Split(';');
-            if (comment.Length != 5) { Debug.LogWarning("Server '" + data.gameName + "' has the wrong number of comment arguments"); }
             else
             {
-                Status = comment[0];
-                if (!float.TryParse(comment[1], out VersionFloat))
-                {
-                    Debug.LogWarning("Failed to parse server version float for server '" + data.gameName + "'.");
-                }
-                VersionString = comment[2];
-                UseNAT = comment[3] == "useNat";
-                if (!int.TryParse(comment[4], out RealPort))
-                {
-                    Debug.LogWarning("Failed to parse real port for server '" + data.gameName + "'");
-                }
+                Debug.LogError("No match starter found");
             }
-
-            ping = new Ping(data.ip[0]);
-
-            rawHostData = data;
         }
-
-        public string GameName { get { return rawHostData.gameName; } }
-        public int ConnectedPlayers { get { return rawHostData.connectedPlayers; } }
-        public int PlayerLimit { get { return rawHostData.playerLimit; } }
     }
 }
