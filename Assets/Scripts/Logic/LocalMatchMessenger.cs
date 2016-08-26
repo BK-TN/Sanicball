@@ -8,7 +8,6 @@ namespace Sanicball.Logic
     {
         public override void SendMessage<T>(T message)
         {
-            Debug.Log("Recieved message of type " + typeof(T));
             for (int i = 0; i < listeners.Count; i++)
             {
                 MatchMessageListener listener = listeners[i];
