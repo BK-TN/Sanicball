@@ -67,6 +67,7 @@ namespace SanicballServerLib
 
         //Server state
         private bool running;
+		private bool debugMode;
         private ServerConfig serverConfig;
         private List<MatchClientState> matchClients = new List<MatchClientState>();
         private List<MatchPlayerState> matchPlayers = new List<MatchPlayerState>();
@@ -116,6 +117,10 @@ namespace SanicballServerLib
                     Log(name);
                 }
             });
+			AddCommandHandler ("toggledebug", cmd => {
+				debugMode = !debugMode;
+				Log ("Debug mode set to " + debugMode);
+			});
             AddCommandHandler("stop", cmd =>
             {
                 running = false;
@@ -140,6 +145,10 @@ namespace SanicballServerLib
                     Log(client.Name);
                 }
             });
+			AddCommandHandler("players", cmd =>
+				{
+					Log(matchClients.Count + " players(s) in match");
+				});
             AddCommandHandler("kick", cmd =>
             {
                 if (cmd.Content.Trim() == string.Empty)
@@ -303,6 +312,10 @@ namespace SanicballServerLib
 
             running = true;
 
+			#if DEBUG
+			debugMode = true;
+			#endif
+
             NetPeerConfiguration config = new NetPeerConfiguration(OnlineMatchMessenger.APP_ID);
             config.Port = serverConfig.PrivatePort;
             config.MaximumConnections = serverConfig.MaxPlayers;
@@ -389,7 +402,7 @@ namespace SanicballServerLib
                 var response = await client.PostAsync("http://www.sanicball.com/servers/add/", content);
                 if (response.IsSuccessStatusCode)
                 {
-                    Log("Server browser said: " + await response.Content.ReadAsStringAsync());
+					Log("Server browser said: " + await response.Content.ReadAsStringAsync(), LogType.Debug);
                 }
                 else
                 {
@@ -953,8 +966,8 @@ namespace SanicballServerLib
             Log("The server has been closed.");
 
             //Write server log
-            Directory.CreateDirectory("Logs\\");
-            using (StreamWriter writer = new StreamWriter("Logs\\" + DateTime.Now.ToString("MM-dd-yyyy_HH-mm-ss") + ".txt"))
+			Directory.CreateDirectory("Logs" + System.IO.Path.DirectorySeparatorChar);
+			using (StreamWriter writer = new StreamWriter("Logs" + System.IO.Path.DirectorySeparatorChar + DateTime.Now.ToString("MM-dd-yyyy_HH-mm-ss") + ".txt"))
             {
                 foreach (LogEntry entry in log)
                 {
@@ -980,6 +993,8 @@ namespace SanicballServerLib
 
         private void Log(object message, LogType type = LogType.Normal)
         {
+			if (!debugMode && type == LogType.Debug)
+				return;
             LogEntry entry = new LogEntry(DateTime.Now, message.ToString(), type);
             OnLog?.Invoke(this, new LogArgs(entry));
             log.Add(entry);

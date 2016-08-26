@@ -60,9 +60,14 @@ namespace Sanicball.UI
             nickname.text = tempSettings.nickname;
             gameJoltAccount.text = (!string.IsNullOrEmpty(tempSettings.gameJoltToken)) ? "Linked as " + tempSettings.gameJoltUsername : "Not linked";
 
-            if (tempSettings.resolution >= Screen.resolutions.Length) tempSettings.resolution = 0;
-            var res = Screen.resolutions[tempSettings.resolution];
-            resolution.text = res.width + " x " + res.height;
+			if (Screen.resolutions.Length > 0) {
+				if (tempSettings.resolution >= Screen.resolutions.Length)
+					tempSettings.resolution = 0;
+				var res = Screen.resolutions [tempSettings.resolution];
+				resolution.text = res.width + " x " + res.height;
+			} else {
+				resolution.text = "None found!";
+			}
             fullscreen.text = tempSettings.fullscreen ? "Fullscreen" : "Windowed";
             vsync.text = tempSettings.vsync ? "On" : "Off";
             speedUnit.text = tempSettings.useImperial ? "Imperial" : "Metric";
