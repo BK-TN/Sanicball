@@ -19,10 +19,13 @@ namespace Sanicball.UI
         private List<ServerListItem> servers = new List<ServerListItem>();
 
         private NetClient discoveryClient;
+        private WWW serverBrowserRequester;
 
         public void RefreshServers()
         {
             discoveryClient.DiscoverLocalPeers(25000);
+
+            serverBrowserRequester = new WWW("http://www.sanicball.com/servers/");
 
             serverCountField.text = "0 servers";
             errorField.enabled = false;
@@ -51,6 +54,35 @@ namespace Sanicball.UI
             if (Input.GetKeyDown(KeyCode.F5))
             {
                 RefreshServers();
+            }
+
+            //Check for response from the server browser requester
+            if (serverBrowserRequester != null && serverBrowserRequester.isDone)
+            {
+                if (string.IsNullOrEmpty(serverBrowserRequester.error))
+                {
+                    string result = serverBrowserRequester.text;
+                    string[] entries = result.Split(new string[] { "<br>" }, StringSplitOptions.RemoveEmptyEntries);
+
+                    foreach (string entry in entries)
+                    {
+                        int seperationPoint = entry.LastIndexOf(':');
+                        string ip = entry.Substring(0, seperationPoint);
+                        string port = entry.Substring(seperationPoint + 1, entry.Length - (seperationPoint + 1));
+
+                        int portInt;
+                        if (int.TryParse(port, out portInt))
+                        {
+                            discoveryClient.DiscoverKnownPeer(ip, portInt);
+                        }
+                    }
+                }
+                else
+                {
+                    Debug.LogError("Failed to recieve servers - " + serverBrowserRequester.error);
+                }
+
+                serverBrowserRequester = null;
             }
 
             //Check for messages on the discovery client

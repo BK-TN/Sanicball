@@ -75,6 +75,10 @@ namespace SanicballServerLib
 
         #region Timers and temporary state
 
+        //Server browser ping timer
+        private Stopwatch serverBrowserPingTimer = new Stopwatch();
+        private const float serverBrowserPingGoal = 60;
+
         //Lobby timer
         private Stopwatch lobbyTimer = new Stopwatch();
         private const float lobbyTimerGoal = 3;
@@ -232,27 +236,48 @@ namespace SanicballServerLib
                         newConfig.MaxPlayers = inputInt;
                     }
                 }
-                while (string.IsNullOrEmpty(newConfig.PublicIP))
+
+                bool inputCorrect = false;
+                while (!inputCorrect)
                 {
-                    Console.Write("Enter the public IP adress to use when connecting from the server browser: ");
-                    newConfig.PublicIP = Console.ReadLine().Trim();
+                    Console.Write("Show this server in the server browser? (yes|no): ");
+                    string input = Console.ReadLine();
+                    if (input == "yes")
+                    {
+                        newConfig.ShowInBrowser = true;
+                        inputCorrect = true;
+                    }
+                    if (input == "no")
+                    {
+                        newConfig.ShowInBrowser = false;
+                        inputCorrect = true;
+                    }
                 }
 
-                while (newConfig.PublicPort == 0)
+                if (newConfig.ShowInBrowser)
                 {
-                    Console.Write("Enter the public port use when connecting from the server browser (Leave blank to use private port): ");
-
-                    string input = Console.ReadLine();
-                    if (input.Trim() == string.Empty)
+                    while (string.IsNullOrEmpty(newConfig.PublicIP))
                     {
-                        newConfig.PublicPort = newConfig.PrivatePort;
+                        Console.Write("Enter the public IP adress to use when connecting from the server browser: ");
+                        newConfig.PublicIP = Console.ReadLine().Trim();
                     }
-                    else
+
+                    while (newConfig.PublicPort == 0)
                     {
-                        int inputInt;
-                        if (int.TryParse(input, out inputInt) && inputInt >= System.Net.IPEndPoint.MinPort && inputInt <= System.Net.IPEndPoint.MaxPort)
+                        Console.Write("Enter the public port use when connecting from the server browser (Leave blank to use private port): ");
+
+                        string input = Console.ReadLine();
+                        if (input.Trim() == string.Empty)
                         {
-                            newConfig.PublicPort = inputInt;
+                            newConfig.PublicPort = newConfig.PrivatePort;
+                        }
+                        else
+                        {
+                            int inputInt;
+                            if (int.TryParse(input, out inputInt) && inputInt >= System.Net.IPEndPoint.MinPort && inputInt <= System.Net.IPEndPoint.MaxPort)
+                            {
+                                newConfig.PublicPort = inputInt;
+                            }
                         }
                     }
                 }
@@ -289,7 +314,11 @@ namespace SanicballServerLib
 
             Log("Server started on port " + serverConfig.PrivatePort + "!");
 
-            AddToServerBrowser();
+            if (serverConfig.ShowInBrowser)
+            {
+                AddToServerBrowser();
+                serverBrowserPingTimer.Start();
+            }
 
             //Thread messageThread = new Thread(MessageLoop);
             MessageLoop();
@@ -345,7 +374,7 @@ namespace SanicballServerLib
             return false;
         }
 
-        private async Task AddToServerBrowser()
+        private async void AddToServerBrowser()
         {
             using (var client = new HttpClient())
             {
@@ -357,10 +386,10 @@ namespace SanicballServerLib
 
                 var content = new FormUrlEncodedContent(values);
 
-                var response = await client.PostAsync("http://sanicball.com/servers/add", content);
+                var response = await client.PostAsync("http://www.sanicball.com/servers/add/", content);
                 if (response.IsSuccessStatusCode)
                 {
-                    Log(await response.Content.ReadAsStringAsync());
+                    Log("Server browser said: " + await response.Content.ReadAsStringAsync());
                 }
                 else
                 {
@@ -374,6 +403,16 @@ namespace SanicballServerLib
             while (running)
             {
                 Thread.Sleep(1000 / TICKRATE);
+
+                //Check server browser ping timer
+                if (serverBrowserPingTimer.IsRunning)
+                {
+                    if (serverBrowserPingTimer.Elapsed.TotalSeconds >= serverBrowserPingGoal)
+                    {
+                        AddToServerBrowser();
+                        serverBrowserPingTimer.Restart();
+                    }
+                }
 
                 //Check lobby timer
                 if (lobbyTimer.IsRunning)
