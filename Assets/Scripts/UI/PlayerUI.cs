@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Sanicball.Data;
+using Sanicball.Logic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -40,6 +41,7 @@ namespace Sanicball.UI
         private RectTransform markerContainer;
 
         private Marker checkpointMarker;
+        private List<Marker> playerMarkers = new List<Marker>();
 
         private RacePlayer targetPlayer;
         private RaceManager targetManager;
@@ -54,11 +56,46 @@ namespace Sanicball.UI
                 if (targetPlayer != null)
                 {
                     targetPlayer.NextCheckpointPassed -= TargetPlayer_NextCheckpointPassed;
+                    Destroy(checkpointMarker.gameObject);
+                    foreach (Marker m in playerMarkers)
+                    {
+                        Destroy(m.gameObject);
+                    }
                 }
 
                 targetPlayer = value;
 
                 targetPlayer.NextCheckpointPassed += TargetPlayer_NextCheckpointPassed;
+
+                //Marker following next checkpoint
+                checkpointMarker = Instantiate(markerPrefab);
+                checkpointMarker.transform.SetParent(markerContainer, false);
+                checkpointMarker.Text = "Checkpoint";
+                checkpointMarker.Clamp = true;
+
+                //Markers following each player
+                for (int i = 0; i < TargetManager.PlayerCount; i++)
+                {
+                    RacePlayer p = TargetManager[i];
+                    if (p == TargetPlayer) continue;
+
+                    var playerMarker = Instantiate(markerPrefab);
+                    playerMarker.transform.SetParent(markerContainer, false);
+                    playerMarker.Text = p.Name;
+                    playerMarker.Target = p.Transform;
+                    playerMarker.Clamp = false;
+
+                    //Disabled for now, glitchy as fuck
+                    //playerMarker.HideImageWhenInSight = true;
+
+                    Data.CharacterInfo character = ActiveData.Characters[p.Character];
+                    //playerMarker.Sprite = character.icon;
+                    Color c = character.color;
+                    c.a = 0.2f;
+                    playerMarker.Color = c;
+
+                    playerMarkers.Add(playerMarker);
+                }
             }
         }
 
@@ -117,9 +154,6 @@ namespace Sanicball.UI
 
         private void Start()
         {
-            checkpointMarker = Instantiate(markerPrefab);
-            checkpointMarker.transform.SetParent(markerContainer, false);
-            checkpointMarker.Text = "Checkpoint";
         }
 
         private void Update()
@@ -156,9 +190,9 @@ namespace Sanicball.UI
             speedFieldLabel.text = postfix;
 
             //Lap counter
-            if (TargetPlayer.Lap < TargetManager.Laps + 1)
+            if (TargetPlayer.Lap < TargetManager.Settings.Laps + 1)
             {
-                lapField.text = "Lap " + TargetPlayer.Lap + "/" + TargetManager.Laps;
+                lapField.text = "Lap " + TargetPlayer.Lap + "/" + TargetManager.Settings.Laps;
             }
             else
             {
@@ -176,11 +210,20 @@ namespace Sanicball.UI
             timeField.text = GetTimeString(timeToUse);
 
             //Checkpoint marker
-            checkpointMarker.Target = TargetPlayer.NextCheckpoint.transform;
+            if (TargetPlayer.NextCheckpoint != null)
+                checkpointMarker.Target = TargetPlayer.NextCheckpoint.transform;
+            else
+                checkpointMarker.Target = null;
             checkpointMarker.CameraToUse = TargetCamera;
+
+            playerMarkers.RemoveAll(a => a == null); //Remove destroyed markers from the list (Markers are destroyed if the player they're following leaves)
+            foreach (Marker m in playerMarkers.ToList())
+            {
+                m.CameraToUse = TargetCamera;
+            }
         }
 
-        private string GetTimeString(System.TimeSpan timeToUse)
+        private string GetTimeString(TimeSpan timeToUse)
         {
             return string.Format("{0:00}:{1:00}.{2:000}", timeToUse.Minutes, timeToUse.Seconds, timeToUse.Milliseconds);
         }

@@ -26,6 +26,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 41.378635, y: 200.69995, z: -136.04373}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -91,7 +92,7 @@ AudioSource:
       tangentMode: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
-    m_RotationOrder: 4
+    m_RotationOrder: 0
   reverbZoneMixCustomCurve:
     serializedVersion: 2
     m_Curve:
@@ -120,6 +121,8 @@ MonoBehaviour:
     type: 2}
   playerUIPrefab: {fileID: 11499260, guid: 448b8e41f02717c4994e9e5e4925dc5c, type: 2}
   raceUIPrefab: {fileID: 11414870, guid: 034bad3d6621fb342a42f46f2c211703, type: 2}
+  spectatorViewPrefab: {fileID: 11495830, guid: 1b1e937c51c6e4d44b995125a35246aa,
+    type: 2}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

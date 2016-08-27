@@ -18,7 +18,7 @@ namespace Sanicball.Data
         private GameSettings gameSettings = new GameSettings();
 
         private KeybindCollection keybinds = new KeybindCollection();
-        private MatchSettings matchSettings = new MatchSettings();
+        private MatchSettings matchSettings = MatchSettings.CreateDefault();
 
         //This data is set from the editor and remains constant
         [Header("Static data")]
@@ -37,7 +37,7 @@ namespace Sanicball.Data
 
         public static GameSettings GameSettings { get { return instance.gameSettings; } }
         public static KeybindCollection Keybinds { get { return instance.keybinds; } }
-        public static MatchSettings MatchSettings { get { return instance.matchSettings; } }
+        public static MatchSettings MatchSettings { get { return instance.matchSettings; } set { instance.matchSettings = value; } }
         public static List<RaceRecord> RaceRecords { get { return instance.raceRecords; } }
 
         public static StageInfo[] Stages { get { return instance.stages; } }
@@ -56,7 +56,8 @@ namespace Sanicball.Data
                 instance = this;
                 DontDestroyOnLoad(gameObject);
             }
-            else {
+            else
+            {
                 Destroy(gameObject);
             }
         }
@@ -80,7 +81,7 @@ namespace Sanicball.Data
         {
             Load("GameSettings.json", ref gameSettings);
             Load("GameKeybinds.json", ref keybinds);
-            Load("RaceSettings.json", ref matchSettings);
+            Load("MatchSettings.json", ref matchSettings);
             Load("Records.json", ref raceRecords);
         }
 
@@ -88,7 +89,7 @@ namespace Sanicball.Data
         {
             Save("GameSettings.json", gameSettings);
             Save("GameKeybinds.json", keybinds);
-            Save("RaceSettings.json", matchSettings);
+            Save("MatchSettings.json", matchSettings);
             Save("Records.json", raceRecords);
         }
 
@@ -113,7 +114,8 @@ namespace Sanicball.Data
                         output = dataObj;
                         Debug.Log(filename + " loaded successfully.");
                     }
-                    else {
+                    else
+                    {
                         Debug.LogError("Failed to load " + filename + ": file is empty.");
                     }
                 }
@@ -122,7 +124,8 @@ namespace Sanicball.Data
                     Debug.LogError("Failed to parse " + filename + "! JSON converter info: " + ex.Message);
                 }
             }
-            else {
+            else
+            {
                 Debug.Log(filename + " has not been loaded - file not found.");
             }
         }

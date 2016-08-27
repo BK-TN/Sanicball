@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Sanicball.Logic;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -20,9 +21,10 @@ namespace Sanicball.UI
 
         public static bool GamePaused { get { return GameObject.FindWithTag(pauseTag); } }
 
+        public bool OnlineMode { get; set; }
+
         private void Awake()
         {
-            Debug.Log(Cursor.lockState);
             if (Cursor.lockState == CursorLockMode.Locked)
             {
                 mouseWasLocked = true;
@@ -34,13 +36,20 @@ namespace Sanicball.UI
         private void Start()
         {
             UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(firstSelected);
-            Time.timeScale = 0;
-            AudioListener.pause = true;
+            if (!OnlineMode)
+            {
+                Time.timeScale = 0;
+                AudioListener.pause = true;
+            }
 
             if (SceneManager.GetActiveScene().name == "Lobby")
             {
                 contextSensitiveButtonLabel.text = "Change match settings";
                 contextSensitiveButton.onClick.AddListener(MatchSettings);
+                if (OnlineMode)
+                {
+                    contextSensitiveButton.interactable = false;
+                }
             }
             else
             {
@@ -61,8 +70,11 @@ namespace Sanicball.UI
 
         private void OnDestroy()
         {
-            Time.timeScale = 1;
-            AudioListener.pause = false;
+            if (!OnlineMode)
+            {
+                Time.timeScale = 1;
+                AudioListener.pause = false;
+            }
         }
 
         public void MatchSettings()
@@ -76,7 +88,8 @@ namespace Sanicball.UI
             var matchManager = FindObjectOfType<MatchManager>();
             if (matchManager)
             {
-                matchManager.GoToLobby();
+                matchManager.RequestLoadLobby();
+                Close();
             }
             else
             {

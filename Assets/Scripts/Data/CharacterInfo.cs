@@ -11,6 +11,7 @@ namespace Sanicball.Data
         public BallStats stats;
         public Material material;
         public Sprite icon;
+        public Color color = Color.white;
         public Material minimapIcon;
         public Material trail;
         public float ballSize = 1;

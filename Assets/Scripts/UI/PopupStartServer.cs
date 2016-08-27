@@ -22,7 +22,6 @@ namespace Sanicball.UI
         public Slideshow slideshow;
 
         private int maxPlayers = 12;
-        private int port = 25000;
         private bool showOnList = true;
         private bool useNat = false;
 

@@ -24,3 +24,16 @@ ExportedObj/
 
 # Unity3D Generated File On Crash Reports
 sysinfo.txt
+
+Server/SanicballServer/bin/
+Server/SanicballServer/obj/
+Server/SanicballServerLib/bin/
+Server/SanicballServerLib/obj/
+
+#Don't ignore stuff for server projects
+!Server/*.sln
+!Server/SanicballServer/*.csproj
+!Server/SanicballServerLib/*.csproj
+
+#Ignore server nuget packages tho
+/Server/packages/

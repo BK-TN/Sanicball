@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Sanicball.Data;
+using Sanicball.Logic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +12,10 @@ namespace Sanicball.UI
     public class LocalPlayerManager : MonoBehaviour
     {
         public LocalPlayerPanel localPlayerPanelPrefab;
+        public event System.EventHandler<MatchPlayerEventArgs> LocalPlayerJoined;
+
+        [SerializeField]
+        private Text matchJoiningHelpField = null;
 
         private const int maxPlayers = 4;
         private MatchManager manager;
@@ -25,18 +30,22 @@ namespace Sanicball.UI
                 //Create local player panels for players already in the game
                 foreach (var p in manager.Players)
                 {
-                    if (p.CtrlType != ControlType.None)
+                    if (p.ClientGuid == manager.LocalClientGuid && p.CtrlType != ControlType.None)
                     {
                         var panel = CreatePanelForControlType(p.CtrlType, true);
                         panel.AssignedPlayer = p;
                         panel.SetCharacter(p.CharacterId);
                     }
                 }
+
+                manager.MatchPlayerAdded += Manager_MatchPlayerAdded;
             }
             else
             {
                 Debug.LogWarning("Game manager not found - players cannot be added");
             }
+
+            UpdateHelpText();
         }
 
         private void Update()
@@ -57,9 +66,15 @@ namespace Sanicball.UI
             }
         }
 
+        private void OnDestroy()
+        {
+            manager.MatchPlayerAdded -= Manager_MatchPlayerAdded;
+        }
+
         private LocalPlayerPanel CreatePanelForControlType(ControlType ctrlType, bool alreadyJoined)
         {
             usedControls.Add(ctrlType);
+            UpdateHelpText();
 
             //Create a new panel and assign the joining control type
             var panel = Instantiate(localPlayerPanelPrefab);
@@ -72,26 +87,59 @@ namespace Sanicball.UI
             return panel;
         }
 
-        public MatchPlayer CreatePlayerForControlType(ControlType ctrlType, int character)
+        public void CreatePlayerForControlType(ControlType ctrlType, int character)
         {
-            var newPlayer = manager.CreatePlayer(ctrlType.ToString(), ctrlType, character);
-            return newPlayer;
+            manager.RequestPlayerJoin(ctrlType, character);
+            //var newPlayer = manager.CreatePlayer(ctrlType.ToString(), ctrlType, character);
+            //return newPlayer;
+        }
+
+        private void Manager_MatchPlayerAdded(object sender, MatchPlayerEventArgs e)
+        {
+            if (e.IsLocal)
+            {
+                if (LocalPlayerJoined != null)
+                    LocalPlayerJoined(this, e);
+            }
+        }
+
+        public void SetCharacter(MatchPlayer player, int c)
+        {
+            manager.RequestCharacterChange(player.CtrlType, c);
+        }
+
+        public void SetReady(MatchPlayer player, bool ready)
+        {
+            manager.RequestReadyChange(player.CtrlType, ready);
         }
 
         public void RemoveControlType(ControlType ctrlType)
         {
             usedControls.Remove(ctrlType);
+            UpdateHelpText();
         }
 
         public void LeaveMatch(MatchPlayer player)
         {
-            manager.RemovePlayer(player);
+            manager.RequestPlayerLeave(player.CtrlType);
             usedControls.Remove(player.CtrlType);
+            UpdateHelpText();
         }
 
-        public void SetCharacter(MatchPlayer player, int c)
+        private void UpdateHelpText()
         {
-            manager.SetCharacter(player, c);
+            bool anyLeft = usedControls.Count < maxPlayers;
+            bool hasKeyboard = usedControls.Contains(ControlType.Keyboard);
+
+            matchJoiningHelpField.text = "";
+            if (anyLeft)
+            {
+                if (!hasKeyboard)
+                {
+                    matchJoiningHelpField.text += "Press <b>" + GameInput.GetKeyCodeName(ActiveData.Keybinds[Keybind.Menu]) + "</b> to join with a keyboard. ";
+                }
+                matchJoiningHelpField.text += "Press <b>X</b> to join with a joystick.";
+            }
         }
     }
 }
