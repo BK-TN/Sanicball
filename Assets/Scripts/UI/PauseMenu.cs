@@ -46,6 +46,10 @@ namespace Sanicball.UI
             {
                 contextSensitiveButtonLabel.text = "Change match settings";
                 contextSensitiveButton.onClick.AddListener(MatchSettings);
+                if (OnlineMode)
+                {
+                    contextSensitiveButton.interactable = false;
+                }
             }
             else
             {

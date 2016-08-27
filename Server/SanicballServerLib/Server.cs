@@ -828,10 +828,11 @@ namespace SanicballServerLib
 
                                     if (matchMessage is SettingsChangedMessage)
                                     {
-                                        var castedMsg = (SettingsChangedMessage)matchMessage;
-                                        matchSettings = castedMsg.NewMatchSettings;
-                                        Log("New settings recieved", LogType.Debug);
-                                        SendToAll(matchMessage);
+                                        //var castedMsg = (SettingsChangedMessage)matchMessage;
+                                        //matchSettings = castedMsg.NewMatchSettings;
+                                        //SendToAll(matchMessage);
+
+                                        Log("A player tried to change match settings", LogType.Debug);
                                     }
 
                                     if (matchMessage is StartRaceMessage)
