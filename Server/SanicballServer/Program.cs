@@ -62,7 +62,9 @@ namespace SanicballServer
             while (true)
             {
                 input = Console.ReadLine();
-                commandQueue.Add(new Command(input.ToString()));
+				if (!string.IsNullOrEmpty(input)) {
+					commandQueue.Add(new Command(input.ToString()));
+				}
             }
         }
     }

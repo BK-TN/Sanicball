@@ -402,12 +402,6 @@ namespace Sanicball.Logic
                 }
             }
 
-            //Instant load race for testing
-            if (inLobby && Input.GetKeyDown(KeyCode.KeypadEnter))
-            {
-                messenger.SendMessage(new LoadRaceMessage());
-            }
-
             if (lobbyTimerOn && inLobby)
             {
                 lobbyTimer -= Time.deltaTime;

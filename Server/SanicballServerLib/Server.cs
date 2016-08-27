@@ -551,7 +551,7 @@ namespace SanicballServerLib
                                         //Tell connected clients to remove the client+players
                                         SendToAll(new ClientLeftMessage(associatedClient.Guid));
 
-                                        Broadcast(associatedClient.Name + " has left the match");
+										Broadcast(associatedClient.Name + " has left the match (" + statusMsg + ")");
                                         Log("(Guid: " + associatedClient.Guid + ", reason: " + statusMsg + ")", LogType.Debug);
                                     }
                                     else

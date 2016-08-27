@@ -47,6 +47,7 @@ namespace Sanicball.Logic
         private bool raceTimerOn = false;
         private UI.RaceUI raceUI;
         private float countdownOffset;
+		private bool joinedWhileRaceInProgress;
 
         //Properties
         public System.TimeSpan RaceTime { get { return System.TimeSpan.FromSeconds(raceTimer); } }
@@ -83,8 +84,13 @@ namespace Sanicball.Logic
                         activeWaitingUI.StageNameToShow = ActiveData.Stages[settings.StageId].name;
                         if (matchManager.OnlineMode)
                         {
-                            activeWaitingUI.InfoToShow = "Waiting for other players...";
-                        }
+							if (joinedWhileRaceInProgress) {
+								activeWaitingUI.InfoToShow = "Waiting for race to end.";
+							} else {
+								activeWaitingUI.InfoToShow = "Waiting for other players...";
+							}
+						}
+
                         break;
 
                     case RaceState.Countdown:
@@ -144,6 +150,7 @@ namespace Sanicball.Logic
             if (raceIsInProgress)
             {
                 Debug.Log("Starting race in progress");
+				joinedWhileRaceInProgress = true;
                 CreateBallObjects();
             }
         }
