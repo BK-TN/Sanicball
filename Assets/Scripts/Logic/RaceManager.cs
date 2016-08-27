@@ -47,7 +47,7 @@ namespace Sanicball.Logic
         private bool raceTimerOn = false;
         private UI.RaceUI raceUI;
         private float countdownOffset;
-		private bool joinedWhileRaceInProgress;
+        private bool joinedWhileRaceInProgress;
 
         //Properties
         public System.TimeSpan RaceTime { get { return System.TimeSpan.FromSeconds(raceTimer); } }
@@ -84,12 +84,15 @@ namespace Sanicball.Logic
                         activeWaitingUI.StageNameToShow = ActiveData.Stages[settings.StageId].name;
                         if (matchManager.OnlineMode)
                         {
-							if (joinedWhileRaceInProgress) {
-								activeWaitingUI.InfoToShow = "Waiting for race to end.";
-							} else {
-								activeWaitingUI.InfoToShow = "Waiting for other players...";
-							}
-						}
+                            if (joinedWhileRaceInProgress)
+                            {
+                                activeWaitingUI.InfoToShow = "Waiting for race to end.";
+                            }
+                            else
+                            {
+                                activeWaitingUI.InfoToShow = "Waiting for other players...";
+                            }
+                        }
 
                         break;
 
@@ -150,7 +153,7 @@ namespace Sanicball.Logic
             if (raceIsInProgress)
             {
                 Debug.Log("Starting race in progress");
-				joinedWhileRaceInProgress = true;
+                joinedWhileRaceInProgress = true;
                 CreateBallObjects();
             }
         }
@@ -183,9 +186,6 @@ namespace Sanicball.Logic
             //Enable lap records if there is only one local player.
             bool enableLapRecords = matchManager.Players.Count(a => a.ClientGuid == matchManager.LocalClientGuid) == 1;
 
-            //Store index for next local player, used to set up splitscreen cameras correctly
-            int nextLocalPlayerIndex = 0;
-
             //Create all player balls
             for (int i = 0; i < matchManager.Players.Count; i++)
             {
@@ -210,48 +210,52 @@ namespace Sanicball.Logic
                 racePlayer.LapRecordsEnabled = enableLapRecords && local;
                 racePlayer.FinishLinePassed += RacePlayer_FinishLinePassed;
 
-                if (local)
-                {
-                    //Create player UI
-                    var playerUI = Instantiate(playerUIPrefab);
-                    playerUI.TargetPlayer = racePlayer;
-                    playerUI.TargetManager = this;
-
-                    //Connect UI to camera (when the camera has been instanced)
-                    int persistentIndex = nextLocalPlayerIndex;
-                    matchPlayer.BallObject.CameraCreated += (sender, e) =>
-                    {
-                        playerUI.TargetCamera = e.CameraCreated.AttachedCamera;
-                        var splitter = e.CameraCreated.AttachedCamera.GetComponent<CameraSplitter>();
-                        if (splitter)
-                            splitter.SplitscreenIndex = persistentIndex;
-                    };
-
-                    nextLocalPlayerIndex++;
-                }
-
                 nextBallPosition++;
             }
 
-            //Create all AI balls
-            for (int i = 0; i < settings.AICount; i++)
+            if (!matchManager.OnlineMode)
             {
-                //Create ball
-                var aiBall = ballSpawner.SpawnBall(
-                    nextBallPosition,
-                    BallType.AI,
-                    ControlType.None,
-                    settings.GetAICharacter(i),
-                    "AI #" + i
-                    );
-                aiBall.CanMove = false;
+                //Create all AI balls (In local play only)
+                for (int i = 0; i < settings.AICount; i++)
+                {
+                    //Create ball
+                    var aiBall = ballSpawner.SpawnBall(
+                        nextBallPosition,
+                        BallType.AI,
+                        ControlType.None,
+                        settings.GetAICharacter(i),
+                        "AI #" + i
+                        );
+                    aiBall.CanMove = false;
 
-                //Create race player
-                var racePlayer = new RacePlayer(aiBall, messenger, null);
-                players.Add(racePlayer);
-                racePlayer.FinishLinePassed += RacePlayer_FinishLinePassed;
+                    //Create race player
+                    var racePlayer = new RacePlayer(aiBall, messenger, null);
+                    players.Add(racePlayer);
+                    racePlayer.FinishLinePassed += RacePlayer_FinishLinePassed;
 
-                nextBallPosition++;
+                    nextBallPosition++;
+                }
+            }
+
+            int nextLocalPlayerIndex = 0;
+            foreach (RacePlayer p in players.Where(a => a.CtrlType != ControlType.None))
+            {
+                //Create player UI
+                var playerUI = Instantiate(playerUIPrefab);
+                playerUI.TargetManager = this;
+                playerUI.TargetPlayer = p;
+
+                //Connect UI to camera (when the camera has been instanced)
+                int persistentIndex = nextLocalPlayerIndex;
+                p.AssociatedMatchPlayer.BallObject.CameraCreated += (sender, e) =>
+                {
+                    playerUI.TargetCamera = e.CameraCreated.AttachedCamera;
+                    var splitter = e.CameraCreated.AttachedCamera.GetComponent<CameraSplitter>();
+                    if (splitter)
+                        splitter.SplitscreenIndex = persistentIndex;
+                };
+
+                nextLocalPlayerIndex++;
             }
         }
 

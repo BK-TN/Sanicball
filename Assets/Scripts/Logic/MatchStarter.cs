@@ -21,12 +21,6 @@ namespace Sanicball.Logic
 
         private void Update()
         {
-            //J for JOIN
-            if (Input.GetKeyDown(KeyCode.J))
-            {
-                JoinOnlineGame();
-            }
-
             if (joiningClient != null)
             {
                 NetIncomingMessage msg;

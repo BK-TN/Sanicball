@@ -167,9 +167,7 @@ namespace SanicballServerLib
                     }
                     else if (matching.Count == 1)
                     {
-                        NetConnection conn = matchClientConnections.FirstOrDefault(a => a.Value == matching[0]).Key;
-                        Log("Kicked client " + matching[0].Name);
-                        conn.Disconnect("Kicked by server");
+                        Kick(matching[0], "Kicked by server");
                     }
                     else
                     {
@@ -525,6 +523,11 @@ namespace SanicballServerLib
                         Log("Some players are still loading the race, starting anyway", LogType.Debug);
                         SendToAll(new StartRaceMessage());
                         stageLoadingTimeoutTimer.Reset();
+
+                        foreach (var c in clientsLoadingStage)
+                        {
+                            Kick(c, "Took too long to load the race");
+                        }
                     }
                 }
 
@@ -1049,6 +1052,12 @@ namespace SanicballServerLib
         public void AddCommandHandler(string commandName, CommandHandler handler)
         {
             commandHandlers.Add(commandName, handler);
+        }
+
+        public void Kick(MatchClientState client, string reason)
+        {
+            NetConnection conn = matchClientConnections.FirstOrDefault(a => a.Value == client).Key;
+            conn.Disconnect(reason);
         }
 
         #endregion Utility methods

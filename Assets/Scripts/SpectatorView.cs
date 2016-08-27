@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using Sanicball.Gameplay;
 using Sanicball.Logic;
+using Sanicball.UI;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace Sanicball
 {
@@ -9,9 +11,15 @@ namespace Sanicball
     {
         [SerializeField]
         private OmniCamera omniCameraPrefab = null;
+        [SerializeField]
+        private PlayerUI playerUIPrefab = null;
+
+        [SerializeField]
+        private Text spectatingField = null;
 
         private RacePlayer target;
         private OmniCamera activeOmniCamera;
+        private PlayerUI activePlayerUI;
 
         private bool leftPressed;
         private bool rightPressed;
@@ -24,13 +32,22 @@ namespace Sanicball
             }
             set
             {
+                target = value;
+                spectatingField.text = "Spectating <b>" + target.Name + "</b>";
+
                 if (activeOmniCamera == null)
                 {
                     activeOmniCamera = Instantiate(omniCameraPrefab);
                 }
-                activeOmniCamera.Target = value.Transform.GetComponent<Rigidbody>();
+                activeOmniCamera.Target = target.Transform.GetComponent<Rigidbody>();
 
-                target = value;
+                if (activePlayerUI == null)
+                {
+                    activePlayerUI = Instantiate(playerUIPrefab);
+                    activePlayerUI.TargetManager = TargetManager;
+                }
+                activePlayerUI.TargetCamera = activeOmniCamera.AttachedCamera;
+                activePlayerUI.TargetPlayer = target;
             }
         }
         public RaceManager TargetManager { get; set; }

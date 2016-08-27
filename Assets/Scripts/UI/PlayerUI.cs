@@ -56,11 +56,46 @@ namespace Sanicball.UI
                 if (targetPlayer != null)
                 {
                     targetPlayer.NextCheckpointPassed -= TargetPlayer_NextCheckpointPassed;
+                    Destroy(checkpointMarker.gameObject);
+                    foreach (Marker m in playerMarkers)
+                    {
+                        Destroy(m.gameObject);
+                    }
                 }
 
                 targetPlayer = value;
 
                 targetPlayer.NextCheckpointPassed += TargetPlayer_NextCheckpointPassed;
+
+                //Marker following next checkpoint
+                checkpointMarker = Instantiate(markerPrefab);
+                checkpointMarker.transform.SetParent(markerContainer, false);
+                checkpointMarker.Text = "Checkpoint";
+                checkpointMarker.Clamp = true;
+
+                //Markers following each player
+                for (int i = 0; i < TargetManager.PlayerCount; i++)
+                {
+                    RacePlayer p = TargetManager[i];
+                    if (p == TargetPlayer) continue;
+
+                    var playerMarker = Instantiate(markerPrefab);
+                    playerMarker.transform.SetParent(markerContainer, false);
+                    playerMarker.Text = p.Name;
+                    playerMarker.Target = p.Transform;
+                    playerMarker.Clamp = false;
+
+                    //Disabled for now, glitchy as fuck
+                    //playerMarker.HideImageWhenInSight = true;
+
+                    Data.CharacterInfo character = ActiveData.Characters[p.Character];
+                    //playerMarker.Sprite = character.icon;
+                    Color c = character.color;
+                    c.a = 0.2f;
+                    playerMarker.Color = c;
+
+                    playerMarkers.Add(playerMarker);
+                }
             }
         }
 
@@ -119,35 +154,6 @@ namespace Sanicball.UI
 
         private void Start()
         {
-            //Marker following next checkpoint
-            checkpointMarker = Instantiate(markerPrefab);
-            checkpointMarker.transform.SetParent(markerContainer, false);
-            checkpointMarker.Text = "Checkpoint";
-            checkpointMarker.Clamp = true;
-
-            //Markers following each player
-            for (int i = 0; i < TargetManager.PlayerCount; i++)
-            {
-                RacePlayer p = TargetManager[i];
-                if (p == TargetPlayer) continue;
-
-                var playerMarker = Instantiate(markerPrefab);
-                playerMarker.transform.SetParent(markerContainer, false);
-                playerMarker.Text = p.Name;
-                playerMarker.Target = p.Transform;
-                playerMarker.Clamp = false;
-
-                //Disabled for now, glitchy as fuck
-                //playerMarker.HideImageWhenInSight = true;
-
-                Data.CharacterInfo character = ActiveData.Characters[p.Character];
-                //playerMarker.Sprite = character.icon;
-                Color c = character.color;
-                c.a = 0.2f;
-                playerMarker.Color = c;
-
-                playerMarkers.Add(playerMarker);
-            }
         }
 
         private void Update()

@@ -86,7 +86,7 @@ namespace Sanicball.Logic
 
         //Timer used for syncing realtime stuff in online
         private float netUpdateTimer = 0;
-        private const int netUpdatesPerSecond = 20;
+        private const int NET_UPDATES_PER_SECOND = 40;
 
         #region Properties
 
@@ -425,7 +425,7 @@ namespace Sanicball.Logic
 
                 if (netUpdateTimer <= 0)
                 {
-                    netUpdateTimer = 1f / netUpdatesPerSecond;
+                    netUpdateTimer = 1f / NET_UPDATES_PER_SECOND;
 
                     //Send local player positions to other clients
                     foreach (MatchPlayer player in players)

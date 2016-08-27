@@ -115,7 +115,7 @@ namespace Sanicball.Logic
 
         public override void Close()
         {
-            client.Disconnect("Client closed the game.");
+            client.Disconnect("Client left the match");
         }
 
         private void RecieveMessage<T>(T message, double timestamp) where T : MatchMessage
