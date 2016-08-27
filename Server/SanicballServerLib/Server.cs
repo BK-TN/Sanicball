@@ -52,6 +52,7 @@ namespace SanicballServerLib
         public const string CONFIG_FILENAME = "ServerConfig.json";
         private const string SETTINGS_FILENAME = "MatchSettings.json";
         private const int TICKRATE = 20;
+        private const int STAGE_COUNT = 5; //Hardcoded stage count for now.. can't recieve the actual count since it's part of a Unity prefab.
 
         public event EventHandler<LogArgs> OnLog;
 
@@ -67,7 +68,7 @@ namespace SanicballServerLib
 
         //Server state
         private bool running;
-		private bool debugMode;
+        private bool debugMode;
         private ServerConfig serverConfig;
         private List<MatchClientState> matchClients = new List<MatchClientState>();
         private List<MatchPlayerState> matchPlayers = new List<MatchPlayerState>();
@@ -96,7 +97,6 @@ namespace SanicballServerLib
 
         //Timer for going back to lobby at the end of a race
         private Stopwatch backToLobbyTimer = new Stopwatch();
-        private const float backToLobbyTimerGoal = 15;
 
         //List of clients wanting to return to lobby
         private List<MatchClientState> clientsWantingToReturn = new List<MatchClientState>();
@@ -109,6 +109,8 @@ namespace SanicballServerLib
         {
             this.commandQueue = commandQueue;
 
+            #region Command handlers
+
             AddCommandHandler("help", cmd =>
             {
                 Log("Available commands:");
@@ -117,10 +119,11 @@ namespace SanicballServerLib
                     Log(name);
                 }
             });
-			AddCommandHandler ("toggledebug", cmd => {
-				debugMode = !debugMode;
-				Log ("Debug mode set to " + debugMode);
-			});
+            AddCommandHandler("toggleDebug", cmd =>
+            {
+                debugMode = !debugMode;
+                Log("Debug mode set to " + debugMode);
+            });
             AddCommandHandler("stop", cmd =>
             {
                 running = false;
@@ -145,10 +148,10 @@ namespace SanicballServerLib
                     Log(client.Name);
                 }
             });
-			AddCommandHandler("players", cmd =>
-				{
-					Log(matchClients.Count + " players(s) in match");
-				});
+            AddCommandHandler("players", cmd =>
+                {
+                    Log(matchClients.Count + " players(s) in match");
+                });
             AddCommandHandler("kick", cmd =>
             {
                 if (cmd.Content.Trim() == string.Empty)
@@ -178,11 +181,15 @@ namespace SanicballServerLib
                     }
                 }
             });
-            AddCommandHandler("showsettings", cmd =>
+            AddCommandHandler("returnToLobby", cmd =>
+            {
+                ReturnToLobby();
+            });
+            AddCommandHandler("showSettings", cmd =>
             {
                 Log(JsonConvert.SerializeObject(matchSettings, Formatting.Indented));
             });
-            AddCommandHandler("loadsettings", cmd =>
+            AddCommandHandler("loadSettings", cmd =>
             {
                 bool success = false;
                 if (cmd.Content.Trim() != string.Empty)
@@ -198,10 +205,82 @@ namespace SanicballServerLib
                     SendToAll(new SettingsChangedMessage(matchSettings));
                 }
             });
-            AddCommandHandler("returntolobby", cmd =>
+            AddCommandHandler("setStage", cmd =>
             {
-                ReturnToLobby();
+                int inputInt;
+                if (int.TryParse(cmd.Content, out inputInt) && inputInt >= 0 && inputInt < STAGE_COUNT)
+                {
+                    matchSettings.StageId = inputInt;
+                    SendToAll(new SettingsChangedMessage(matchSettings));
+                    Log("Stage set to " + inputInt);
+                }
+                else
+                {
+                    Log("Usage: setStage [0-" + (STAGE_COUNT - 1) + "]");
+                }
             });
+            AddCommandHandler("setLaps", cmd =>
+            {
+                int inputInt;
+                if (int.TryParse(cmd.Content, out inputInt) && inputInt > 0)
+                {
+                    matchSettings.Laps = inputInt;
+                    SendToAll(new SettingsChangedMessage(matchSettings));
+                    Log("Lap count set to " + inputInt);
+                }
+                else
+                {
+                    Log("Usage: setLaps [>=0]");
+                }
+            });
+            AddCommandHandler("setAutoStartTime", cmd =>
+            {
+                int inputInt;
+                if (int.TryParse(cmd.Content, out inputInt) && inputInt > 0)
+                {
+                    matchSettings.AutoStartTime = inputInt;
+                    SendToAll(new SettingsChangedMessage(matchSettings));
+                    Log("Match auto start time set to " + inputInt);
+                }
+                else
+                {
+                    Log("Usage: setAutoStartTime [>=0]");
+                }
+            });
+            AddCommandHandler("setAutoStartMinPlayers", cmd =>
+            {
+                int inputInt;
+                if (int.TryParse(cmd.Content, out inputInt) && inputInt > 0)
+                {
+                    matchSettings.AutoStartMinPlayers = inputInt;
+                    SendToAll(new SettingsChangedMessage(matchSettings));
+                    Log("Match auto start minimum players set to " + inputInt);
+                }
+                else
+                {
+                    Log("Usage: setAutoStartMinPlayers [>=0]");
+                }
+            });
+            AddCommandHandler("setStageRotationMode", cmd =>
+            {
+                StageRotationMode rotMode;
+                if (Enum.TryParse(cmd.Content, out rotMode))
+                {
+                    matchSettings.StageRotationMode = rotMode;
+                    SendToAll(new SettingsChangedMessage(matchSettings));
+                    Log("Stage rotation mode set to " + rotMode);
+                }
+                else
+                {
+                    string[] modes = Enum.GetNames(typeof(StageRotationMode));
+                    string modesStr = string.Join("|", modes);
+                    Log("Usage: setStageRotationMode [" + modesStr + "]");
+                }
+            });
+
+            #endregion Command handlers
+
+            #region Server config wizard
 
             if (!File.Exists(CONFIG_FILENAME))
             {
@@ -296,6 +375,8 @@ namespace SanicballServerLib
                     sw.Write(JsonConvert.SerializeObject(newConfig));
                     Console.WriteLine("Config saved!");
                 }
+
+                #endregion Server config wizard
             }
         }
 
@@ -312,9 +393,9 @@ namespace SanicballServerLib
 
             running = true;
 
-			#if DEBUG
-			debugMode = true;
-			#endif
+#if DEBUG
+            debugMode = true;
+#endif
 
             NetPeerConfiguration config = new NetPeerConfiguration(OnlineMatchMessenger.APP_ID);
             config.Port = serverConfig.PrivatePort;
@@ -333,7 +414,6 @@ namespace SanicballServerLib
                 serverBrowserPingTimer.Start();
             }
 
-            //Thread messageThread = new Thread(MessageLoop);
             MessageLoop();
         }
 
@@ -351,7 +431,7 @@ namespace SanicballServerLib
                     }
                     catch (JsonException ex)
                     {
-                        Log("Failed to load " + CONFIG_FILENAME + ", server cannot start. (" + ex.Message + ")", LogType.Error);
+                        Log("Failed to load server config from " + CONFIG_FILENAME + ", server cannot start. Please fix or delete the file. (" + ex.Message + ")", LogType.Error);
                     }
                 }
             }
@@ -376,13 +456,13 @@ namespace SanicballServerLib
                     }
                     catch (JsonException ex)
                     {
-                        Log("Failed to load " + path + ", using default settings (" + ex.Message + ")", LogType.Warning);
+                        Log("Failed to match settings from " + path + ", using default settings instead. (" + ex.Message + ")", LogType.Warning);
                     }
                 }
             }
             else
             {
-                Log("File " + path + " not found");
+                Log("Match settings at " + path + " not found");
             }
             return false;
         }
@@ -402,7 +482,7 @@ namespace SanicballServerLib
                 var response = await client.PostAsync("http://www.sanicball.com/servers/add/", content);
                 if (response.IsSuccessStatusCode)
                 {
-					Log("Server browser said: " + await response.Content.ReadAsStringAsync(), LogType.Debug);
+                    Log("Server browser said: " + await response.Content.ReadAsStringAsync(), LogType.Debug);
                 }
                 else
                 {
@@ -461,7 +541,7 @@ namespace SanicballServerLib
                 //Check back to lobby timer
                 if (backToLobbyTimer.IsRunning)
                 {
-                    if (backToLobbyTimer.Elapsed.TotalSeconds >= backToLobbyTimerGoal)
+                    if (backToLobbyTimer.Elapsed.TotalSeconds >= matchSettings.AutoReturnTime)
                     {
                         ReturnToLobby();
                         backToLobbyTimer.Reset();
@@ -551,7 +631,7 @@ namespace SanicballServerLib
                                         //Tell connected clients to remove the client+players
                                         SendToAll(new ClientLeftMessage(associatedClient.Guid));
 
-										Broadcast(associatedClient.Name + " has left the match (" + statusMsg + ")");
+                                        Broadcast(associatedClient.Name + " has left the match (" + statusMsg + ")");
                                         Log("(Guid: " + associatedClient.Guid + ", reason: " + statusMsg + ")", LogType.Debug);
                                     }
                                     else
@@ -568,18 +648,13 @@ namespace SanicballServerLib
 
                         case NetIncomingMessageType.ConnectionApproval:
                             ClientInfo clientInfo = null;
-                            bool approved = false;
                             try
                             {
                                 clientInfo = JsonConvert.DeserializeObject<ClientInfo>(msg.ReadString());
-                                approved = true;
                             }
                             catch (JsonException ex)
                             {
                                 Log("Error reading client connection approval: \"" + ex.Message + "\". Client rejected.");
-                            }
-                            if (!approved)
-                            {
                                 msg.SenderConnection.Deny("Invalid client info!");
                                 break;
                             }
@@ -620,7 +695,7 @@ namespace SanicballServerLib
                                     }
                                     catch (JsonException ex)
                                     {
-                                        Log("Failed to deserialize recieved match message. Error description: " + ex.Message);
+                                        Log("Failed to deserialize recieved match message. Error description: " + ex.Message, LogType.Warning);
                                         continue; //Skip to next message in queue
                                     }
 
@@ -822,12 +897,18 @@ namespace SanicballServerLib
                                         {
                                             playersStillRacing.Remove(player);
 
-                                            Log(playersStillRacing.Count + " players(s) still racing");
-
                                             if (playersStillRacing.Count == 0)
                                             {
-                                                Log("All players are done racing, returning to lobby in " + backToLobbyTimerGoal + " seconds");
-                                                backToLobbyTimer.Start();
+                                                Log("All players are done racing.");
+                                                if (matchSettings.AutoReturnTime > 0)
+                                                {
+                                                    Broadcast("Returning to lobby in " + matchSettings.AutoReturnTime + " seconds");
+                                                    backToLobbyTimer.Start();
+                                                }
+                                            }
+                                            else
+                                            {
+                                                Log(playersStillRacing.Count + " players(s) still racing");
                                             }
                                         }
                                     }
@@ -835,7 +916,7 @@ namespace SanicballServerLib
                                     break;
 
                                 default:
-                                    Log("Recieved data message of unknown type");
+                                    Log("Recieved data message of unknown type", LogType.Debug);
                                     break;
                             }
                             break;
@@ -847,6 +928,8 @@ namespace SanicballServerLib
                 }
             }
         }
+
+        #region Gameplay methods
 
         private void LoadRace()
         {
@@ -876,12 +959,11 @@ namespace SanicballServerLib
                 clientsWantingToReturn.Clear();
 
                 //Stage rotation
-                const int stageCount = 5; //Hardcoded stage count for now.. can't recieve the actual count since it's part of a Unity prefab.
                 switch (matchSettings.StageRotationMode)
                 {
                     case StageRotationMode.Random:
                         Log("Picking random stage");
-                        int newStage = random.Next(stageCount);
+                        int newStage = random.Next(STAGE_COUNT);
                         matchSettings.StageId = newStage;
                         SendToAll(new SettingsChangedMessage(matchSettings));
                         break;
@@ -889,7 +971,7 @@ namespace SanicballServerLib
                     case StageRotationMode.Sequenced:
                         Log("Picking next stage");
                         int nextStage = matchSettings.StageId + 1;
-                        if (nextStage >= stageCount) nextStage = 0;
+                        if (nextStage >= STAGE_COUNT) nextStage = 0;
                         matchSettings.StageId = nextStage;
                         SendToAll(new SettingsChangedMessage(matchSettings));
                         break;
@@ -920,6 +1002,10 @@ namespace SanicballServerLib
             SendToAll(new AutoStartTimerMessage(false));
         }
 
+        #endregion Gameplay methods
+
+        #region Utility methods
+
         private void SendToAll(MatchMessage matchMsg)
         {
             if (matchMsg.Reliable)
@@ -946,14 +1032,34 @@ namespace SanicballServerLib
             SendToAll(new ChatMessage("Server", ChatMessageType.System, text));
         }
 
+        private void Log(object message, LogType type = LogType.Normal)
+        {
+            if (!debugMode && type == LogType.Debug)
+                return;
+            LogEntry entry = new LogEntry(DateTime.Now, message.ToString(), type);
+            OnLog?.Invoke(this, new LogArgs(entry));
+            log.Add(entry);
+        }
+
+        private List<MatchClientState> SearchClients(string name)
+        {
+            return matchClients.Where(a => a.Name.Contains(name)).ToList();
+        }
+
+        public void AddCommandHandler(string commandName, CommandHandler handler)
+        {
+            commandHandlers.Add(commandName, handler);
+        }
+
+        #endregion Utility methods
+
         public void Dispose()
         {
-            /*Log("Saving server config...");
+            Log("Saving server config...");
             using (StreamWriter sw = new StreamWriter(CONFIG_FILENAME))
             {
                 sw.Write(JsonConvert.SerializeObject(serverConfig));
             }
-            */
 
             Log("Saving match settings...");
             using (StreamWriter sw = new StreamWriter(SETTINGS_FILENAME))
@@ -966,8 +1072,8 @@ namespace SanicballServerLib
             Log("The server has been closed.");
 
             //Write server log
-			Directory.CreateDirectory("Logs" + System.IO.Path.DirectorySeparatorChar);
-			using (StreamWriter writer = new StreamWriter("Logs" + System.IO.Path.DirectorySeparatorChar + DateTime.Now.ToString("MM-dd-yyyy_HH-mm-ss") + ".txt"))
+            Directory.CreateDirectory("Logs" + System.IO.Path.DirectorySeparatorChar);
+            using (StreamWriter writer = new StreamWriter("Logs" + System.IO.Path.DirectorySeparatorChar + DateTime.Now.ToString("MM-dd-yyyy_HH-mm-ss") + ".txt"))
             {
                 foreach (LogEntry entry in log)
                 {
@@ -989,25 +1095,6 @@ namespace SanicballServerLib
                     writer.WriteLine(entry.Timestamp + logTypeText + " - " + entry.Message);
                 }
             }
-        }
-
-        private void Log(object message, LogType type = LogType.Normal)
-        {
-			if (!debugMode && type == LogType.Debug)
-				return;
-            LogEntry entry = new LogEntry(DateTime.Now, message.ToString(), type);
-            OnLog?.Invoke(this, new LogArgs(entry));
-            log.Add(entry);
-        }
-
-        private List<MatchClientState> SearchClients(string name)
-        {
-            return matchClients.Where(a => a.Name.Contains(name)).ToList();
-        }
-
-        public void AddCommandHandler(string commandName, CommandHandler handler)
-        {
-            commandHandlers.Add(commandName, handler);
         }
     }
 }

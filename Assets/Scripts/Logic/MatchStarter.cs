@@ -58,8 +58,16 @@ namespace Sanicball.Logic
                                     {
                                         string hailMsg = msg.SenderConnection.RemoteHailMessage.ReadString();
                                         Debug.Log("Server's hail message: " + hailMsg);
-                                        MatchState matchInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<MatchState>(hailMsg);
-                                        BeginOnlineGame(matchInfo);
+                                        try
+                                        {
+                                            MatchState matchInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<MatchState>(hailMsg);
+                                            BeginOnlineGame(matchInfo);
+                                        }
+                                        catch (Newtonsoft.Json.JsonException ex)
+                                        {
+                                            Debug.LogError("Failed to dezerialize hail message: " + ex.Message);
+                                            activeConnectingPopup.Failed("An error occurred when reading server info.");
+                                        }
                                     }
                                     else
                                     {

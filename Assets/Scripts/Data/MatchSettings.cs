@@ -30,9 +30,9 @@ namespace Sanicball.Data
         public int AICount { get; set; }
         public AISkillLevel AISkill { get; set; }
 
-        public float AutoStartTime { get; set; }
+        public int AutoStartTime { get; set; }
         public int AutoStartMinPlayers { get; set; }
-        public float AutoReturnTime { get; set; }
+        public int AutoReturnTime { get; set; }
         public StageRotationMode StageRotationMode { get; set; }
 
         /// <summary>
@@ -49,9 +49,9 @@ namespace Sanicball.Data
                 AISkill = AISkillLevel.Average,
                 aiCharacters = "1,2,3,4,5,6,7,8,9,10,11,12",
 
-                AutoStartTime = 30,
+                AutoStartTime = 60,
                 AutoStartMinPlayers = 2,
-                AutoReturnTime = 60,
+                AutoReturnTime = 15,
                 StageRotationMode = StageRotationMode.None
             };
         }
