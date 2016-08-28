@@ -6,13 +6,13 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: CheckpointHidden
-  m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
-  m_ShaderKeywords: _ALPHABLEND_ON _EMISSION
+  m_Name: DemoMaterialOldGenerations
+  m_Shader: {fileID: 30, guid: 0000000000000000f000000000000000, type: 0}
+  m_ShaderKeywords: _ALPHABLEND_ON _DETAIL_MULX2 _EMISSION _NORMALMAP _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
+    _SPECULARHIGHLIGHTS_OFF
   m_LightmapFlags: 1
-  m_CustomRenderQueue: 3000
-  stringTagMap:
-    RenderType: Transparent
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
   m_SavedProperties:
     serializedVersion: 2
     m_TexEnvs:
@@ -37,20 +37,20 @@ Material:
     - first:
         name: _DetailNormalMap
       second:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 79ab019fc261b4f4dbbd1ce68f62672e, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - first:
         name: _EmissionMap
       second:
         m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
+        m_Scale: {x: 6, y: 6}
         m_Offset: {x: 0, y: 0}
     - first:
         name: _MainTex
       second:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: a4174ba60f409674fb598de33507edc5, type: 3}
+        m_Scale: {x: 6, y: 6}
         m_Offset: {x: 0, y: 0}
     - first:
         name: _MetallicGlossMap
@@ -84,14 +84,11 @@ Material:
         name: _DstBlend
       second: 10
     - first:
-        name: _EmissionScaleUI
-      second: 0
-    - first:
         name: _GlossMapScale
       second: 1
     - first:
         name: _Glossiness
-      second: 0.5
+      second: 1
     - first:
         name: _GlossyReflections
       second: 1
@@ -109,13 +106,13 @@ Material:
       second: 0.02
     - first:
         name: _Shininess
-      second: 0.31563008
+      second: 0.752
     - first:
         name: _SmoothnessTextureChannel
-      second: 0
+      second: 1
     - first:
         name: _SpecularHighlights
-      second: 1
+      second: 0
     - first:
         name: _SrcBlend
       second: 5
@@ -128,13 +125,13 @@ Material:
     m_Colors:
     - first:
         name: _Color
-      second: {r: 0, g: 0, b: 0.47843137, a: 0.5019608}
+      second: {r: 1, g: 1, b: 1, a: 0.253}
     - first:
-        name: _EmissionColor
+        name: _Emission
       second: {r: 0, g: 0, b: 0, a: 0}
     - first:
-        name: _EmissionColorUI
-      second: {r: 1, g: 1, b: 1, a: 1}
+        name: _EmissionColor
+      second: {r: 0, g: 0, b: 0, a: 1}
     - first:
         name: _SpecColor
-      second: {r: 0.5, g: 0.5, b: 0.5, a: 1}
+      second: {r: 1, g: 1, b: 1, a: 0}
