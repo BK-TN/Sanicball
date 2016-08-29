@@ -10,7 +10,7 @@ namespace Sanicball.UI
         [SerializeField]
         private Image spinner = null;
 
-        public void Failed(string text)
+        public void ShowMessage(string text)
         {
             titleField.text = text;
             spinner.enabled = false;

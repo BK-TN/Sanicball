@@ -9,6 +9,7 @@ namespace Sanicball.Logic
     public class MessageType
     {
         public const byte MatchMessage = 0;
+        public const byte InitMessage = 0;
     }
 
     public class DisconnectArgs : EventArgs

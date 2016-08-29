@@ -47,36 +47,34 @@ namespace Sanicball.Logic
                             switch (status)
                             {
                                 case NetConnectionStatus.Connected:
-                                    Debug.Log("Connected!");
-                                    if (msg.SenderConnection.RemoteHailMessage != null)
-                                    {
-                                        string hailMsg = msg.SenderConnection.RemoteHailMessage.ReadString();
-                                        Debug.Log("Server's hail message: " + hailMsg);
-                                        try
-                                        {
-                                            MatchState matchInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<MatchState>(hailMsg);
-                                            BeginOnlineGame(matchInfo);
-                                        }
-                                        catch (Newtonsoft.Json.JsonException ex)
-                                        {
-                                            Debug.LogError("Failed to dezerialize hail message: " + ex.Message);
-                                            activeConnectingPopup.Failed("An error occurred when reading server info.");
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Debug.LogError("Error: no hail message");
-                                    }
+                                    Debug.Log("Connected! Now waiting for match state");
+                                    activeConnectingPopup.ShowMessage("Recieving match state...");
                                     break;
 
                                 case NetConnectionStatus.Disconnected:
-                                    activeConnectingPopup.Failed(msg.ReadString());
+                                    activeConnectingPopup.ShowMessage(msg.ReadString());
                                     break;
 
                                 default:
                                     string statusMsg = msg.ReadString();
                                     Debug.Log("Status change recieved: " + status + " - Message: " + statusMsg);
                                     break;
+                            }
+                            break;
+
+                        case NetIncomingMessageType.Data:
+                            byte type = msg.ReadByte();
+                            if (type == MessageType.InitMessage)
+                            {
+                                try
+                                {
+                                    MatchState matchInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<MatchState>(msg.ReadString());
+                                    BeginOnlineGame(matchInfo);
+                                }
+                                catch (Newtonsoft.Json.JsonException ex)
+                                {
+                                    activeConnectingPopup.ShowMessage("Failed to read match state - cannot join server!");
+                                }
                             }
                             break;
                     }

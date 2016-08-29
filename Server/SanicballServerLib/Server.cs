@@ -574,15 +574,15 @@ namespace SanicballServerLib
                     {
                         case NetIncomingMessageType.VerboseDebugMessage:
                         case NetIncomingMessageType.DebugMessage:
-                            Log(msg.ReadString(), LogType.Debug);
+                            Log("Lidgren debug: " + msg.ReadString(), LogType.Debug);
                             break;
 
                         case NetIncomingMessageType.WarningMessage:
-                            Log(msg.ReadString(), LogType.Warning);
+                            Log("Lidgren warning: " + msg.ReadString(), LogType.Warning);
                             break;
 
                         case NetIncomingMessageType.ErrorMessage:
-                            Log(msg.ReadString(), LogType.Error);
+                            Log("Lidgren error: " + msg.ReadString(), LogType.Error);
                             break;
 
                         case NetIncomingMessageType.DiscoveryRequest:
@@ -597,12 +597,52 @@ namespace SanicballServerLib
                             Log("Sent discovery response to " + msg.SenderEndPoint, LogType.Debug);
                             break;
 
+                        case NetIncomingMessageType.ConnectionApproval:
+                            ClientInfo clientInfo = null;
+                            try
+                            {
+                                clientInfo = JsonConvert.DeserializeObject<ClientInfo>(msg.ReadString());
+                            }
+                            catch (JsonException ex)
+                            {
+                                Log("Error reading client connection approval: \"" + ex.Message + "\". Client rejected.");
+                                msg.SenderConnection.Deny("Invalid client info!");
+                                break;
+                            }
+
+                            if (clientInfo.Version != GameVersion.AS_FLOAT || clientInfo.IsTesting != GameVersion.IS_TESTING)
+                            {
+                                msg.SenderConnection.Deny("Wrong game version.");
+                                break;
+                            }
+
+                            msg.SenderConnection.Approve();
+                            break;
+
                         case NetIncomingMessageType.StatusChanged:
                             NetConnectionStatus status = (NetConnectionStatus)msg.ReadByte();
 
                             string statusMsg = msg.ReadString();
                             switch (status)
                             {
+                                case NetConnectionStatus.Connected:
+                                    //Send match state to newly connected client
+                                    NetOutgoingMessage stateMsg = netServer.CreateMessage();
+                                    stateMsg.Write(MessageType.InitMessage);
+
+                                    float autoStartTimeLeft = 0;
+                                    if (autoStartTimer.IsRunning)
+                                    {
+                                        autoStartTimeLeft = matchSettings.AutoStartTime - (float)autoStartTimer.Elapsed.TotalSeconds;
+                                    }
+                                    MatchState state = new MatchState(new List<MatchClientState>(matchClients), new List<MatchPlayerState>(matchPlayers), matchSettings, inRace, autoStartTimeLeft);
+                                    stateMsg.Write(JsonConvert.SerializeObject(state));
+
+                                    netServer.SendMessage(stateMsg, msg.SenderConnection, NetDeliveryMethod.ReliableOrdered);
+
+                                    Log("Sent match state to newly connected client", LogType.Debug);
+                                    break;
+
                                 case NetConnectionStatus.Disconnected:
                                     MatchClientState associatedClient;
                                     if (matchClientConnections.TryGetValue(msg.SenderConnection, out associatedClient))
@@ -647,41 +687,6 @@ namespace SanicballServerLib
                                     Log("Status change recieved: " + status + " - Message: " + statusMsg, LogType.Debug);
                                     break;
                             }
-                            break;
-
-                        case NetIncomingMessageType.ConnectionApproval:
-                            ClientInfo clientInfo = null;
-                            try
-                            {
-                                clientInfo = JsonConvert.DeserializeObject<ClientInfo>(msg.ReadString());
-                            }
-                            catch (JsonException ex)
-                            {
-                                Log("Error reading client connection approval: \"" + ex.Message + "\". Client rejected.");
-                                msg.SenderConnection.Deny("Invalid client info!");
-                                break;
-                            }
-
-                            if (clientInfo.Version != GameVersion.AS_FLOAT || clientInfo.IsTesting != GameVersion.IS_TESTING)
-                            {
-                                msg.SenderConnection.Deny("Wrong game version.");
-                                break;
-                            }
-
-                            //Create hail message with match state
-                            NetOutgoingMessage hailMsg = netServer.CreateMessage();
-
-                            float autoStartTimeLeft = 0;
-                            if (autoStartTimer.IsRunning)
-                            {
-                                autoStartTimeLeft = matchSettings.AutoStartTime - (float)autoStartTimer.Elapsed.TotalSeconds;
-                            }
-
-                            MatchState state = new MatchState(new List<MatchClientState>(matchClients), new List<MatchPlayerState>(matchPlayers), matchSettings, inRace, autoStartTimeLeft);
-                            string infoStr = JsonConvert.SerializeObject(state);
-
-                            hailMsg.Write(infoStr);
-                            msg.SenderConnection.Approve(hailMsg);
                             break;
 
                         case NetIncomingMessageType.Data:
