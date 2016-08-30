@@ -451,7 +451,7 @@ namespace SanicballServerLib
             }
             else
             {
-                Log("Match settings at " + path + " not found");
+                Log("Match settings at " + path + " not found, using default settings", LogType.Warning);
             }
             return false;
         }
@@ -511,7 +511,6 @@ namespace SanicballServerLib
                 {
                     if (stageLoadingTimeoutTimer.Elapsed.TotalSeconds >= stageLoadingTimeoutTimerGoal)
                     {
-                        Log("Some players are still loading the race, starting anyway", LogType.Debug);
                         SendToAll(new StartRaceMessage());
                         stageLoadingTimeoutTimer.Reset();
 
@@ -596,8 +595,8 @@ namespace SanicballServerLib
                             }
                             catch (JsonException ex)
                             {
-                                Log("Error reading client connection approval: \"" + ex.Message + "\". Client rejected.");
-                                msg.SenderConnection.Deny("Invalid client info!");
+                                Log("Error reading client connection approval: \"" + ex.Message + "\". Client rejected.", LogType.Warning);
+                                msg.SenderConnection.Deny("Invalid client info! You are likely using a different game version than the server.");
                                 break;
                             }
 
@@ -655,14 +654,14 @@ namespace SanicballServerLib
                                         //If no players are left and we're in a race, return to lobby
                                         if (players.Count == 0 && inRace)
                                         {
-                                            Log("No players left in race.");
+                                            Log("No players left in race!");
                                             ReturnToLobby();
                                         }
 
                                         //If there are now less players than AutoStartMinPlayers, stop the auto start timer
                                         if (players.Count < matchSettings.AutoStartMinPlayers && autoStartTimer.IsRunning)
                                         {
-                                            Log("Player count now below AutoStartMinPlayers, autoStartTimer stopped", LogType.Debug);
+                                            Log("Too few players, match auto start timer stopped");
                                             StopAutoStartTimer();
                                         }
 
@@ -673,7 +672,6 @@ namespace SanicballServerLib
                                         SendToAll(new ClientLeftMessage(associatedClient.Guid));
 
                                         Broadcast(associatedClient.Name + " has left the match (" + statusMsg + ")");
-                                        Log("(Guid: " + associatedClient.Guid + ", reason: " + statusMsg + ")", LogType.Debug);
                                     }
                                     else
                                     {
@@ -713,7 +711,6 @@ namespace SanicballServerLib
                                         clients.Add(newClient);
 
                                         Broadcast(castedMsg.ClientName + " has joined the match");
-                                        Log("(Guid: " + castedMsg.ClientGuid + ")", LogType.Debug);
                                         SendToAll(matchMessage);
                                     }
 
@@ -731,12 +728,12 @@ namespace SanicballServerLib
                                         else
                                         {
                                             players.Add(new ServPlayer(castedMsg.ClientGuid, castedMsg.CtrlType, castedMsg.InitialCharacter));
-                                            Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " joined", LogType.Debug);
+                                            Log("Player " + client.Name + " (" + castedMsg.CtrlType + ") joined", LogType.Debug);
                                             SendToAll(matchMessage);
 
                                             if (players.Count >= matchSettings.AutoStartMinPlayers && !autoStartTimer.IsRunning && matchSettings.AutoStartTime > 0)
                                             {
-                                                Log("Player count is now above AutoStartMinPlayers, autoStartTimer started", LogType.Debug);
+                                                Log("Match will auto start in " + matchSettings.AutoStartTime + " seconds.");
                                                 StartAutoStartTimer();
                                             }
                                         }
@@ -756,7 +753,7 @@ namespace SanicballServerLib
                                         {
                                             ServPlayer player = players.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
                                             players.Remove(player);
-                                            Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " left", LogType.Debug);
+                                            Log("Player " + client.Name + " (" + castedMsg.CtrlType + ") left", LogType.Debug);
                                             SendToAll(matchMessage);
 
                                             if (players.Count < matchSettings.AutoStartMinPlayers && autoStartTimer.IsRunning)
@@ -785,7 +782,7 @@ namespace SanicballServerLib
                                                 int index = players.IndexOf(player);
                                                 players[index].CharacterId = castedMsg.NewCharacter;
                                             }
-                                            Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " set character to " + castedMsg.NewCharacter, LogType.Debug);
+                                            Log("Player " + client.Name + " (" + castedMsg.CtrlType + ") set character to " + castedMsg.NewCharacter, LogType.Debug);
 
                                             SendToAll(matchMessage);
                                         }
@@ -809,7 +806,7 @@ namespace SanicballServerLib
                                                 int index = players.IndexOf(player);
                                                 players[index].ReadyToRace = castedMsg.Ready;
                                             }
-                                            Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " set ready to " + castedMsg.Ready, LogType.Debug);
+                                            Log("Player " + client.Name + " (" + castedMsg.CtrlType + ") set ready to " + castedMsg.Ready, LogType.Debug);
 
                                             //Start lobby timer if all players are ready - otherwise reset it if it's running
                                             bool allPlayersReady = players.All(a => a.ReadyToRace);
@@ -823,7 +820,7 @@ namespace SanicballServerLib
                                                 if (lobbyTimer.IsRunning)
                                                 {
                                                     lobbyTimer.Reset();
-                                                    Log("Timer stopped, not all players are ready", LogType.Debug);
+                                                    Log("Not all players are ready, timer stopped", LogType.Debug);
                                                 }
                                             }
 
@@ -848,11 +845,13 @@ namespace SanicballServerLib
                                             ServClient client = clients.FirstOrDefault(a => a.Connection == msg.SenderConnection);
                                             client.CurrentlyLoadingStage = false;
                                             clientsLoadingStage--;
-                                            Log("Waiting for " + clientsLoadingStage + " client(s) to load");
-
-                                            if (clientsLoadingStage == 0)
+                                            if (clientsLoadingStage > 0)
                                             {
-                                                Log("Starting race!", LogType.Debug);
+                                                Log("Waiting for " + clientsLoadingStage + " client(s) to load");
+                                            }
+                                            else
+                                            {
+                                                Log("Starting race!");
                                                 SendToAll(new StartRaceMessage());
                                                 stageLoadingTimeoutTimer.Reset();
                                                 //Indicate that all currently active players are racing
