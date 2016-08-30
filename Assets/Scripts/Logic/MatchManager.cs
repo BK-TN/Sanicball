@@ -259,7 +259,7 @@ namespace Sanicball.Logic
         private void ChatCallback(ChatMessage msg, float travelTime)
         {
             if (activeChat)
-                activeChat.ShowMessage(msg.From, msg.Text);
+                activeChat.ShowMessage(msg.Type, msg.From, msg.Text);
         }
 
         private void LoadLobbyCallback(LoadLobbyMessage msg, float travelTime)
