@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -58,18 +59,17 @@ namespace SanicballServer
                     }
                     catch (Exception ex)
                     {
-                        Console.ForegroundColor = ConsoleColor.White;
-                        Console.BackgroundColor = ConsoleColor.DarkRed;
-                        Console.WriteLine("Server encountered an exception and will restart.");
-                        Console.WriteLine(ex.GetType() + ": " + ex.Message);
-                        Console.WriteLine(ex.StackTrace);
-                        Console.ResetColor();
+                        serv.Log("Server encountered an exception and will restart.", LogType.Error);
+                        string exText = ex.GetType() + ": " + ex.Message + Environment.NewLine + ex.StackTrace;
+                        serv.Log(exText, LogType.Normal);
+                        Thread.Sleep(1000);
                     }
 
                     inputThread.Abort();
                     inputThread.Join();
                 }
             }
+
             Console.WriteLine("Press any key to close this window.");
             Console.ReadKey(true);
         }

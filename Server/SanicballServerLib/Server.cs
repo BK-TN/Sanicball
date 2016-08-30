@@ -63,45 +63,36 @@ namespace SanicballServerLib
         private CommandQueue commandQueue;
         private Random random = new Random();
 
-        //Associates connections with the match client they create (To identify which client is sending a message)
-        private Dictionary<NetConnection, MatchClientState> matchClientConnections = new Dictionary<NetConnection, MatchClientState>();
-
         //Server state
         private bool running;
         private bool debugMode;
-        private ServerConfig serverConfig;
-        private List<MatchClientState> matchClients = new List<MatchClientState>();
-        private List<MatchPlayerState> matchPlayers = new List<MatchPlayerState>();
+        private ServerConfig config;
+        private List<ServClient> clients = new List<ServClient>();
+        private List<ServPlayer> players = new List<ServPlayer>();
         private MatchSettings matchSettings;
         private bool inRace;
 
-        #region Timers and temporary state
+        #region Timers
 
         //Server browser ping timer
         private Stopwatch serverBrowserPingTimer = new Stopwatch();
         private const float serverBrowserPingGoal = 60;
 
-        //Lobby timer
+        //Timer for starting a match by all players being ready
         private Stopwatch lobbyTimer = new Stopwatch();
         private const float lobbyTimerGoal = 3;
-        //Autostart timer
+
+        //Timer for starting a match automatically
         private Stopwatch autoStartTimer = new Stopwatch();
 
-        //List of clients that haven't loaded a stage yet
-        private List<MatchClientState> clientsLoadingStage = new List<MatchClientState>();
+        //Timeout for clients loading stage
         private Stopwatch stageLoadingTimeoutTimer = new Stopwatch();
         private const float stageLoadingTimeoutTimerGoal = 20;
-
-        //List of players that are still racing
-        private List<MatchPlayerState> playersStillRacing = new List<MatchPlayerState>();
 
         //Timer for going back to lobby at the end of a race
         private Stopwatch backToLobbyTimer = new Stopwatch();
 
-        //List of clients wanting to return to lobby
-        private List<MatchClientState> clientsWantingToReturn = new List<MatchClientState>();
-
-        #endregion Timers and temporary state
+        #endregion Timers
 
         public bool Running { get { return running; } }
 
@@ -142,15 +133,15 @@ namespace SanicballServerLib
             });
             AddCommandHandler("clients", cmd =>
             {
-                Log(matchClients.Count + " connected client(s)");
-                foreach (MatchClientState client in matchClients)
+                Log(clients.Count + " connected client(s)");
+                foreach (ServClient client in clients)
                 {
                     Log(client.Name);
                 }
             });
             AddCommandHandler("players", cmd =>
                 {
-                    Log(matchClients.Count + " players(s) in match");
+                    Log(clients.Count + " players(s) in match");
                 });
             AddCommandHandler("kick", cmd =>
             {
@@ -160,7 +151,7 @@ namespace SanicballServerLib
                 }
                 else
                 {
-                    List<MatchClientState> matching = SearchClients(cmd.Content);
+                    List<ServClient> matching = SearchClients(cmd.Content);
                     if (matching.Count == 0)
                     {
                         Log("No clients match your search.");
@@ -172,7 +163,7 @@ namespace SanicballServerLib
                     else
                     {
                         Log("More than one client matches your search:");
-                        foreach (MatchClientState client in matching)
+                        foreach (ServClient client in matching)
                         {
                             Log(client.Name);
                         }
@@ -396,17 +387,17 @@ namespace SanicballServerLib
 #endif
 
             NetPeerConfiguration config = new NetPeerConfiguration(OnlineMatchMessenger.APP_ID);
-            config.Port = serverConfig.PrivatePort;
-            config.MaximumConnections = serverConfig.MaxPlayers;
+            config.Port = this.config.PrivatePort;
+            config.MaximumConnections = this.config.MaxPlayers;
             config.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
             config.EnableMessageType(NetIncomingMessageType.DiscoveryRequest);
 
             netServer = new NetServer(config);
             netServer.Start();
 
-            Log("Server started on port " + serverConfig.PrivatePort + "!");
+            Log("Server started on port " + this.config.PrivatePort + "!");
 
-            if (serverConfig.ShowInBrowser)
+            if (this.config.ShowInBrowser)
             {
                 AddToServerBrowser();
                 serverBrowserPingTimer.Start();
@@ -423,7 +414,7 @@ namespace SanicballServerLib
                 {
                     try
                     {
-                        serverConfig = JsonConvert.DeserializeObject<ServerConfig>(sr.ReadToEnd());
+                        config = JsonConvert.DeserializeObject<ServerConfig>(sr.ReadToEnd());
                         Log("Loaded server config from " + CONFIG_FILENAME);
                         return true;
                     }
@@ -471,8 +462,8 @@ namespace SanicballServerLib
             {
                 var values = new Dictionary<string, string>
                 {
-                    { "ip", serverConfig.PublicIP },
-                    { "port", serverConfig.PublicPort.ToString() }
+                    { "ip", config.PublicIP },
+                    { "port", config.PublicPort.ToString() }
                 };
 
                 var content = new FormUrlEncodedContent(values);
@@ -524,7 +515,7 @@ namespace SanicballServerLib
                         SendToAll(new StartRaceMessage());
                         stageLoadingTimeoutTimer.Reset();
 
-                        foreach (var c in clientsLoadingStage)
+                        foreach (var c in clients.Where(a => a.CurrentlyLoadingStage))
                         {
                             Kick(c, "Took too long to load the race");
                         }
@@ -587,7 +578,7 @@ namespace SanicballServerLib
 
                         case NetIncomingMessageType.DiscoveryRequest:
                             ServerInfo info = new ServerInfo();
-                            info.Config = serverConfig;
+                            info.Config = config;
                             info.Timestamp = DateTime.UtcNow;
                             info.Players = netServer.ConnectionsCount;
                             info.InRace = inRace;
@@ -635,7 +626,18 @@ namespace SanicballServerLib
                                     {
                                         autoStartTimeLeft = matchSettings.AutoStartTime - (float)autoStartTimer.Elapsed.TotalSeconds;
                                     }
-                                    MatchState state = new MatchState(new List<MatchClientState>(matchClients), new List<MatchPlayerState>(matchPlayers), matchSettings, inRace, autoStartTimeLeft);
+                                    List<MatchClientState> clientStates = new List<MatchClientState>();
+                                    foreach (ServClient c in clients)
+                                    {
+                                        clientStates.Add(new MatchClientState(c.Guid, c.Name));
+                                    }
+                                    List<MatchPlayerState> playerStates = new List<MatchPlayerState>();
+                                    foreach (ServPlayer p in players)
+                                    {
+                                        playerStates.Add(new MatchPlayerState(p.ClientGuid, p.CtrlType, p.ReadyToRace, p.CharacterId));
+                                    }
+
+                                    MatchState state = new MatchState(clientStates, playerStates, matchSettings, inRace, autoStartTimeLeft);
                                     stateMsg.Write(JsonConvert.SerializeObject(state));
 
                                     netServer.SendMessage(stateMsg, msg.SenderConnection, NetDeliveryMethod.ReliableOrdered);
@@ -644,32 +646,28 @@ namespace SanicballServerLib
                                     break;
 
                                 case NetConnectionStatus.Disconnected:
-                                    MatchClientState associatedClient;
-                                    if (matchClientConnections.TryGetValue(msg.SenderConnection, out associatedClient))
+                                    ServClient associatedClient = clients.FirstOrDefault(a => a.Connection == msg.SenderConnection);
+                                    if (associatedClient != null)
                                     {
                                         //Remove all players created by this client
-                                        matchPlayers.RemoveAll(a => a.ClientGuid == associatedClient.Guid);
-                                        playersStillRacing.RemoveAll(a => a.ClientGuid == associatedClient.Guid);
+                                        players.RemoveAll(a => a.ClientGuid == associatedClient.Guid);
 
                                         //If no players are left and we're in a race, return to lobby
-                                        if (matchPlayers.Count == 0 && inRace)
+                                        if (players.Count == 0 && inRace)
                                         {
                                             Log("No players left in race.");
                                             ReturnToLobby();
                                         }
 
                                         //If there are now less players than AutoStartMinPlayers, stop the auto start timer
-                                        if (matchPlayers.Count < matchSettings.AutoStartMinPlayers && autoStartTimer.IsRunning)
+                                        if (players.Count < matchSettings.AutoStartMinPlayers && autoStartTimer.IsRunning)
                                         {
                                             Log("Player count now below AutoStartMinPlayers, autoStartTimer stopped", LogType.Debug);
                                             StopAutoStartTimer();
                                         }
 
                                         //Remove the client
-                                        matchClients.Remove(associatedClient);
-                                        matchClientConnections.Remove(msg.SenderConnection);
-                                        clientsWantingToReturn.Remove(associatedClient);
-                                        clientsLoadingStage.Remove(associatedClient);
+                                        clients.Remove(associatedClient);
 
                                         //Tell connected clients to remove the client+players
                                         SendToAll(new ClientLeftMessage(associatedClient.Guid));
@@ -711,9 +709,8 @@ namespace SanicballServerLib
                                     {
                                         var castedMsg = (ClientJoinedMessage)matchMessage;
 
-                                        MatchClientState newClient = new MatchClientState(castedMsg.ClientGuid, castedMsg.ClientName);
-                                        matchClients.Add(newClient);
-                                        matchClientConnections.Add(msg.SenderConnection, newClient);
+                                        ServClient newClient = new ServClient(castedMsg.ClientGuid, castedMsg.ClientName, msg.SenderConnection);
+                                        clients.Add(newClient);
 
                                         Broadcast(castedMsg.ClientName + " has joined the match");
                                         Log("(Guid: " + castedMsg.ClientGuid + ")", LogType.Debug);
@@ -725,18 +722,19 @@ namespace SanicballServerLib
                                         var castedMsg = (PlayerJoinedMessage)matchMessage;
 
                                         //Check if the message was sent from the same client it wants to act for
+                                        ServClient client = clients.FirstOrDefault(a => a.Connection == msg.SenderConnection);
 
-                                        if (castedMsg.ClientGuid != matchClientConnections[msg.SenderConnection].Guid)
+                                        if (client == null || castedMsg.ClientGuid != client.Guid)
                                         {
                                             Log("Recieved PlayerJoinedMessage with invalid ClientGuid property", LogType.Warning);
                                         }
                                         else
                                         {
-                                            matchPlayers.Add(new MatchPlayerState(castedMsg.ClientGuid, castedMsg.CtrlType, false, castedMsg.InitialCharacter));
+                                            players.Add(new ServPlayer(castedMsg.ClientGuid, castedMsg.CtrlType, castedMsg.InitialCharacter));
                                             Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " joined", LogType.Debug);
                                             SendToAll(matchMessage);
 
-                                            if (matchPlayers.Count >= matchSettings.AutoStartMinPlayers && !autoStartTimer.IsRunning && matchSettings.AutoStartTime > 0)
+                                            if (players.Count >= matchSettings.AutoStartMinPlayers && !autoStartTimer.IsRunning && matchSettings.AutoStartTime > 0)
                                             {
                                                 Log("Player count is now above AutoStartMinPlayers, autoStartTimer started", LogType.Debug);
                                                 StartAutoStartTimer();
@@ -749,21 +747,21 @@ namespace SanicballServerLib
                                         var castedMsg = (PlayerLeftMessage)matchMessage;
 
                                         //Check if the message was sent from the same client it wants to act for
-                                        if (castedMsg.ClientGuid != matchClientConnections[msg.SenderConnection].Guid)
+                                        ServClient client = clients.FirstOrDefault(a => a.Connection == msg.SenderConnection);
+                                        if (client == null || castedMsg.ClientGuid != client.Guid)
                                         {
                                             Log("Recieved PlayerLeftMessage with invalid ClientGuid property", LogType.Warning);
                                         }
                                         else
                                         {
-                                            MatchPlayerState player = matchPlayers.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
-                                            matchPlayers.Remove(player);
-                                            playersStillRacing.Remove(player);
+                                            ServPlayer player = players.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
+                                            players.Remove(player);
                                             Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " left", LogType.Debug);
                                             SendToAll(matchMessage);
 
-                                            if (matchPlayers.Count < matchSettings.AutoStartMinPlayers && autoStartTimer.IsRunning)
+                                            if (players.Count < matchSettings.AutoStartMinPlayers && autoStartTimer.IsRunning)
                                             {
-                                                Log("Player count is now below AutoStartMinPlayers, autoStartTimer stopped", LogType.Debug);
+                                                Log("Too few players, match auto start timer stopped");
                                                 StopAutoStartTimer();
                                             }
                                         }
@@ -774,17 +772,18 @@ namespace SanicballServerLib
                                         var castedMsg = (CharacterChangedMessage)matchMessage;
 
                                         //Check if the message was sent from the same client it wants to act for
-                                        if (castedMsg.ClientGuid != matchClientConnections[msg.SenderConnection].Guid)
+                                        ServClient client = clients.FirstOrDefault(a => a.Connection == msg.SenderConnection);
+                                        if (client == null || client.Guid != castedMsg.ClientGuid)
                                         {
                                             Log("Recieved CharacterChangedMessage with invalid ClientGuid property", LogType.Warning);
                                         }
                                         else
                                         {
-                                            MatchPlayerState player = matchPlayers.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
+                                            ServPlayer player = players.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
                                             if (player != null)
                                             {
-                                                int index = matchPlayers.IndexOf(player);
-                                                matchPlayers[index] = new MatchPlayerState(player.ClientGuid, player.CtrlType, player.ReadyToRace, castedMsg.NewCharacter);
+                                                int index = players.IndexOf(player);
+                                                players[index].CharacterId = castedMsg.NewCharacter;
                                             }
                                             Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " set character to " + castedMsg.NewCharacter, LogType.Debug);
 
@@ -797,22 +796,23 @@ namespace SanicballServerLib
                                         var castedMsg = (ChangedReadyMessage)matchMessage;
 
                                         //Check if the message was sent from the same client it wants to act for
-                                        if (castedMsg.ClientGuid != matchClientConnections[msg.SenderConnection].Guid)
+                                        ServClient client = clients.FirstOrDefault(a => a.Connection == msg.SenderConnection);
+                                        if (client == null || client.Guid != castedMsg.ClientGuid)
                                         {
                                             Log("Recieved ChangeReadyMessage with invalid ClientGuid property", LogType.Warning);
                                         }
                                         else
                                         {
-                                            MatchPlayerState player = matchPlayers.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
+                                            ServPlayer player = players.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
                                             if (player != null)
                                             {
-                                                int index = matchPlayers.IndexOf(player);
-                                                matchPlayers[index] = new MatchPlayerState(player.ClientGuid, player.CtrlType, castedMsg.Ready, player.CharacterId);
+                                                int index = players.IndexOf(player);
+                                                players[index].ReadyToRace = castedMsg.Ready;
                                             }
                                             Log("Player " + castedMsg.ClientGuid + "#" + castedMsg.CtrlType + " set ready to " + castedMsg.Ready, LogType.Debug);
 
                                             //Start lobby timer if all players are ready - otherwise reset it if it's running
-                                            bool allPlayersReady = matchPlayers.All(a => a.ReadyToRace);
+                                            bool allPlayersReady = players.All(a => a.ReadyToRace);
                                             if (allPlayersReady)
                                             {
                                                 lobbyTimer.Start();
@@ -842,18 +842,21 @@ namespace SanicballServerLib
 
                                     if (matchMessage is StartRaceMessage)
                                     {
-                                        if (clientsLoadingStage.Count > 0)
+                                        int clientsLoadingStage = clients.Count(a => a.CurrentlyLoadingStage);
+                                        if (clientsLoadingStage > 0)
                                         {
-                                            MatchClientState client = matchClientConnections[msg.SenderConnection];
-                                            clientsLoadingStage.Remove(client);
-                                            Log("Waiting for " + clientsLoadingStage.Count + " client(s) to load");
+                                            ServClient client = clients.FirstOrDefault(a => a.Connection == msg.SenderConnection);
+                                            client.CurrentlyLoadingStage = false;
+                                            clientsLoadingStage--;
+                                            Log("Waiting for " + clientsLoadingStage + " client(s) to load");
 
-                                            if (clientsLoadingStage.Count == 0)
+                                            if (clientsLoadingStage == 0)
                                             {
                                                 Log("Starting race!", LogType.Debug);
                                                 SendToAll(new StartRaceMessage());
                                                 stageLoadingTimeoutTimer.Reset();
-                                                playersStillRacing.AddRange(matchPlayers);
+                                                //Indicate that all currently active players are racing
+                                                foreach (ServPlayer p in players) p.CurrentlyRacing = true;
                                             }
                                         }
                                     }
@@ -863,24 +866,29 @@ namespace SanicballServerLib
                                         var castedMsg = (ChatMessage)matchMessage;
                                         Log(string.Format("[{0}] {1}: {2}", castedMsg.Type, castedMsg.From, castedMsg.Text));
 
+                                        if (castedMsg.Text.ToLower().Contains("shrek"))
+                                        {
+                                            Kick(clients.FirstOrDefault(a => a.Connection == msg.SenderConnection), "no");
+                                        }
+
                                         SendToAll(matchMessage);
                                     }
 
                                     if (matchMessage is LoadLobbyMessage)
                                     {
-                                        MatchClientState client = matchClientConnections[msg.SenderConnection];
-                                        if (!clientsWantingToReturn.Contains(client))
+                                        ServClient client = clients.FirstOrDefault(a => a.Connection == msg.SenderConnection);
+                                        if (!client.WantsToReturnToLobby)
                                         {
-                                            clientsWantingToReturn.Add(client);
+                                            client.WantsToReturnToLobby = true;
 
-                                            if (clientsWantingToReturn.Count >= matchClients.Count)
+                                            if (clients.All(a => a.WantsToReturnToLobby))
                                             {
                                                 Broadcast("All clients have voted to return to the lobby.");
                                                 ReturnToLobby();
                                             }
                                             else
                                             {
-                                                int clientsNeeded = matchClients.Count - clientsWantingToReturn.Count;
+                                                int clientsNeeded = clients.Count - clients.Count(a => a.WantsToReturnToLobby);
                                                 Broadcast(client.Name + " wants to return to the lobby. " + clientsNeeded + " more vote(s) needed.");
                                             }
                                         }
@@ -901,12 +909,13 @@ namespace SanicballServerLib
                                     if (matchMessage is DoneRacingMessage)
                                     {
                                         var castedMsg = (DoneRacingMessage)matchMessage;
-                                        MatchPlayerState player = playersStillRacing.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
+                                        ServPlayer player = players.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
                                         if (player != null)
                                         {
-                                            playersStillRacing.Remove(player);
+                                            player.CurrentlyRacing = false;
 
-                                            if (playersStillRacing.Count == 0)
+                                            int playersStillRacing = players.Count(a => a.CurrentlyRacing);
+                                            if (playersStillRacing == 0)
                                             {
                                                 Log("All players are done racing.");
                                                 if (matchSettings.AutoReturnTime > 0)
@@ -917,7 +926,7 @@ namespace SanicballServerLib
                                             }
                                             else
                                             {
-                                                Log(playersStillRacing.Count + " players(s) still racing");
+                                                Log(playersStillRacing + " players(s) still racing");
                                             }
                                         }
                                     }
@@ -946,13 +955,11 @@ namespace SanicballServerLib
             StopAutoStartTimer();
             SendToAll(new LoadRaceMessage());
             inRace = true;
-            for (int i = 0; i < matchPlayers.Count; i++)
-            {
-                MatchPlayerState player = matchPlayers[i];
-                matchPlayers[i] = new MatchPlayerState(player.ClientGuid, player.CtrlType, false, player.CharacterId);
-            }
+            //Set ready to false for all players
+            players.ForEach(a => a.ReadyToRace = false);
             //Wait for clients to load the stage
-            clientsLoadingStage.AddRange(matchClients);
+            clients.ForEach(a => a.CurrentlyLoadingStage = true);
+            //Start timeout timer
             stageLoadingTimeoutTimer.Start();
         }
 
@@ -964,8 +971,8 @@ namespace SanicballServerLib
                 inRace = false;
                 SendToAll(new LoadLobbyMessage());
 
-                playersStillRacing.Clear();
-                clientsWantingToReturn.Clear();
+                players.ForEach(a => a.CurrentlyRacing = false);
+                clients.ForEach(a => a.WantsToReturnToLobby = false);
 
                 //Stage rotation
                 switch (matchSettings.StageRotationMode)
@@ -986,7 +993,7 @@ namespace SanicballServerLib
                         break;
                 }
 
-                if (matchPlayers.Count >= matchSettings.AutoStartMinPlayers && matchSettings.AutoStartTime > 0)
+                if (players.Count >= matchSettings.AutoStartMinPlayers && matchSettings.AutoStartTime > 0)
                 {
                     Log("There are still players, autoStartTimer started", LogType.Debug);
                     StartAutoStartTimer();
@@ -1041,7 +1048,12 @@ namespace SanicballServerLib
             SendToAll(new ChatMessage("Server", ChatMessageType.System, text));
         }
 
-        private void Log(object message, LogType type = LogType.Normal)
+        /// <summary>
+        /// Writes a message to the server log.
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="type"></param>
+        public void Log(object message, LogType type = LogType.Normal)
         {
             if (!debugMode && type == LogType.Debug)
                 return;
@@ -1050,9 +1062,9 @@ namespace SanicballServerLib
             log.Add(entry);
         }
 
-        private List<MatchClientState> SearchClients(string name)
+        private List<ServClient> SearchClients(string name)
         {
-            return matchClients.Where(a => a.Name.Contains(name)).ToList();
+            return clients.Where(a => a.Name.Contains(name)).ToList();
         }
 
         public void AddCommandHandler(string commandName, CommandHandler handler)
@@ -1060,10 +1072,9 @@ namespace SanicballServerLib
             commandHandlers.Add(commandName, handler);
         }
 
-        public void Kick(MatchClientState client, string reason)
+        public void Kick(ServClient client, string reason)
         {
-            NetConnection conn = matchClientConnections.FirstOrDefault(a => a.Value == client).Key;
-            conn.Disconnect(reason);
+            client.Connection.Disconnect(reason);
         }
 
         #endregion Utility methods
@@ -1073,7 +1084,7 @@ namespace SanicballServerLib
             Log("Saving server config...");
             using (StreamWriter sw = new StreamWriter(CONFIG_FILENAME))
             {
-                sw.Write(JsonConvert.SerializeObject(serverConfig));
+                sw.Write(JsonConvert.SerializeObject(config));
             }
 
             Log("Saving match settings...");

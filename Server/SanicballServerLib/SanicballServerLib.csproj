@@ -64,7 +64,9 @@
     <Compile Include="Command.cs" />
     <Compile Include="CommandQueue.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServClient.cs" />
     <Compile Include="Server.cs" />
+    <Compile Include="ServPlayer.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
