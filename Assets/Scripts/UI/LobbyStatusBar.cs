@@ -54,7 +54,7 @@ namespace Sanicball.UI
             {
                 leftText.text = "Match will not start without players.";
             }
-            rightText.text = clients + " " + (clients != 1 ? "clients" : "client") + " connected playing with " + players + " " + (players != 1 ? "players" : "player");
+            rightText.text = clients + " " + (clients != 1 ? "clients" : "client") + " - " + players + " " + (players != 1 ? "players" : "player");
 
             foreach (ClientListEntry entry in curClientListEntries)
             {
