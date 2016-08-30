@@ -73,7 +73,13 @@ namespace Sanicball.UI
                         int portInt;
                         if (int.TryParse(port, out portInt))
                         {
-                            discoveryClient.DiscoverKnownPeer(ip, portInt);
+                            System.Diagnostics.Stopwatch s = new System.Diagnostics.Stopwatch();
+                            s.Start();
+
+                            System.Threading.Thread discoverThread = new System.Threading.Thread(() => { discoveryClient.DiscoverKnownPeer(ip, portInt); });
+                            discoverThread.Start();
+
+                            Debug.Log("Time: " + s.Elapsed);
                         }
                     }
                 }
