@@ -48,7 +48,7 @@ namespace Sanicball.Logic
                             {
                                 case NetConnectionStatus.Connected:
                                     Debug.Log("Connected! Now waiting for match state");
-                                    activeConnectingPopup.ShowMessage("Recieving match state...");
+                                    activeConnectingPopup.ShowMessage("Receiving match state...");
                                     break;
 
                                 case NetConnectionStatus.Disconnected:

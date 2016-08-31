@@ -52,7 +52,7 @@ namespace SanicballServerLib
         public const string CONFIG_FILENAME = "ServerConfig.json";
         private const string SETTINGS_FILENAME = "MatchSettings.json";
         private const int TICKRATE = 20;
-        private const int STAGE_COUNT = 5; //Hardcoded stage count for now.. can't recieve the actual count since it's part of a Unity prefab.
+        private const int STAGE_COUNT = 5; //Hardcoded stage count for now.. can't receive the actual count since it's part of a Unity prefab.
 
         public event EventHandler<LogArgs> OnLog;
 
@@ -680,7 +680,7 @@ namespace SanicballServerLib
                                     break;
 
                                 default:
-                                    Log("Status change recieved: " + status + " - Message: " + statusMsg, LogType.Debug);
+                                    Log("Status change received: " + status + " - Message: " + statusMsg, LogType.Debug);
                                     break;
                             }
                             break;
@@ -699,7 +699,7 @@ namespace SanicballServerLib
                                     }
                                     catch (JsonException ex)
                                     {
-                                        Log("Failed to deserialize recieved match message. Error description: " + ex.Message, LogType.Warning);
+                                        Log("Failed to deserialize received match message. Error description: " + ex.Message, LogType.Warning);
                                         continue; //Skip to next message in queue
                                     }
 
@@ -723,7 +723,7 @@ namespace SanicballServerLib
 
                                         if (client == null || castedMsg.ClientGuid != client.Guid)
                                         {
-                                            Log("Recieved PlayerJoinedMessage with invalid ClientGuid property", LogType.Warning);
+                                            Log("Received PlayerJoinedMessage with invalid ClientGuid property", LogType.Warning);
                                         }
                                         else
                                         {
@@ -747,7 +747,7 @@ namespace SanicballServerLib
                                         ServClient client = clients.FirstOrDefault(a => a.Connection == msg.SenderConnection);
                                         if (client == null || castedMsg.ClientGuid != client.Guid)
                                         {
-                                            Log("Recieved PlayerLeftMessage with invalid ClientGuid property", LogType.Warning);
+                                            Log("Received PlayerLeftMessage with invalid ClientGuid property", LogType.Warning);
                                         }
                                         else
                                         {
@@ -772,7 +772,7 @@ namespace SanicballServerLib
                                         ServClient client = clients.FirstOrDefault(a => a.Connection == msg.SenderConnection);
                                         if (client == null || client.Guid != castedMsg.ClientGuid)
                                         {
-                                            Log("Recieved CharacterChangedMessage with invalid ClientGuid property", LogType.Warning);
+                                            Log("Received CharacterChangedMessage with invalid ClientGuid property", LogType.Warning);
                                         }
                                         else
                                         {
@@ -796,7 +796,7 @@ namespace SanicballServerLib
                                         ServClient client = clients.FirstOrDefault(a => a.Connection == msg.SenderConnection);
                                         if (client == null || client.Guid != castedMsg.ClientGuid)
                                         {
-                                            Log("Recieved ChangeReadyMessage with invalid ClientGuid property", LogType.Warning);
+                                            Log("Received ChangeReadyMessage with invalid ClientGuid property", LogType.Warning);
                                         }
                                         else
                                         {
@@ -933,13 +933,13 @@ namespace SanicballServerLib
                                     break;
 
                                 default:
-                                    Log("Recieved data message of unknown type", LogType.Debug);
+                                    Log("Received data message of unknown type", LogType.Debug);
                                     break;
                             }
                             break;
 
                         default:
-                            Log("Recieved unhandled message of type " + msg.MessageType, LogType.Debug);
+                            Log("Received unhandled message of type " + msg.MessageType, LogType.Debug);
                             break;
                     }
                 }

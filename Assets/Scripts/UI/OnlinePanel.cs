@@ -85,7 +85,7 @@ namespace Sanicball.UI
                 }
                 else
                 {
-                    Debug.LogError("Failed to recieve servers - " + serverBrowserRequester.error);
+                    Debug.LogError("Failed to receive servers - " + serverBrowserRequester.error);
                 }
 
                 serverBrowserRequester = null;
@@ -113,7 +113,7 @@ namespace Sanicball.UI
                         break;
 
                     default:
-                        Debug.Log("Server discovery client recieved an unhandled NetMessage (" + msg.MessageType + ")");
+                        Debug.Log("Server discovery client received an unhandled NetMessage (" + msg.MessageType + ")");
                         break;
                 }
             }

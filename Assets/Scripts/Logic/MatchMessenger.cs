@@ -32,10 +32,10 @@ namespace Sanicball.Logic
         public abstract void Close();
 
         /// <summary>
-        /// Creates a listener for a type of message that calls the supplied handler delegate when this message type is recieved.
+        /// Creates a listener for a type of message that calls the supplied handler delegate when this message type is received.
         /// </summary>
         /// <typeparam name="T">Message type to add.</typeparam>
-        /// <param name="handler">Handler to call when this message type is recieved.</param>
+        /// <param name="handler">Handler to call when this message type is received.</param>
         public void CreateListener<T>(MatchMessageHandler<T> handler) where T : MatchMessage
         {
             listeners.Add(new MatchMessageListener(typeof(T), handler));
