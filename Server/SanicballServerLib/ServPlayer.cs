@@ -16,10 +16,12 @@ namespace SanicballServerLib
         public bool ReadyToRace { get; set; }
 
         public bool CurrentlyRacing { get; set; }
-        public Stopwatch RacingTimeout { get; set; }
+        public Stopwatch RacingTimeout { get; }
+        public bool TimeoutMessageSent { get; set; }
 
         public ServPlayer(Guid clientGuid, ControlType ctrlType, int initialCharacterId)
         {
+            RacingTimeout = new Stopwatch();
             ClientGuid = clientGuid;
             CtrlType = ctrlType;
             CharacterId = initialCharacterId;

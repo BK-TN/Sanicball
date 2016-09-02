@@ -541,6 +541,24 @@ namespace SanicballServerLib
                     }
                 }
 
+                //Check racing timeout timers
+                foreach (ServPlayer p in players)
+                {
+                    if (!p.TimeoutMessageSent && p.RacingTimeout.Elapsed.TotalSeconds > 30)
+                    {
+                        SendToAll(new RaceTimeoutMessage(p.ClientGuid, p.CtrlType, 30));
+                        p.TimeoutMessageSent = true;
+                    }
+                    if (p.RacingTimeout.Elapsed.TotalSeconds > 60)
+                    {
+                        Log("A player was too slow to race and has been disqualified.");
+                        p.CurrentlyRacing = false;
+                        p.RacingTimeout.Reset();
+
+                        SendToAll(new DoneRacingMessage(p.ClientGuid, p.CtrlType));
+                    }
+                }
+
                 //Check command queue
                 Command cmd;
                 while ((cmd = commandQueue.ReadNext()) != null)
@@ -855,7 +873,11 @@ namespace SanicballServerLib
                                                 SendToAll(new StartRaceMessage());
                                                 stageLoadingTimeoutTimer.Reset();
                                                 //Indicate that all currently active players are racing
-                                                foreach (ServPlayer p in players) p.CurrentlyRacing = true;
+                                                players.ForEach(a =>
+                                                {
+                                                    a.CurrentlyRacing = true;
+                                                    a.RacingTimeout.Start();
+                                                });
                                             }
                                         }
                                     }
@@ -896,8 +918,22 @@ namespace SanicballServerLib
                                     if (matchMessage is CheckpointPassedMessage)
                                     {
                                         var castedMsg = (CheckpointPassedMessage)matchMessage;
-                                        Log("Player entered checkpoint with lap time " + castedMsg.LapTime, LogType.Debug);
-                                        SendToAll(matchMessage);
+
+                                        ServPlayer player = players.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
+                                        if (player != null)
+                                        {
+                                            player.RacingTimeout.Restart();
+                                            if (player.TimeoutMessageSent)
+                                            {
+                                                player.TimeoutMessageSent = false;
+                                                SendToAll(new RaceTimeoutMessage(player.ClientGuid, player.CtrlType, 0));
+                                            }
+                                            SendToAll(matchMessage);
+                                        }
+                                        else
+                                        {
+                                            Log("Received CheckpointPassedMessage for invalid player", LogType.Debug);
+                                        }
                                     }
 
                                     if (matchMessage is PlayerMovementMessage)
@@ -912,6 +948,7 @@ namespace SanicballServerLib
                                         if (player != null)
                                         {
                                             player.CurrentlyRacing = false;
+                                            player.RacingTimeout.Reset();
 
                                             int playersStillRacing = players.Count(a => a.CurrentlyRacing);
                                             if (playersStillRacing == 0)
@@ -970,7 +1007,12 @@ namespace SanicballServerLib
                 inRace = false;
                 SendToAll(new LoadLobbyMessage());
 
-                players.ForEach(a => a.CurrentlyRacing = false);
+                players.ForEach(a =>
+                {
+                    a.CurrentlyRacing = false;
+                    a.RacingTimeout.Reset();
+                    a.TimeoutMessageSent = false;
+                });
                 clients.ForEach(a => a.WantsToReturnToLobby = false);
 
                 //Stage rotation

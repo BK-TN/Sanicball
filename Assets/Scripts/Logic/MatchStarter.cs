@@ -57,7 +57,7 @@ namespace Sanicball.Logic
 
                                 default:
                                     string statusMsg = msg.ReadString();
-                                    Debug.Log("Status change recieved: " + status + " - Message: " + statusMsg);
+                                    Debug.Log("Status change received: " + status + " - Message: " + statusMsg);
                                     break;
                             }
                             break;

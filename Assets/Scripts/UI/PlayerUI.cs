@@ -201,13 +201,18 @@ namespace Sanicball.UI
             }
 
             //Race time
-            System.TimeSpan timeToUse = TargetManager.RaceTime;
+            TimeSpan timeToUse = TargetManager.RaceTime;
             if (TargetPlayer.FinishReport != null)
             {
                 timeToUse = TargetPlayer.FinishReport.Time;
                 timeField.color = finishedColor;
             }
             timeField.text = GetTimeString(timeToUse);
+
+            if (TargetPlayer.Timeout > 0)
+            {
+                timeField.text += Environment.NewLine + "<b>Timeout</b> " + GetTimeString(TimeSpan.FromSeconds(TargetPlayer.Timeout));
+            }
 
             //Checkpoint marker
             if (TargetPlayer.NextCheckpoint != null)

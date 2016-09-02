@@ -51,6 +51,7 @@ namespace Sanicball.Logic
         //Time
         private float lapTime;
         private float[] checkpointTimes;
+        private float timeout;
 
         //Cache of the scene's StageReferences object (Because it's used often)
         private StageReferences sr;
@@ -77,6 +78,7 @@ namespace Sanicball.Logic
         public int Lap { get { return lap; } }
         public bool RaceFinished { get { return finishReport != null; } }
         public RaceFinishReport FinishReport { get { return finishReport; } }
+        public float Timeout { get { return timeout; } }
 
         //Misc properties
         public MatchPlayer AssociatedMatchPlayer { get { return associatedMatchPlayer; } }
@@ -90,6 +92,7 @@ namespace Sanicball.Logic
             this.matchMessenger = matchMessenger;
             this.associatedMatchPlayer = associatedMatchPlayer;
             matchMessenger.CreateListener<CheckpointPassedMessage>(CheckpointPassedHandler);
+            matchMessenger.CreateListener<RaceTimeoutMessage>(RaceTimeoutHandler);
 
             lap = 1;
 
@@ -194,6 +197,14 @@ namespace Sanicball.Logic
             }
         }
 
+        private void RaceTimeoutHandler(RaceTimeoutMessage msg, float travelTime)
+        {
+            if (associatedMatchPlayer != null && msg.ClientGuid == associatedMatchPlayer.ClientGuid && msg.CtrlType == associatedMatchPlayer.CtrlType)
+            {
+                timeout = msg.Time - travelTime;
+            }
+        }
+
         private void PassNextCheckpoint(float lapTime)
         {
             checkpointTimes[currentCheckpointIndex] = lapTime;
@@ -268,6 +279,12 @@ namespace Sanicball.Logic
         public void UpdateTimer(float dt)
         {
             lapTime += dt;
+
+            //This is also a good time to decrement the timeout timer if it's above 0
+            if (timeout > 0)
+            {
+                timeout = Mathf.Max(0, timeout - Time.deltaTime);
+            }
         }
 
         public void Destroy()
