@@ -18,8 +18,12 @@ namespace Sanicball.Gameplay
         }
 
         private void Update()
-        {
-            if (UI.PauseMenu.GamePaused) return; //Short circuit if paused
+        { //Short circuit if paused
+            if (UI.PauseMenu.GamePaused)
+            {
+                ball.DirectionVector = Vector3.zero;
+                return;
+            }
 
             //GO FAST
             const float weight = 0.5f;

@@ -2,6 +2,7 @@
 using System.Linq;
 using Sanicball.Data;
 using Sanicball.Gameplay;
+using Sanicball.UI;
 using UnityEngine;
 
 namespace Sanicball.Logic
@@ -23,11 +24,11 @@ namespace Sanicball.Logic
         [SerializeField]
         private WaitingUI waitingUIPrefab = null;
         [SerializeField]
-        private UI.RaceCountdown raceCountdownPrefab = null;
+        private RaceCountdown raceCountdownPrefab = null;
         [SerializeField]
-        private UI.PlayerUI playerUIPrefab = null;
+        private PlayerUI playerUIPrefab = null;
         [SerializeField]
-        private UI.RaceUI raceUIPrefab = null;
+        private RaceUI raceUIPrefab = null;
         [SerializeField]
         private SpectatorView spectatorViewPrefab = null;
 
@@ -45,13 +46,14 @@ namespace Sanicball.Logic
         private WaitingUI activeWaitingUI;
         private double raceTimer = 0f;
         private bool raceTimerOn = false;
-        private UI.RaceUI raceUI;
+        private RaceUI raceUI;
         private float countdownOffset;
         private bool joinedWhileRaceInProgress;
 
         //Properties
         public System.TimeSpan RaceTime { get { return System.TimeSpan.FromSeconds(raceTimer); } }
         public MatchSettings Settings { get { return settings; } }
+
         //PlayerCount gets number of players, indexer lets you retrieve them
         public int PlayerCount { get { return players.Count; } }
         public RacePlayer this[int playerIndex] { get { return players[playerIndex]; } }
@@ -273,7 +275,7 @@ namespace Sanicball.Logic
                 if (!players.Any(a => a.IsPlayer && !a.RaceFinished))
                 {
                     //TODO: Auto return to lobby after a timer
-                    raceUI.ShowFinishedText();
+                    raceUI.ShowScoreboard();
                 }
             }
         }

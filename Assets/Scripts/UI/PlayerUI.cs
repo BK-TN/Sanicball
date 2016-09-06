@@ -113,7 +113,7 @@ namespace Sanicball.UI
         private void TargetPlayer_NextCheckpointPassed(object sender, NextCheckpointPassArgs e)
         {
             UISound.Play(checkpointSound);
-            checkpointTimeField.text = GetTimeString(e.CurrentLapTime);
+            checkpointTimeField.text = Utils.GetTimeString(e.CurrentLapTime);
             checkpointTimeField.GetComponent<ToggleCanvasGroup>().ShowTemporarily(2f);
 
             if (TargetPlayer.LapRecordsEnabled)
@@ -131,7 +131,7 @@ namespace Sanicball.UI
                     bool faster = diff < 0;
                     TimeSpan diffSpan = TimeSpan.FromSeconds(Mathf.Abs(diff));
 
-                    checkpointTimeDiffField.text = (faster ? "-" : "+") + GetTimeString(diffSpan);
+                    checkpointTimeDiffField.text = (faster ? "-" : "+") + Utils.GetTimeString(diffSpan);
                     checkpointTimeDiffField.color = faster ? Color.blue : Color.red;
                     checkpointTimeDiffField.GetComponent<ToggleCanvasGroup>().ShowTemporarily(2f);
 
@@ -207,11 +207,11 @@ namespace Sanicball.UI
                 timeToUse = TargetPlayer.FinishReport.Time;
                 timeField.color = finishedColor;
             }
-            timeField.text = GetTimeString(timeToUse);
+            timeField.text = Utils.GetTimeString(timeToUse);
 
             if (TargetPlayer.Timeout > 0)
             {
-                timeField.text += Environment.NewLine + "<b>Timeout</b> " + GetTimeString(TimeSpan.FromSeconds(TargetPlayer.Timeout));
+                timeField.text += Environment.NewLine + "<b>Timeout</b> " + Utils.GetTimeString(TimeSpan.FromSeconds(TargetPlayer.Timeout));
             }
 
             //Checkpoint marker
@@ -226,11 +226,6 @@ namespace Sanicball.UI
             {
                 m.CameraToUse = TargetCamera;
             }
-        }
-
-        private string GetTimeString(TimeSpan timeToUse)
-        {
-            return string.Format("{0:00}:{1:00}.{2:000}", timeToUse.Minutes, timeToUse.Seconds, timeToUse.Milliseconds);
         }
     }
 }

@@ -8,6 +8,11 @@ namespace Sanicball.Logic
 {
     public class RaceFinishReport
     {
+        /// <summary>
+        /// Finishing with this position means the player has been disqualified.
+        /// </summary>
+        public const int DISQUALIFIED_POS = -1;
+
         private TimeSpan time;
         private int position;
 

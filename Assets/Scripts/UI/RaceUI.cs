@@ -13,7 +13,7 @@ namespace Sanicball.UI
         private Transform portraitContainer = null;
 
         [SerializeField]
-        private RectTransform finishedText;
+        private Scoreboard scoreboard;
 
         public RaceManager TargetManager { get; set; }
 
@@ -27,9 +27,10 @@ namespace Sanicball.UI
             }
         }
 
-        public void ShowFinishedText()
+        public void ShowScoreboard()
         {
-            finishedText.gameObject.SetActive(true);
+            scoreboard.GetComponent<ToggleCanvasGroup>().Show();
+            scoreboard.DisplayResults(TargetManager);
         }
     }
 }
