@@ -961,6 +961,7 @@ namespace SanicballServerLib
 
                 playersStillRacing.Clear();
                 clientsWantingToReturn.Clear();
+                backToLobbyTimer.Reset();
 
                 //Stage rotation
                 switch (matchSettings.StageRotationMode)
