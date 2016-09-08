@@ -18,10 +18,14 @@ namespace Sanicball.UI
         private ServerInfo info;
         private System.Net.IPEndPoint endpoint;
 
-        public void Init(ServerInfo info, System.Net.IPEndPoint endpoint, int pingMs)
+        public void Init(ServerInfo info, System.Net.IPEndPoint endpoint, int pingMs, bool isLocal)
         {
             serverNameText.text = info.Config.ServerName;
             serverStatusText.text = info.InRace ? "In race" : "In lobby";
+            if (isLocal)
+            {
+                serverStatusText.text += " - LAN server";
+            }
             playerCountText.text = info.Players + "/" + info.Config.MaxPlayers;
             pingText.text = pingMs + "ms";
 

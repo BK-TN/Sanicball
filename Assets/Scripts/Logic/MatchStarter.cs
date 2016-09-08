@@ -66,14 +66,19 @@ namespace Sanicball.Logic
                             byte type = msg.ReadByte();
                             if (type == MessageType.InitMessage)
                             {
+                                string matchStateStr = "";
                                 try
                                 {
-                                    MatchState matchInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<MatchState>(msg.ReadString());
+                                    matchStateStr = msg.ReadString();
+                                    MatchState matchInfo = Newtonsoft.Json.JsonConvert.DeserializeObject<MatchState>(matchStateStr);
                                     BeginOnlineGame(matchInfo);
                                 }
                                 catch (Newtonsoft.Json.JsonException ex)
                                 {
                                     activeConnectingPopup.ShowMessage("Failed to read match state - cannot join server!");
+                                    joiningClient.Disconnect("Failed to read match state");
+                                    Debug.LogError("Could not read match state, error: " + ex.Message);
+                                    Debug.LogError("Full message: " + matchStateStr);
                                 }
                             }
                             break;

@@ -127,7 +127,7 @@ namespace SanicballServerLib
                 }
                 else
                 {
-                    SendToAll(new ChatMessage("Server", ChatMessageType.User, cmd.Content));
+                    SendToAll(new ChatMessage("Server", ChatMessageType.System, cmd.Content));
                     Log("Chat message sent");
                 }
             });
@@ -596,7 +596,6 @@ namespace SanicballServerLib
                         case NetIncomingMessageType.DiscoveryRequest:
                             ServerInfo info = new ServerInfo();
                             info.Config = config;
-                            info.Timestamp = DateTime.UtcNow;
                             info.Players = netServer.ConnectionsCount;
                             info.InRace = inRace;
                             NetOutgoingMessage responseMessage = netServer.CreateMessage();
@@ -655,7 +654,10 @@ namespace SanicballServerLib
                                     }
 
                                     MatchState state = new MatchState(clientStates, playerStates, matchSettings, inRace, autoStartTimeLeft);
-                                    stateMsg.Write(JsonConvert.SerializeObject(state));
+
+                                    string str = JsonConvert.SerializeObject(state);
+                                    Log("Sending match state: " + str, LogType.Debug);
+                                    stateMsg.Write(str);
 
                                     netServer.SendMessage(stateMsg, msg.SenderConnection, NetDeliveryMethod.ReliableOrdered);
 
