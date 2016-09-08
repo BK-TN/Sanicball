@@ -1076,7 +1076,7 @@ namespace SanicballServerLib
             netMsg.Write(MessageType.MatchMessage);
             netMsg.WriteTime(false);
             netMsg.Write(matchMsgSerialized);
-            netServer.SendMessage(netMsg, netServer.Connections, NetDeliveryMethod.ReliableOrdered, 0);
+            netServer.SendMessage(netMsg, netServer.Connections, matchMsg.Reliable ? NetDeliveryMethod.ReliableOrdered : NetDeliveryMethod.Unreliable, 0);
         }
 
         /// <summary>
