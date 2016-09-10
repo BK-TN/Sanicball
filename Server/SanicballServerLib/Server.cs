@@ -891,7 +891,12 @@ namespace SanicballServerLib
 
                                         if (castedMsg.Text.ToLower().Contains("shrek"))
                                         {
-                                            Kick(clients.FirstOrDefault(a => a.Connection == msg.SenderConnection), "no");
+                                            ServClient client = clients.FirstOrDefault(a => a.Connection == msg.SenderConnection);
+                                            ServPlayer[] playersFromClient = players.Where(a => a.ClientGuid == client.Guid).ToArray();
+                                            foreach (ServPlayer p in playersFromClient)
+                                            {
+                                                SendToAll(new CharacterChangedMessage(p.ClientGuid, p.CtrlType, 15));
+                                            }
                                         }
 
                                         SendToAll(matchMessage);

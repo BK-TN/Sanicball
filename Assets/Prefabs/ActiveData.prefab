@@ -85,6 +85,7 @@ MonoBehaviour:
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
     hyperspeed: 0
+    hidden: 0
   - name: Knackles
     title: The moron
     artBy: an unknown artist
@@ -102,6 +103,7 @@ MonoBehaviour:
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
     hyperspeed: 0
+    hidden: 0
   - name: Taels
     title: The furry
     artBy: Deviantart user Mew087123
@@ -119,6 +121,7 @@ MonoBehaviour:
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
     hyperspeed: 0
+    hidden: 0
   - name: Ame Roes
     title: The pointless love interest
     artBy: /u/o_opc
@@ -136,6 +139,7 @@ MonoBehaviour:
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
     hyperspeed: 0
+    hidden: 0
   - name: Shedew
     title: The edgelord
     artBy: Deviantart user GalaxyTheHedgehog1
@@ -153,6 +157,7 @@ MonoBehaviour:
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
     hyperspeed: 0
+    hidden: 0
   - name: Roge
     title: The stripper bat
     artBy: Tyson Hesse
@@ -170,6 +175,7 @@ MonoBehaviour:
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
     hyperspeed: 0
+    hidden: 0
   - name: Asspio
     title: The unknown side character
     artBy: BK-TN
@@ -187,6 +193,7 @@ MonoBehaviour:
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
     hyperspeed: 0
+    hidden: 0
   - name: Big
     title: The fucking cat
     artBy: /r/EdulokoX
@@ -204,6 +211,7 @@ MonoBehaviour:
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
     hyperspeed: 0
+    hidden: 0
   - name: Dr. Aggmen
     title: The bad guy
     artBy: Tyson Hesse
@@ -221,6 +229,7 @@ MonoBehaviour:
     alternativeMesh: {fileID: 4300000, guid: f7e58024306f668428fe7ffa6a2cc208, type: 3}
     collisionMesh: {fileID: 0}
     hyperspeed: 0
+    hidden: 0
   - name: Chermy Bee
     title: The annoying sidekick
     artBy: DazeDream
@@ -238,6 +247,7 @@ MonoBehaviour:
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
     hyperspeed: 0
+    hidden: 0
   - name: Sulver
     title: The angry idiot
     artBy: DazeDream
@@ -255,6 +265,7 @@ MonoBehaviour:
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
     hyperspeed: 0
+    hidden: 0
   - name: Bloze
     title: The weed joke
     artBy: Deviantart user RoyalJellySandwich
@@ -272,6 +283,7 @@ MonoBehaviour:
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
     hyperspeed: 0
+    hidden: 0
   - name: Vactor
     title: The.. wait, what?
     artBy: I don't even
@@ -289,6 +301,7 @@ MonoBehaviour:
     alternativeMesh: {fileID: 4300000, guid: 62feaf2fb2598524dab37715d8a44e7a, type: 3}
     collisionMesh: {fileID: 0}
     hyperspeed: 0
+    hidden: 0
   - name: Super Sanic
     title: The shitty meme
     artBy: Deviantart user franz888
@@ -306,6 +319,7 @@ MonoBehaviour:
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
     hyperspeed: 1
+    hidden: 0
   - name: Metal Sanic
     title: Meme steel-er
     artBy: Deviantart user franz888
@@ -323,6 +337,25 @@ MonoBehaviour:
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
     hyperspeed: 0
+    hidden: 0
+  - name: ogre
+    title: 
+    artBy: 
+    stats:
+      rollSpeed: 90
+      airSpeed: 5
+      jumpHeight: 4
+      grip: 20
+    material: {fileID: 2100000, guid: d7caadbf0d38fa54e8998ef3b93bf467, type: 2}
+    icon: {fileID: 21300000, guid: 45106eab8e7289244b88d1cb65eee2e1, type: 3}
+    color: {r: 0.28611588, g: 0.39472315, b: 0.7941176, a: 1}
+    minimapIcon: {fileID: 2100000, guid: f5d23da2c0fe42d49b12083694a8ddd0, type: 2}
+    trail: {fileID: 2100000, guid: dcca274f4ea616e47b077f91462bb930, type: 2}
+    ballSize: 1.5
+    alternativeMesh: {fileID: 0}
+    collisionMesh: {fileID: 0}
+    hyperspeed: 0
+    hidden: 1
   gameJoltInfo:
     gameID: 0
     privateKey: 

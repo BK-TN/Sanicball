@@ -18,5 +18,6 @@ namespace Sanicball.Data
         public Mesh alternativeMesh = null;
         public Mesh collisionMesh = null;
         public bool hyperspeed;
+        public bool hidden = false;
     }
 }
