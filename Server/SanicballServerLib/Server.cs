@@ -275,6 +275,20 @@ namespace SanicballServerLib
                     Log("Usage: setStageRotationMode [" + modesStr + "]");
                 }
             });
+            AddCommandHandler("setVoteRatio", cmd =>
+            {
+                float newVoteRatio;
+                if (float.TryParse(cmd.Content, out newVoteRatio) && newVoteRatio <= 1.0)
+                {
+                    matchSettings.voteRatio = newVoteRatio;
+                    SendToAll(new SettingsChangedMessage(matchSettings));
+                    Log("Match vote ratio set to " + newVoteRatio);
+                }
+                else
+                {
+                    Log("Usage: setVoteRatio [<=1.0]");
+                }
+            });
 
             #endregion Command handlers
 
@@ -867,15 +881,16 @@ namespace SanicballServerLib
                                         if (!clientsWantingToReturn.Contains(client))
                                         {
                                             clientsWantingToReturn.Add(client);
+                                            int clientsRequiredToReturn = (int)(matchClients.Count * matchSettings.voteRatio);
 
-                                            if (clientsWantingToReturn.Count >= matchClients.Count)
+                                            if (clientsWantingToReturn.Count >= clientsRequiredToReturn)
                                             {
                                                 Broadcast("All clients have voted to return to the lobby.");
                                                 ReturnToLobby();
                                             }
                                             else
-                                            {
-                                                int clientsNeeded = matchClients.Count - clientsWantingToReturn.Count;
+                                            {   
+                                                int clientsNeeded = clientsRequiredToReturn - clientsWantingToReturn.Count;
                                                 Broadcast(client.Name + " wants to return to the lobby. " + clientsNeeded + " more vote(s) needed.");
                                             }
                                         }
