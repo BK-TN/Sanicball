@@ -11,11 +11,25 @@ namespace Sanicball.UI
         private ScoreboardEntry entryPrefab = null;
         [SerializeField]
         private RectTransform entryContainer = null;
+        [SerializeField]
+        private SlideCanvasGroup slide = null;
+
+        private bool slideShouldOpen = false;
 
         private List<ScoreboardEntry> activeEntries = new List<ScoreboardEntry>();
 
+        private void Update()
+        {
+            if (slideShouldOpen && !slide.isOpen)
+            {
+                slide.Open();
+            }
+        }
+
         public void DisplayResults(RaceManager manager)
         {
+            slideShouldOpen = true;
+
             foreach (ScoreboardEntry e in activeEntries)
             {
                 Destroy(e.gameObject);

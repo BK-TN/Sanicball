@@ -12,9 +12,6 @@ namespace Sanicball.UI
         [SerializeField]
         private Transform portraitContainer = null;
 
-        [SerializeField]
-        private Scoreboard scoreboard;
-
         public RaceManager TargetManager { get; set; }
 
         private void Start()
@@ -25,12 +22,6 @@ namespace Sanicball.UI
                 p.transform.SetParent(portraitContainer, false);
                 p.TargetPlayer = TargetManager[i];
             }
-        }
-
-        public void ShowScoreboard()
-        {
-            scoreboard.GetComponent<ToggleCanvasGroup>().Show();
-            scoreboard.DisplayResults(TargetManager);
         }
     }
 }

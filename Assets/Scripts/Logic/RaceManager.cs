@@ -274,8 +274,7 @@ namespace Sanicball.Logic
                 //TODO: Make proper scoreboard and have it trigger when only local players have finished
                 if (!players.Any(a => a.IsPlayer && !a.RaceFinished))
                 {
-                    //TODO: Auto return to lobby after a timer
-                    raceUI.ShowScoreboard();
+                    StageReferences.Active.endOfMatchHandler.Activate(this);
                 }
             }
         }
