@@ -183,6 +183,16 @@ namespace SanicballServerLib
             {
                 ReturnToLobby();
             });
+            AddCommandHandler("forceStart", cmd =>
+            {
+                if (inRace == false)
+                {
+                    Log("The race has been forcefully started.");
+                    LoadRace();
+                } else {
+                    Log("Race can only be force started in the lobby.");
+                }
+            });
             AddCommandHandler("showSettings", cmd =>
             {
                 Log(JsonConvert.SerializeObject(matchSettings, Formatting.Indented));
@@ -273,6 +283,20 @@ namespace SanicballServerLib
                     string[] modes = Enum.GetNames(typeof(StageRotationMode));
                     string modesStr = string.Join("|", modes);
                     Log("Usage: setStageRotationMode [" + modesStr + "]");
+                }
+            });
+            AddCommandHandler("setVoteRatio", cmd =>
+            {
+                float newVoteRatio;
+                if (float.TryParse(cmd.Content, out newVoteRatio) && newVoteRatio <= 1.0)
+                {
+                    matchSettings.voteRatio = newVoteRatio;
+                    SendToAll(new SettingsChangedMessage(matchSettings));
+                    Log("Match vote ratio set to " + newVoteRatio);
+                }
+                else
+                {
+                    Log("Usage: setVoteRatio [<=1.0]");
                 }
             });
 
@@ -867,15 +891,16 @@ namespace SanicballServerLib
                                         if (!clientsWantingToReturn.Contains(client))
                                         {
                                             clientsWantingToReturn.Add(client);
+                                            int clientsRequiredToReturn = (int)(matchClients.Count * matchSettings.voteRatio);
 
-                                            if (clientsWantingToReturn.Count >= matchClients.Count)
+                                            if (clientsWantingToReturn.Count >= clientsRequiredToReturn)
                                             {
                                                 Broadcast("All clients have voted to return to the lobby.");
                                                 ReturnToLobby();
                                             }
                                             else
-                                            {
-                                                int clientsNeeded = matchClients.Count - clientsWantingToReturn.Count;
+                                            {   
+                                                int clientsNeeded = clientsRequiredToReturn - clientsWantingToReturn.Count;
                                                 Broadcast(client.Name + " wants to return to the lobby. " + clientsNeeded + " more vote(s) needed.");
                                             }
                                         }
@@ -966,6 +991,18 @@ namespace SanicballServerLib
                 //Stage rotation
                 switch (matchSettings.StageRotationMode)
                 {
+                    case StageRotationMode.Shuffle:
+                        //psuedo-shuffle mode (makes sure previous stage isn't the same)
+                        Log("Picking random, different stage");
+                        int differentStage = random.Next(STAGE_COUNT);
+                        while (differentStage == matchSettings.StageId)
+                        {
+                            differentStage = random.Next(STAGE_COUNT);
+                        }
+                        matchSettings.StageId = differentStage;
+                        SendToAll(new SettingsChangedMessage(matchSettings));
+                        break;
+
                     case StageRotationMode.Random:
                         Log("Picking random stage");
                         int newStage = random.Next(STAGE_COUNT);
