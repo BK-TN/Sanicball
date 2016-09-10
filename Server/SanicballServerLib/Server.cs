@@ -966,6 +966,18 @@ namespace SanicballServerLib
                 //Stage rotation
                 switch (matchSettings.StageRotationMode)
                 {
+                    case StageRotationMode.Shuffle:
+                        //psuedo-shuffle mode (makes sure previous stage isn't the same)
+                        Log("Picking random, different stage");
+                        int differentStage = random.Next(STAGE_COUNT);
+                        while (differentStage == matchSettings.StageId)
+                        {
+                            differentStage = random.Next(STAGE_COUNT);
+                        }
+                        matchSettings.StageId = differentStage;
+                        SendToAll(new SettingsChangedMessage(matchSettings));
+                        break;
+
                     case StageRotationMode.Random:
                         Log("Picking random stage");
                         int newStage = random.Next(STAGE_COUNT);

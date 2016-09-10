@@ -17,7 +17,8 @@ namespace Sanicball.Data
     {
         None,
         Sequenced,
-        Random
+        Random,
+        Shuffle
     }
 
     public struct MatchSettings
