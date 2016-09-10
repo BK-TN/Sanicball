@@ -58,6 +58,9 @@ namespace Sanicball.Logic
         public int PlayerCount { get { return players.Count; } }
         public RacePlayer this[int playerIndex] { get { return players[playerIndex]; } }
 
+        //Return players as read only collection (easier to query)
+        public System.Collections.ObjectModel.ReadOnlyCollection<RacePlayer> Players { get { return new System.Collections.ObjectModel.ReadOnlyCollection<RacePlayer>(players); } }
+
         private RaceState CurrentState
         {
             get
@@ -204,7 +207,6 @@ namespace Sanicball.Logic
                     matchPlayer.CharacterId,
                     name + " (" + GameInput.GetControlTypeName(matchPlayer.CtrlType) + ")"
                     );
-                matchPlayer.BallObject.CanMove = false;
 
                 //Create race player
                 var racePlayer = new RacePlayer(matchPlayer.BallObject, messenger, matchPlayer);

@@ -34,14 +34,14 @@ public class Marker : MonoBehaviour
 
     private void Update()
     {
-        if (!target)
+        var cam = Camera.main;
+        if (CameraToUse) cam = CameraToUse;
+
+        if (!target || !cam)
         {
             Destroy(gameObject);
             return;
         }
-
-        var cam = Camera.main;
-        if (CameraToUse) cam = CameraToUse;
 
         var relativePosition = cam.transform.InverseTransformPoint(target.position);
         relativePosition.z = Mathf.Max(relativePosition.z, 1);

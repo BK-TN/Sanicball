@@ -40,6 +40,11 @@ namespace Sanicball.Gameplay
             ytargetRotation = eulerAngles.z;
         }
 
+        public void Remove()
+        {
+            Destroy(gameObject);
+        }
+
         private void Start()
         {
             if (UseMouse)

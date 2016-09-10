@@ -72,12 +72,14 @@ namespace Sanicball.Logic
         public event EventHandler Destroyed;
 
         //Readonly properties that get stuff from the player's ball
+        public Ball Ball { get { return ball; } }
         public bool IsPlayer { get { return ball.Type == BallType.Player; } }
         public string Name { get { return ball.Nickname; } }
         public ControlType CtrlType { get { return ball.CtrlType; } }
         public int Character { get { return ball.CharacterId; } }
         public Transform Transform { get { return ball.transform; } }
         public float Speed { get { return ball.GetComponent<Rigidbody>().velocity.magnitude; } }
+        public IBallCamera Camera { get { return ballCamera; } }
 
         //Race progress properties
         public int Lap { get { return lap; } }
@@ -102,6 +104,7 @@ namespace Sanicball.Logic
             lap = 1;
 
             ball.CanMove = false;
+            ball.AutoBrake = true;
             ball.CheckpointPassed += Ball_CheckpointPassed;
             ball.RespawnRequested += Ball_RespawnRequested;
             currentCheckpointPos = sr.checkpoints[0].transform.position;
@@ -121,6 +124,7 @@ namespace Sanicball.Logic
         public void StartRace()
         {
             ball.CanMove = true;
+            ball.AutoBrake = false;
         }
 
         public void FinishRace(RaceFinishReport report)

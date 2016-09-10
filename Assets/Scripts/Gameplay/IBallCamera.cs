@@ -10,5 +10,7 @@ namespace Sanicball.Gameplay
         ControlType CtrlType { get; set; }
 
         void SetDirection(Quaternion dir);
+
+        void Remove();
     }
 }
