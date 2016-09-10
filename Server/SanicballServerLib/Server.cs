@@ -183,6 +183,16 @@ namespace SanicballServerLib
             {
                 ReturnToLobby();
             });
+            AddCommandHandler("forceStart", cmd =>
+            {
+                if (inRace == false)
+                {
+                    Log("The race has been forcefully started.");
+                    LoadRace();
+                } else {
+                    Log("Race can only be force started in the lobby.");
+                }
+            });
             AddCommandHandler("showSettings", cmd =>
             {
                 Log(JsonConvert.SerializeObject(matchSettings, Formatting.Indented));
