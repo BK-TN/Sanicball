@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Sanicball.Logic;
 using UnityEngine;
 
@@ -30,14 +31,10 @@ namespace Sanicball.UI
         {
             slideShouldOpen = true;
 
-            foreach (ScoreboardEntry e in activeEntries)
-            {
-                Destroy(e.gameObject);
-            }
-            activeEntries.Clear();
-
             for (int i = 0; i < manager.PlayerCount; i++)
             {
+                if (activeEntries.Any(a => a.Player == manager[i])) continue;
+
                 if (manager[i].RaceFinished)
                 {
                     ScoreboardEntry e = Instantiate(entryPrefab);

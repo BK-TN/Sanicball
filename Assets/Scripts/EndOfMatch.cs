@@ -29,6 +29,24 @@ namespace Sanicball
         {
             if (!hasActivatedOnce)
             {
+                //Activate with fade
+                CameraFade.StartAlphaFade(Color.black, false, 1f, 0, () =>
+                {
+                    CameraFade.StartAlphaFade(Color.black, true, 1f);
+                    ActivateInner(manager);
+                });
+            }
+            else
+            {
+                //Activate without fade
+                ActivateInner(manager);
+            }
+        }
+
+        private void ActivateInner(RaceManager manager)
+        {
+            if (!hasActivatedOnce)
+            {
                 hasActivatedOnce = true;
 
                 activeScoreboard = Instantiate(scoreboardPrefab);
@@ -68,9 +86,10 @@ namespace Sanicball
                 if (!movedPlayers.Contains(playerToMove))
                 {
                     playerToMove.Ball.transform.position = spawnpoint;
-                    playerToMove.Ball.GetComponent<Rigidbody>().velocity = Random.insideUnitSphere * 1f;
-                    playerToMove.Ball.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
+                    playerToMove.Ball.GetComponent<Rigidbody>().velocity = Random.insideUnitSphere * 0.5f;
+                    playerToMove.Ball.GetComponent<Rigidbody>().angularVelocity = new Vector3(0, Random.Range(-50f, 50f));
                     playerToMove.Ball.CanMove = false;
+                    playerToMove.Ball.gameObject.layer = LayerMask.NameToLayer("Racer");
                     movedPlayers.Add(playerToMove);
                 }
             }

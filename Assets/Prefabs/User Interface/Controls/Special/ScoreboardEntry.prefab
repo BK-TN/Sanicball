@@ -12,6 +12,8 @@ GameObject:
   - 114: {fileID: 11436950}
   - 114: {fileID: 11421550}
   - 114: {fileID: 11475858}
+  - 225: {fileID: 22530064}
+  - 114: {fileID: 11493388}
   m_Layer: 5
   m_Name: ScoreboardEntry
   m_TagString: Untagged
@@ -273,6 +275,19 @@ MonoBehaviour:
   iconField: {fileID: 11415208}
   nameField: {fileID: 11427646}
   timeField: {fileID: 11427094}
+--- !u!114 &11493388
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 113022}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cb5c99c8c973da439bf3e2955a83650, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startHidden: 1
+  time: 0.5
 --- !u!222 &22205744
 CanvasRenderer:
   m_ObjectHideFlags: 1
@@ -397,6 +412,17 @@ RectTransform:
   m_AnchoredPosition: {x: 5, y: -4}
   m_SizeDelta: {x: 80, y: -8}
   m_Pivot: {x: 0, y: 1}
+--- !u!225 &22530064
+CanvasGroup:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 113022}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

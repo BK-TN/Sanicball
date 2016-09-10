@@ -5,6 +5,7 @@ using UnityEngine.UI;
 
 namespace Sanicball.UI
 {
+    [RequireComponent(typeof(ToggleCanvasGroup))]
     public class ScoreboardEntry : MonoBehaviour
     {
         [SerializeField]
@@ -16,8 +17,13 @@ namespace Sanicball.UI
         [SerializeField]
         private Text timeField = null;
 
+        public RacePlayer Player { get; private set; }
+
         public void Init(RacePlayer player)
         {
+            Player = player;
+            GetComponent<ToggleCanvasGroup>().Show();
+
             RaceFinishReport report = player.FinishReport;
             if (report != null)
             {
