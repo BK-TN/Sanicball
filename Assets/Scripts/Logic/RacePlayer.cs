@@ -16,14 +16,15 @@ namespace Sanicball.Logic
         private TimeSpan time;
         private int position;
 
+        public int Position { get { return position; } }
+        public TimeSpan Time { get { return time; } }
+        public bool Disqualified { get { return position == DISQUALIFIED_POS; } }
+
         public RaceFinishReport(int position, TimeSpan time)
         {
             this.position = position;
             this.time = time;
         }
-
-        public int Position { get { return position; } }
-        public TimeSpan Time { get { return time; } }
     }
 
     public class NextCheckpointPassArgs : EventArgs
@@ -137,12 +138,6 @@ namespace Sanicball.Logic
                     ball.CanMove = false;
                 //Set layer to Racer Ghost to block collision with racing players
                 ball.gameObject.layer = LayerMask.NameToLayer("Racer Ghost");
-
-                //Send a done racing message if this is a local player
-                if (ball.Type == BallType.Player && ball.CtrlType != ControlType.None)
-                {
-                    matchMessenger.SendMessage(new DoneRacingMessage(associatedMatchPlayer.ClientGuid, associatedMatchPlayer.CtrlType));
-                }
             }
             else
             {

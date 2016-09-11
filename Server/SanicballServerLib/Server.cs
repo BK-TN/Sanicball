@@ -53,6 +53,8 @@ namespace SanicballServerLib
         private const string SETTINGS_FILENAME = "MatchSettings.json";
         private const int TICKRATE = 20;
         private const int STAGE_COUNT = 5; //Hardcoded stage count for now.. can't receive the actual count since it's part of a Unity prefab.
+        private const float PLAYER_TIMEOUT_NOTIFY = 60; //Time in seconds until players get notified about their time left to race
+        private const float PLAYER_TIMEOUT_DISQUALIFY = 120; //Time in seconds until players are disqualified
 
         public event EventHandler<LogArgs> OnLog;
 
@@ -544,18 +546,17 @@ namespace SanicballServerLib
                 //Check racing timeout timers
                 foreach (ServPlayer p in players)
                 {
-                    if (!p.TimeoutMessageSent && p.RacingTimeout.Elapsed.TotalSeconds > 30)
+                    if (!p.TimeoutMessageSent && p.RacingTimeout.Elapsed.TotalSeconds > PLAYER_TIMEOUT_NOTIFY)
                     {
-                        SendToAll(new RaceTimeoutMessage(p.ClientGuid, p.CtrlType, 30));
+                        SendToAll(new RaceTimeoutMessage(p.ClientGuid, p.CtrlType, PLAYER_TIMEOUT_DISQUALIFY - PLAYER_TIMEOUT_NOTIFY));
                         p.TimeoutMessageSent = true;
                     }
-                    if (p.RacingTimeout.Elapsed.TotalSeconds > 60)
+                    if (p.RacingTimeout.Elapsed.TotalSeconds > PLAYER_TIMEOUT_DISQUALIFY)
                     {
                         Log("A player was too slow to race and has been disqualified.");
-                        p.CurrentlyRacing = false;
-                        p.RacingTimeout.Reset();
+                        FinishRace(p);
 
-                        SendToAll(new DoneRacingMessage(p.ClientGuid, p.CtrlType));
+                        SendToAll(new DoneRacingMessage(p.ClientGuid, p.CtrlType, 0, true));
                     }
                 }
 
@@ -929,11 +930,15 @@ namespace SanicballServerLib
                                         ServPlayer player = players.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
                                         if (player != null)
                                         {
-                                            player.RacingTimeout.Restart();
-                                            if (player.TimeoutMessageSent)
+                                            //As long as all players are racing, timeouts should be reset.
+                                            if (players.All(a => a.CurrentlyRacing))
                                             {
-                                                player.TimeoutMessageSent = false;
-                                                SendToAll(new RaceTimeoutMessage(player.ClientGuid, player.CtrlType, 0));
+                                                player.RacingTimeout.Restart();
+                                                if (player.TimeoutMessageSent)
+                                                {
+                                                    player.TimeoutMessageSent = false;
+                                                    SendToAll(new RaceTimeoutMessage(player.ClientGuid, player.CtrlType, 0));
+                                                }
                                             }
                                             SendToAll(matchMessage);
                                         }
@@ -954,24 +959,9 @@ namespace SanicballServerLib
                                         ServPlayer player = players.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
                                         if (player != null)
                                         {
-                                            player.CurrentlyRacing = false;
-                                            player.RacingTimeout.Reset();
-
-                                            int playersStillRacing = players.Count(a => a.CurrentlyRacing);
-                                            if (playersStillRacing == 0)
-                                            {
-                                                Log("All players are done racing.");
-                                                if (matchSettings.AutoReturnTime > 0)
-                                                {
-                                                    Broadcast("Returning to lobby in " + matchSettings.AutoReturnTime + " seconds");
-                                                    backToLobbyTimer.Start();
-                                                }
-                                            }
-                                            else
-                                            {
-                                                Log(playersStillRacing + " players(s) still racing");
-                                            }
+                                            FinishRace(player);
                                         }
+                                        SendToAll(matchMessage);
                                     }
 
                                     break;
@@ -1064,6 +1054,27 @@ namespace SanicballServerLib
         {
             autoStartTimer.Reset();
             SendToAll(new AutoStartTimerMessage(false));
+        }
+
+        private void FinishRace(ServPlayer p)
+        {
+            p.CurrentlyRacing = false;
+            p.RacingTimeout.Reset();
+
+            int playersStillRacing = players.Count(a => a.CurrentlyRacing);
+            if (playersStillRacing == 0)
+            {
+                Log("All players are done racing.");
+                if (matchSettings.AutoReturnTime > 0)
+                {
+                    Broadcast("Returning to lobby in " + matchSettings.AutoReturnTime + " seconds");
+                    backToLobbyTimer.Start();
+                }
+            }
+            else
+            {
+                Log(playersStillRacing + " players(s) still racing");
+            }
         }
 
         #endregion Gameplay methods

@@ -190,14 +190,22 @@ namespace Sanicball.UI
             speedFieldLabel.text = postfix;
 
             //Lap counter
-            if (TargetPlayer.Lap < TargetManager.Settings.Laps + 1)
+            if (!TargetPlayer.RaceFinished)
             {
                 lapField.text = "Lap " + TargetPlayer.Lap + "/" + TargetManager.Settings.Laps;
             }
             else
             {
-                lapField.text = "Race finished";
-                lapField.color = finishedColor;
+                if (TargetPlayer.FinishReport.Disqualified)
+                {
+                    lapField.text = "Disqualified";
+                    lapField.color = Color.red;
+                }
+                else
+                {
+                    lapField.text = "Race finished";
+                    lapField.color = finishedColor;
+                }
             }
 
             //Race time

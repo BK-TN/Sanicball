@@ -35,7 +35,7 @@ namespace Sanicball.UI
             {
                 if (activeEntries.Any(a => a.Player == manager[i])) continue;
 
-                if (manager[i].RaceFinished)
+                if (manager[i].RaceFinished && !manager[i].FinishReport.Disqualified)
                 {
                     ScoreboardEntry e = Instantiate(entryPrefab);
                     e.transform.SetParent(entryContainer, false);

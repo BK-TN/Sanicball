@@ -74,7 +74,7 @@ namespace Sanicball
             }
             activeScoreboard.DisplayResults(manager);
 
-            RacePlayer[] movablePlayers = manager.Players.Where(a => a.RaceFinished).OrderBy(a => a.FinishReport.Position).ToArray();
+            RacePlayer[] movablePlayers = manager.Players.Where(a => a.RaceFinished && !a.FinishReport.Disqualified).OrderBy(a => a.FinishReport.Position).ToArray();
             for (int i = 0; i < movablePlayers.Length; i++)
             {
                 Vector3 spawnpoint = lowerPositionsSpawnpoint.position;
