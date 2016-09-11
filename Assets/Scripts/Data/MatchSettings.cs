@@ -17,7 +17,7 @@ namespace Sanicball.Data
     {
         None,
         Sequenced,
-        Random
+        Random,
     }
 
     public struct MatchSettings
@@ -33,6 +33,7 @@ namespace Sanicball.Data
         public int AutoStartTime { get; set; }
         public int AutoStartMinPlayers { get; set; }
         public int AutoReturnTime { get; set; }
+        public float VoteRatio { get; set; }
         public StageRotationMode StageRotationMode { get; set; }
 
         /// <summary>
@@ -52,6 +53,7 @@ namespace Sanicball.Data
                 AutoStartTime = 60,
                 AutoStartMinPlayers = 2,
                 AutoReturnTime = 15,
+                VoteRatio = 1f,
                 StageRotationMode = StageRotationMode.None
             };
         }
