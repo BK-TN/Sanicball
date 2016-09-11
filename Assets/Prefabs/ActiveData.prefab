@@ -338,17 +338,17 @@ MonoBehaviour:
     collisionMesh: {fileID: 0}
     hyperspeed: 0
     hidden: 0
-  - name: ogre
-    title: 
-    artBy: 
+  - name: Ogre
+    title: Like an onion
+    artBy: didney
     stats:
-      rollSpeed: 90
+      rollSpeed: 99
       airSpeed: 5
       jumpHeight: 4
       grip: 20
     material: {fileID: 2100000, guid: d7caadbf0d38fa54e8998ef3b93bf467, type: 2}
-    icon: {fileID: 21300000, guid: 45106eab8e7289244b88d1cb65eee2e1, type: 3}
-    color: {r: 0.28611588, g: 0.39472315, b: 0.7941176, a: 1}
+    icon: {fileID: 21300000, guid: 69604edd7f9387841a777c31d9ad559a, type: 3}
+    color: {r: 0.8146552, g: 0.99264705, b: 0, a: 1}
     minimapIcon: {fileID: 2100000, guid: f5d23da2c0fe42d49b12083694a8ddd0, type: 2}
     trail: {fileID: 2100000, guid: dcca274f4ea616e47b077f91462bb930, type: 2}
     ballSize: 1.5
