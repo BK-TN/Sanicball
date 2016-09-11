@@ -8,17 +8,23 @@ namespace Sanicball.Logic
 {
     public class RaceFinishReport
     {
+        /// <summary>
+        /// Finishing with this position means the player has been disqualified.
+        /// </summary>
+        public const int DISQUALIFIED_POS = -1;
+
         private TimeSpan time;
         private int position;
+
+        public int Position { get { return position; } }
+        public TimeSpan Time { get { return time; } }
+        public bool Disqualified { get { return position == DISQUALIFIED_POS; } }
 
         public RaceFinishReport(int position, TimeSpan time)
         {
             this.position = position;
             this.time = time;
         }
-
-        public int Position { get { return position; } }
-        public TimeSpan Time { get { return time; } }
     }
 
     public class NextCheckpointPassArgs : EventArgs
@@ -51,6 +57,7 @@ namespace Sanicball.Logic
         //Time
         private float lapTime;
         private float[] checkpointTimes;
+        private float timeout;
 
         //Cache of the scene's StageReferences object (Because it's used often)
         private StageReferences sr;
@@ -66,17 +73,20 @@ namespace Sanicball.Logic
         public event EventHandler Destroyed;
 
         //Readonly properties that get stuff from the player's ball
+        public Ball Ball { get { return ball; } }
         public bool IsPlayer { get { return ball.Type == BallType.Player; } }
         public string Name { get { return ball.Nickname; } }
         public ControlType CtrlType { get { return ball.CtrlType; } }
         public int Character { get { return ball.CharacterId; } }
         public Transform Transform { get { return ball.transform; } }
         public float Speed { get { return ball.GetComponent<Rigidbody>().velocity.magnitude; } }
+        public IBallCamera Camera { get { return ballCamera; } }
 
         //Race progress properties
         public int Lap { get { return lap; } }
         public bool RaceFinished { get { return finishReport != null; } }
         public RaceFinishReport FinishReport { get { return finishReport; } }
+        public float Timeout { get { return timeout; } }
 
         //Misc properties
         public MatchPlayer AssociatedMatchPlayer { get { return associatedMatchPlayer; } }
@@ -90,10 +100,12 @@ namespace Sanicball.Logic
             this.matchMessenger = matchMessenger;
             this.associatedMatchPlayer = associatedMatchPlayer;
             matchMessenger.CreateListener<CheckpointPassedMessage>(CheckpointPassedHandler);
+            matchMessenger.CreateListener<RaceTimeoutMessage>(RaceTimeoutHandler);
 
             lap = 1;
 
             ball.CanMove = false;
+            ball.AutoBrake = true;
             ball.CheckpointPassed += Ball_CheckpointPassed;
             ball.RespawnRequested += Ball_RespawnRequested;
             currentCheckpointPos = sr.checkpoints[0].transform.position;
@@ -113,6 +125,7 @@ namespace Sanicball.Logic
         public void StartRace()
         {
             ball.CanMove = true;
+            ball.AutoBrake = false;
         }
 
         public void FinishRace(RaceFinishReport report)
@@ -125,12 +138,6 @@ namespace Sanicball.Logic
                     ball.CanMove = false;
                 //Set layer to Racer Ghost to block collision with racing players
                 ball.gameObject.layer = LayerMask.NameToLayer("Racer Ghost");
-
-                //Send a done racing message if this is a local player
-                if (ball.Type == BallType.Player && ball.CtrlType != ControlType.None)
-                {
-                    matchMessenger.SendMessage(new DoneRacingMessage(associatedMatchPlayer.ClientGuid, associatedMatchPlayer.CtrlType));
-                }
             }
             else
             {
@@ -191,6 +198,14 @@ namespace Sanicball.Logic
             {
                 PassNextCheckpoint(msg.LapTime);
                 waitingForCheckpointMessage = false;
+            }
+        }
+
+        private void RaceTimeoutHandler(RaceTimeoutMessage msg, float travelTime)
+        {
+            if (associatedMatchPlayer != null && msg.ClientGuid == associatedMatchPlayer.ClientGuid && msg.CtrlType == associatedMatchPlayer.CtrlType)
+            {
+                timeout = msg.Time - travelTime;
             }
         }
 
@@ -268,6 +283,12 @@ namespace Sanicball.Logic
         public void UpdateTimer(float dt)
         {
             lapTime += dt;
+
+            //This is also a good time to decrement the timeout timer if it's above 0
+            if (timeout > 0)
+            {
+                timeout = Mathf.Max(0, timeout - Time.deltaTime);
+            }
         }
 
         public void Destroy()

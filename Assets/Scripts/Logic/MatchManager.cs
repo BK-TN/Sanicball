@@ -78,7 +78,7 @@ namespace Sanicball.Logic
 
         #endregion Scenes and scene initializing
 
-        //Match messenger used to send and recieve state changes.
+        //Match messenger used to send and receive state changes.
         //This will be either a LocalMatchMessenger or OnlineMatchMessenger, but each are used the same way.
         private MatchMessenger messenger;
 
@@ -259,7 +259,7 @@ namespace Sanicball.Logic
         private void ChatCallback(ChatMessage msg, float travelTime)
         {
             if (activeChat)
-                activeChat.ShowMessage(msg.From, msg.Text);
+                activeChat.ShowMessage(msg.Type, msg.From, msg.Text);
         }
 
         private void LoadLobbyCallback(LoadLobbyMessage msg, float travelTime)

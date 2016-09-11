@@ -92,12 +92,21 @@ namespace Sanicball.UI
             }
         }
 
-        public void ShowMessage(string from, string text)
+        public void ShowMessage(Logic.ChatMessageType type, string from, string text)
         {
             Text messageObj = Instantiate(chatMessagePrefab);
 
             messageObj.transform.SetParent(chatMessageContainer, false);
-            messageObj.text = string.Format("<color=#0000ff><b>{0}</b></color>: {1}", from, text);
+            switch (type)
+            {
+                case Logic.ChatMessageType.User:
+                    messageObj.text = string.Format("<color=#2244ff><b>{0}</b></color>: {1}", from, text);
+                    break;
+
+                case Logic.ChatMessageType.System:
+                    messageObj.text = string.Format("<color=#ffff77><b>{0}</b></color>", text);
+                    break;
+            }
 
             visibleTime = MAX_VISIBLE_TIME;
         }

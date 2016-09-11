@@ -35,6 +35,11 @@ namespace Sanicball.Gameplay
             currentDirection = dir;
         }
 
+        public void Remove()
+        {
+            Destroy(gameObject);
+        }
+
         private void Update()
         {
             //Input

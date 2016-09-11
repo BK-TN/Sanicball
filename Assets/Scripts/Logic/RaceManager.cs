@@ -2,6 +2,7 @@
 using System.Linq;
 using Sanicball.Data;
 using Sanicball.Gameplay;
+using Sanicball.UI;
 using UnityEngine;
 
 namespace Sanicball.Logic
@@ -23,11 +24,11 @@ namespace Sanicball.Logic
         [SerializeField]
         private WaitingUI waitingUIPrefab = null;
         [SerializeField]
-        private UI.RaceCountdown raceCountdownPrefab = null;
+        private RaceCountdown raceCountdownPrefab = null;
         [SerializeField]
-        private UI.PlayerUI playerUIPrefab = null;
+        private PlayerUI playerUIPrefab = null;
         [SerializeField]
-        private UI.RaceUI raceUIPrefab = null;
+        private RaceUI raceUIPrefab = null;
         [SerializeField]
         private SpectatorView spectatorViewPrefab = null;
 
@@ -43,18 +44,22 @@ namespace Sanicball.Logic
         //Misc
         private WaitingCamera activeWaitingCam;
         private WaitingUI activeWaitingUI;
-        private double raceTimer = 0f;
+        private double raceTimer = 0;
         private bool raceTimerOn = false;
-        private UI.RaceUI raceUI;
+        private RaceUI raceUI;
         private float countdownOffset;
         private bool joinedWhileRaceInProgress;
 
         //Properties
         public System.TimeSpan RaceTime { get { return System.TimeSpan.FromSeconds(raceTimer); } }
         public MatchSettings Settings { get { return settings; } }
+
         //PlayerCount gets number of players, indexer lets you retrieve them
         public int PlayerCount { get { return players.Count; } }
         public RacePlayer this[int playerIndex] { get { return players[playerIndex]; } }
+
+        //Return players as read only collection (easier to query)
+        public System.Collections.ObjectModel.ReadOnlyCollection<RacePlayer> Players { get { return new System.Collections.ObjectModel.ReadOnlyCollection<RacePlayer>(players); } }
 
         private RaceState CurrentState
         {
@@ -149,6 +154,7 @@ namespace Sanicball.Logic
 
             messenger.CreateListener<StartRaceMessage>(StartRaceCallback);
             messenger.CreateListener<ClientLeftMessage>(ClientLeftCallback);
+            messenger.CreateListener<DoneRacingMessage>(DoneRacingCallback);
 
             if (raceIsInProgress)
             {
@@ -202,7 +208,6 @@ namespace Sanicball.Logic
                     matchPlayer.CharacterId,
                     name + " (" + GameInput.GetControlTypeName(matchPlayer.CtrlType) + ")"
                     );
-                matchPlayer.BallObject.CanMove = false;
 
                 //Create race player
                 var racePlayer = new RacePlayer(matchPlayer.BallObject, messenger, matchPlayer);
@@ -266,15 +271,42 @@ namespace Sanicball.Logic
 
             if (rp.FinishReport == null && rp.Lap > settings.Laps)
             {
-                rp.FinishRace(new RaceFinishReport(players.IndexOf(rp) + 1, RaceTime));
+                //Race finishing is handled differently depending on what type of racer this is
 
-                //Display scoreboard when all players have finished
-                //TODO: Make proper scoreboard and have it trigger when only local players have finished
-                if (!players.Any(a => a.IsPlayer && !a.RaceFinished))
+                if (rp.AssociatedMatchPlayer != null)
                 {
-                    //TODO: Auto return to lobby after a timer
-                    raceUI.ShowFinishedText();
+                    if (rp.AssociatedMatchPlayer.ClientGuid == matchManager.LocalClientGuid)
+                    {
+                        //For local player balls, send a DoneRacingMessage.
+                        messenger.SendMessage(new DoneRacingMessage(rp.AssociatedMatchPlayer.ClientGuid, rp.AssociatedMatchPlayer.CtrlType, raceTimer, false));
+                    }
+                    //For remote player balls, do nothing.
                 }
+                else
+                {
+                    //For AI balls, call DoneRacingInner directly to bypass the messaging system.
+                    DoneRacingInner(rp, raceTimer, false);
+                }
+            }
+        }
+
+        private void DoneRacingCallback(DoneRacingMessage msg, float travelTime)
+        {
+            RacePlayer rp = players.FirstOrDefault(a => a.AssociatedMatchPlayer.ClientGuid == msg.ClientGuid && a.AssociatedMatchPlayer.CtrlType == msg.CtrlType);
+            DoneRacingInner(rp, msg.RaceTime, msg.Disqualified);
+        }
+
+        private void DoneRacingInner(RacePlayer rp, double raceTime, bool disqualified)
+        {
+            int pos = players.IndexOf(rp) + 1;
+            if (disqualified) pos = RaceFinishReport.DISQUALIFIED_POS;
+            rp.FinishRace(new RaceFinishReport(pos, System.TimeSpan.FromSeconds(raceTime)));
+
+            //Display scoreboard when all players have finished
+            //TODO: Make proper scoreboard and have it trigger when only local players have finished
+            if (!players.Any(a => a.IsPlayer && !a.RaceFinished))
+            {
+                StageReferences.Active.endOfMatchHandler.Activate(this);
             }
         }
 
@@ -318,6 +350,7 @@ namespace Sanicball.Logic
             //Otherwise the race manager won't get destroyed properly
             messenger.RemoveListener<StartRaceMessage>(StartRaceCallback);
             messenger.RemoveListener<ClientLeftMessage>(ClientLeftCallback);
+            messenger.RemoveListener<DoneRacingMessage>(DoneRacingCallback);
 
             //Call the Destroy method on all players to properly dispose them
             foreach (RacePlayer p in players)

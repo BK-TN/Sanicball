@@ -9,6 +9,7 @@ namespace Sanicball.Logic
     public class MessageType
     {
         public const byte MatchMessage = 0;
+        public const byte InitMessage = 0;
     }
 
     public class DisconnectArgs : EventArgs
@@ -84,7 +85,7 @@ namespace Sanicball.Logic
                                 break;
 
                             default:
-                                Debug.Log("Status change recieved: " + status + " - Message: " + statusMsg);
+                                Debug.Log("Status change received: " + status + " - Message: " + statusMsg);
                                 break;
                         }
                         break;
@@ -98,7 +99,7 @@ namespace Sanicball.Logic
                                 MatchMessage message = Newtonsoft.Json.JsonConvert.DeserializeObject<MatchMessage>(msg.ReadString(), serializerSettings);
 
                                 //Use reflection to call ReceiveMessage with the proper type parameter
-                                MethodInfo methodToCall = typeof(OnlineMatchMessenger).GetMethod("RecieveMessage", BindingFlags.NonPublic | BindingFlags.Instance);
+                                MethodInfo methodToCall = typeof(OnlineMatchMessenger).GetMethod("ReceiveMessage", BindingFlags.NonPublic | BindingFlags.Instance);
                                 MethodInfo genericVersion = methodToCall.MakeGenericMethod(message.GetType());
                                 genericVersion.Invoke(this, new object[] { message, timestamp });
 
@@ -107,7 +108,7 @@ namespace Sanicball.Logic
                         break;
 
                     default:
-                        Debug.Log("Recieved unhandled message of type " + msg.MessageType);
+                        Debug.Log("Received unhandled message of type " + msg.MessageType);
                         break;
                 }
             }
@@ -118,7 +119,7 @@ namespace Sanicball.Logic
             client.Disconnect("Client left the match");
         }
 
-        private void RecieveMessage<T>(T message, double timestamp) where T : MatchMessage
+        private void ReceiveMessage<T>(T message, double timestamp) where T : MatchMessage
         {
             float travelTime = (float)(NetTime.Now - timestamp);
 

@@ -389,9 +389,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90041534c4572ae4eaf093d0eff6fb16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  characterIconContainer: {fileID: 22446554}
-  characterIconPrefab: {fileID: 22409102, guid: 7432a5917aa9cd84b91aaed9cf11d3b2,
-    type: 2}
+  entryContainer: {fileID: 22446554}
+  entryPrefab: {fileID: 11425626, guid: 7432a5917aa9cd84b91aaed9cf11d3b2, type: 2}
   characterNameLabel: {fileID: 11485272}
   scrollSpeed: 10
   normalIconSize: 48
@@ -1175,7 +1174,7 @@ RectTransform:
   m_RootOrder: 0
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 664.5287, y: 153.34668}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!224 &22496842

@@ -48,7 +48,7 @@ namespace Sanicball.UI
         {
             targetPosition = TargetPlayer.RaceFinished ? (TargetPlayer.FinishReport.Position) : (TargetPlayer.Position);
             //Position field
-            positionField.text = targetPosition + GetPostfix(targetPosition);
+            positionField.text = Utils.GetPosString(targetPosition);
             if (TargetPlayer.RaceFinished) positionField.color = new Color(0f, 0.5f, 1f);
             //Image representing character
             characterImage.color = ActiveData.Characters[TargetPlayer.Character].color;
@@ -60,14 +60,6 @@ namespace Sanicball.UI
             y = Mathf.Lerp(y, -(targetPosition - 1) * spacing, Time.deltaTime * 10);
 
             trans.anchoredPosition = new Vector2(trans.anchoredPosition.x, y);
-        }
-
-        private string GetPostfix(int i)
-        {
-            if (i % 10 == 1 && i % 100 != 11) return "st";
-            if (i % 10 == 2 && i % 100 != 12) return "nd";
-            if (i % 10 == 3 && i % 100 != 13) return "rd";
-            return "th";
         }
     }
 }

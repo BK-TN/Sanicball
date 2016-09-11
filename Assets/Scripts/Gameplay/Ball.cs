@@ -103,6 +103,7 @@ namespace Sanicball.Gameplay
         private DriftySmoke smoke;
 
         public bool CanMove { get { return canMove; } set { canMove = value; } }
+        public bool AutoBrake { get; set; }
         public Vector3 DirectionVector { get; set; }
         public Vector3 Up { get; set; }
         public bool Brake { get; set; }
@@ -263,9 +264,10 @@ namespace Sanicball.Gameplay
                     rb.AddForce((Quaternion.Euler(0, -90, 0) * DirectionVector) * characterStats.airSpeed);
                 }
             }
-            else
+
+            if (AutoBrake)
             {
-                //Always brake when canControl is off
+                //Always brake when AutoBrake is on
                 Brake = true;
             }
 

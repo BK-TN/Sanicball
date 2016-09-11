@@ -10,6 +10,8 @@ namespace Sanicball.Logic
 
         public CameraOrientation[] waitingCameraOrientations;
 
+        public EndOfMatch endOfMatchHandler;
+
         public static StageReferences Active
         {
             get; private set;
