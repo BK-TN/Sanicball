@@ -1001,7 +1001,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22400416, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
       propertyPath: m_SizeDelta.y
-      value: -11.724339
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
@@ -3214,7 +3214,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22481230, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: -71.54777
+      value: -74.98863
       objectReference: {fileID: 0}
     - target: {fileID: 22481230, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_SizeDelta.x
@@ -3222,7 +3222,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22481230, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 143.09554
+      value: 149.97726
       objectReference: {fileID: 0}
     - target: {fileID: 22481230, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_AnchorMin.x
@@ -3262,7 +3262,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22446600, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: -71.54777
+      value: -74.98863
       objectReference: {fileID: 0}
     - target: {fileID: 22446600, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_SizeDelta.x
@@ -3270,14 +3270,15 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22446600, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 143.09554
+      value: 149.97726
       objectReference: {fileID: 0}
     - target: {fileID: 11424744, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_Text
-      value: "Game/Coding/Models by BK-TN (That's me)\n\rSanicball is built with Unity3D
-        and coded in C#.\n\nMost art in this game has been shamelessly stolen from
-        sources all over the internet. If you are the author of anything found here
-        and would like me to remove your content, please contact me."
+      value: "Game/Coding/Models by BK-TN (That's me), with help from several open
+        source contributors.\n\rSanicball is built with Unity3D and coded in C#.\n\nMost
+        art in this game has been shamelessly stolen from sources all over the internet.
+        If you are the author of anything found here and would like me to remove your
+        content, please contact me.\n"
       objectReference: {fileID: 0}
     - target: {fileID: 145028, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_Name
@@ -5029,7 +5030,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22481230, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 246.32135
+      value: 232.55792
       objectReference: {fileID: 0}
     - target: {fileID: 22481230, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_AnchorMin.x
@@ -5069,7 +5070,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22446600, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: -123.160675
+      value: -116.27896
       objectReference: {fileID: 0}
     - target: {fileID: 22446600, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_SizeDelta.x
@@ -5077,16 +5078,17 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22446600, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 246.32135
+      value: 232.55792
       objectReference: {fileID: 0}
     - target: {fileID: 11424744, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_Text
-      value: "\u2022 SANIC: Popular wallpaper - unknown origin\n\u2022 KNACKLES: Disappeared
-        from internet somehow\n\u2022 TAELS: Mew087123 on Deviantart\n\u2022 AME ROES:
-        o_opc on Reddit\n\u2022 SHEDEW: GalaxyTheHedgehog1 on Deviantart\n\u2022 ROGE
-        DA BAT: tysonhesse on Deviantart\n\u2022 ASSPIO: drawn by me\n\u2022 BIG DA
-        CAT: EdulokoX on Reddit\n\u2022 DR. AGGMEN: tysonhesse on Deviantart\n\u2022
-        WEED CAT: RoyalJellySandwich on Deviantart\n\u2022 CHERMY and SULVER: DazeDream"
+      value: "\u2022 <b>Sanic</b>: Popular wallpaper - unknown origin\n\u2022 <b>Knackles</b>:
+        Disappeared from internet somehow\n\u2022 <b>Taels</b>: Mew087123 on Deviantart\n\u2022
+        <b>Ame Roes</b>: o_opc on Reddit\n\u2022 <b>Shedew</b>: GalaxyTheHedgehog1
+        on Deviantart\n\u2022 <b>Roge</b>: tysonhesse on Deviantart\n\u2022 <b>Asspio</b>:
+        drawn by me\n\u2022 <b>Big</b>: EdulokoX on Reddit\n\u2022 <b>Dr. Aggmen</b>:
+        tysonhesse on Deviantart\n\u2022 <b>Bloze</b>: RoyalJellySandwich on Deviantart\n\u2022
+        <b>Chermy</b> and <b>Sulver</b>: DazeDream"
       objectReference: {fileID: 0}
     - target: {fileID: 145028, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_Name
@@ -5566,7 +5568,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22473796, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: -162.09554
+      value: -168.97726
       objectReference: {fileID: 0}
     - target: {fileID: 22473796, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
       propertyPath: m_SizeDelta.x
@@ -5666,88 +5668,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   groupDisabledOnPopup: {fileID: 410813831}
   targetParent: {fileID: 130951524}
---- !u!1001 &604283720
-Prefab:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 22472476, guid: 0729525267b150b499b26f95c4429ac3, type: 2}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 22472476, guid: 0729525267b150b499b26f95c4429ac3, type: 2}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 22472476, guid: 0729525267b150b499b26f95c4429ac3, type: 2}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 22472476, guid: 0729525267b150b499b26f95c4429ac3, type: 2}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 22472476, guid: 0729525267b150b499b26f95c4429ac3, type: 2}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 22472476, guid: 0729525267b150b499b26f95c4429ac3, type: 2}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 22472476, guid: 0729525267b150b499b26f95c4429ac3, type: 2}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 22472476, guid: 0729525267b150b499b26f95c4429ac3, type: 2}
-      propertyPath: m_RootOrder
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 22472476, guid: 0729525267b150b499b26f95c4429ac3, type: 2}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 22472476, guid: 0729525267b150b499b26f95c4429ac3, type: 2}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 22472476, guid: 0729525267b150b499b26f95c4429ac3, type: 2}
-      propertyPath: m_SizeDelta.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 22472476, guid: 0729525267b150b499b26f95c4429ac3, type: 2}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 22472476, guid: 0729525267b150b499b26f95c4429ac3, type: 2}
-      propertyPath: m_AnchorMin.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 22472476, guid: 0729525267b150b499b26f95c4429ac3, type: 2}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 22472476, guid: 0729525267b150b499b26f95c4429ac3, type: 2}
-      propertyPath: m_AnchorMax.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 22472476, guid: 0729525267b150b499b26f95c4429ac3, type: 2}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 22472476, guid: 0729525267b150b499b26f95c4429ac3, type: 2}
-      propertyPath: m_Pivot.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 22472476, guid: 0729525267b150b499b26f95c4429ac3, type: 2}
-      propertyPath: m_Pivot.y
-      value: 0
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_ParentPrefab: {fileID: 100100000, guid: 0729525267b150b499b26f95c4429ac3, type: 2}
-  m_IsPrefabParent: 0
 --- !u!1 &610053050
 GameObject:
   m_ObjectHideFlags: 0
@@ -6204,7 +6124,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22400416, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
       propertyPath: m_SizeDelta.y
-      value: -11.724339
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
@@ -6611,19 +6531,19 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22480478, guid: 365bc4f088672fe42a5a7452dc6de819, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 26.275661
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 22437098, guid: 365bc4f088672fe42a5a7452dc6de819, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 26.275661
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 22423122, guid: 365bc4f088672fe42a5a7452dc6de819, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 61.935486
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 22439134, guid: 365bc4f088672fe42a5a7452dc6de819, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 33.782993
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 136534, guid: 365bc4f088672fe42a5a7452dc6de819, type: 2}
       propertyPath: m_Name
@@ -6988,7 +6908,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22473796, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: -446.41687
+      value: -439.5352
       objectReference: {fileID: 0}
     - target: {fileID: 22473796, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
       propertyPath: m_SizeDelta.x
@@ -7151,7 +7071,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22400416, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
       propertyPath: m_SizeDelta.y
-      value: -11.724339
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
@@ -7593,7 +7513,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22400416, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
       propertyPath: m_SizeDelta.y
-      value: -11.724339
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
@@ -7730,7 +7650,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22400416, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
       propertyPath: m_SizeDelta.y
-      value: -11.724339
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
@@ -10164,7 +10084,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22400416, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
       propertyPath: m_SizeDelta.y
-      value: -11.724339
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 156408, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
       propertyPath: m_IsActive
@@ -10815,19 +10735,19 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22480478, guid: 365bc4f088672fe42a5a7452dc6de819, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 26.275661
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 22437098, guid: 365bc4f088672fe42a5a7452dc6de819, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 26.275661
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 22423122, guid: 365bc4f088672fe42a5a7452dc6de819, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 61.935486
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 22439134, guid: 365bc4f088672fe42a5a7452dc6de819, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 33.782993
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 136534, guid: 365bc4f088672fe42a5a7452dc6de819, type: 2}
       propertyPath: m_Name
@@ -11097,7 +11017,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22481230, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: -660.83563
+      value: -657.3948
       objectReference: {fileID: 0}
     - target: {fileID: 22481230, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_SizeDelta.x
@@ -11105,7 +11025,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22481230, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 390.8375
+      value: 397.71924
       objectReference: {fileID: 0}
     - target: {fileID: 22481230, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_AnchorMin.x
@@ -11145,7 +11065,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22446600, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_AnchoredPosition.y
-      value: -195.41875
+      value: -198.85962
       objectReference: {fileID: 0}
     - target: {fileID: 22446600, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_SizeDelta.x
@@ -11153,12 +11073,12 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22446600, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_SizeDelta.y
-      value: 390.8375
+      value: 397.71924
       objectReference: {fileID: 0}
     - target: {fileID: 11424744, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_Text
-      value: "\u2022 MENU: Chariots Of Fire theme song\n\u2022 LOBBY: Green Hill Zone
-        from Sonic The Hedgehog\n\u2022 INGAME PLAYLIST\n\u2022 Sonic Generations
+      value: "<b>Menu</b>: Chariots Of Fire theme song\n<b>Lobby</b>: MIDI versions
+        of various official Sonic tracks\n<b>Ingame playlist</b>:\n\u2022 Sonic Generations
         - vs. Metal Sonic (Stardust Speedway Bad Future) JP [Generations Mix]\r\n\u2022
         Deadmau5 - Infra Super Turbo Pig Cart Racer\n\u2022 Sonic Adventure 2 - City
         Escape\n\u2022 Tube and Berger - Straight Ahead (Instrumental)\n\u2022 Sonic
@@ -11166,7 +11086,8 @@ Prefab:
         Sonic the Hedgehog CD - Sonic Boom\n\u2022 Daytona USA - Rolling start!\r\n\u2022
         Sonic the Hedgehog CD - Intro (Toot Toot Sonic Warrior)\n\u2022 Ugly Baby
         - Pronto\n\u2022 Katamari Damacy - Main Theme\n\u2022 Guile's Theme\n\u2022
-        Erland - Singing Birds\n\u2022 Cynematic - Space City"
+        Erland - Singing Birds\n\u2022 Cynematic - Space City\n\u2022 Initial D -
+        Deja Vu"
       objectReference: {fileID: 0}
     - target: {fileID: 145028, guid: 348966db71fa603449cae3efa7eda193, type: 2}
       propertyPath: m_Name
@@ -12625,7 +12546,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22400416, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
       propertyPath: m_SizeDelta.y
-      value: -11.724339
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 11402242, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
       propertyPath: m_Text
@@ -13021,7 +12942,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22400416, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
       propertyPath: m_SizeDelta.y
-      value: -11.724339
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
@@ -13831,7 +13752,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22400416, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
       propertyPath: m_SizeDelta.y
-      value: -11.724339
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
@@ -16622,7 +16543,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 22400416, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
       propertyPath: m_SizeDelta.y
-      value: -11.724339
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 11402242, guid: 3d883ab2b7fc4ab49bf980169105d3c9, type: 2}
       propertyPath: m_Text
