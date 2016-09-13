@@ -15,4 +15,18 @@ public static class Utils
         if (pos % 10 == 3 && pos % 100 != 13) return pos + "rd";
         return pos + "th";
     }
+
+    public static void WriteGuidToBuffer(Lidgren.Network.NetBuffer target, Guid guid)
+    {
+        byte[] guidBytes = guid.ToByteArray();
+        target.Write(guidBytes.Length);
+        target.Write(guidBytes);
+    }
+
+    public static Guid ReadGuidFromBuffer(Lidgren.Network.NetBuffer target)
+    {
+        int guidLength = target.ReadInt32();
+        byte[] guidBytes = target.ReadBytes(guidLength);
+        return new Guid(guidBytes);
+    }
 }

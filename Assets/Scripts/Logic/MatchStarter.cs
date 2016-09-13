@@ -66,7 +66,18 @@ namespace Sanicball.Logic
                             byte type = msg.ReadByte();
                             if (type == MessageType.InitMessage)
                             {
-                                string matchStateStr = "";
+                                try
+                                {
+                                    MatchState matchInfo = MatchState.ReadFromMessage(msg);
+                                    BeginOnlineGame(matchInfo);
+                                }
+                                catch (System.Exception ex)
+                                {
+                                    activeConnectingPopup.ShowMessage("Failed to read match message - cannot join server!");
+                                    Debug.LogError("Could not read match state, error: " + ex.Message);
+                                }
+
+                                /*string matchStateStr = "";
                                 try
                                 {
                                     matchStateStr = msg.ReadString();
@@ -79,7 +90,7 @@ namespace Sanicball.Logic
                                     joiningClient.Disconnect("Failed to read match state");
                                     Debug.LogError("Could not read match state, error: " + ex.Message);
                                     Debug.LogError("Full message: " + matchStateStr);
-                                }
+                                }*/
                             }
                             break;
                     }

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -682,9 +683,13 @@ namespace SanicballServerLib
 
                                     MatchState state = new MatchState(clientStates, playerStates, matchSettings, inRace, autoStartTimeLeft);
 
-                                    string str = JsonConvert.SerializeObject(state);
+                                    state.WriteToMessage(stateMsg);
+
+                                    /*string str = JsonConvert.SerializeObject(state);
                                     Log("Sending match state: " + str, LogType.Debug);
-                                    stateMsg.Write(str);
+                                    stateMsg.Write(str);*/
+
+                                    Log("State message size in bytes: " + stateMsg.LengthBytes, LogType.Debug);
 
                                     netServer.SendMessage(stateMsg, msg.SenderConnection, NetDeliveryMethod.ReliableOrdered);
 
