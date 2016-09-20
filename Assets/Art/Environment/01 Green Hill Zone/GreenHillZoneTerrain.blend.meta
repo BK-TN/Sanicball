@@ -23,6 +23,8 @@ ModelImporter:
     100030: Bridge
     100032: MainIsland
     100034: UTurnIsland
+    100036: UTurnIsland_MeshPart0
+    100038: UTurnIsland_MeshPart1
     400000: Cube
     400002: Cube_001
     400004: //RootNode
@@ -41,6 +43,8 @@ ModelImporter:
     400030: Bridge
     400032: MainIsland
     400034: UTurnIsland
+    400036: UTurnIsland_MeshPart0
+    400038: UTurnIsland_MeshPart1
     2300000: Cube
     2300002: Cube_001
     2300004: Terrain_002_MeshPart0
@@ -56,6 +60,8 @@ ModelImporter:
     2300024: Bridge
     2300026: MainIsland
     2300028: UTurnIsland
+    2300030: UTurnIsland_MeshPart0
+    2300032: UTurnIsland_MeshPart1
     3300000: Cube
     3300002: Cube_001
     3300004: Terrain_002_MeshPart0
@@ -71,6 +77,8 @@ ModelImporter:
     3300024: Bridge
     3300026: MainIsland
     3300028: UTurnIsland
+    3300030: UTurnIsland_MeshPart0
+    3300032: UTurnIsland_MeshPart1
     4300000: Cube_001
     4300002: Terrain_002_MeshPart0
     4300004: Terrain_002_MeshPart1
@@ -86,6 +94,8 @@ ModelImporter:
     4300024: Bridge
     4300026: UTurnIsland
     4300028: MainIsland
+    4300030: UTurnIsland_MeshPart0
+    4300032: UTurnIsland_MeshPart1
     7400000: Default Take
     9500000: //RootNode
   materials:
