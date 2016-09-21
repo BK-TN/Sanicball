@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Sanicball;
 
-namespace SanicballServerLib
+namespace SanicballCore.Server
 {
     public class ServPlayer
     {

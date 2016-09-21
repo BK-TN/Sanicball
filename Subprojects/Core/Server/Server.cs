@@ -14,7 +14,7 @@ using Sanicball;
 using Sanicball.Data;
 using Sanicball.Logic;
 
-namespace SanicballServerLib
+namespace SanicballCore.Server
 {
     public class LogArgs : EventArgs
     {

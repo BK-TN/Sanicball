@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Lidgren.Network;
 
-namespace SanicballServerLib
+namespace SanicballCore.Server
 {
     public class ServClient
     {

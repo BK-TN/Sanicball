@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SanicballServerLib
+namespace SanicballCore.Server
 {
     /// <summary>
     /// Thread-safe command queue

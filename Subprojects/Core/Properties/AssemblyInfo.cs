@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("SanicballServerLib")]
+[assembly: AssemblyTitle("SanicballCore")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("SanicballServerLib")]
+[assembly: AssemblyProduct("SanicballCore")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("58448095-ade9-4576-8acb-c789cc471aa9")]
+[assembly: Guid("ed8d5d1e-e70f-4005-a3ba-f03794ff7a40")]
 
 // Version information for an assembly consists of the following four values:
 //

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SanicballServerLib
+namespace SanicballCore.Server
 {
     public delegate void CommandHandler(Command cmd);
 
