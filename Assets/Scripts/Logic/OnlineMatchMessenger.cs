@@ -2,16 +2,11 @@
 using System.Collections;
 using System.Reflection;
 using Lidgren.Network;
+using SanicballCore;
 using UnityEngine;
 
 namespace Sanicball.Logic
 {
-    public class MessageType
-    {
-        public const byte MatchMessage = 0;
-        public const byte InitMessage = 0;
-    }
-
     public class DisconnectArgs : EventArgs
     {
         public string Reason { get; private set; }

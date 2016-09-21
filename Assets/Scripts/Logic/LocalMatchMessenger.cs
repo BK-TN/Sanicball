@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using SanicballCore;
 using UnityEngine;
 
 namespace Sanicball.Logic

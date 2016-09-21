@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Linq;
+using SanicballCore.MatchMessages;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -92,18 +93,18 @@ namespace Sanicball.UI
             }
         }
 
-        public void ShowMessage(Logic.ChatMessageType type, string from, string text)
+        public void ShowMessage(ChatMessageType type, string from, string text)
         {
             Text messageObj = Instantiate(chatMessagePrefab);
 
             messageObj.transform.SetParent(chatMessageContainer, false);
             switch (type)
             {
-                case Logic.ChatMessageType.User:
+                case ChatMessageType.User:
                     messageObj.text = string.Format("<color=#2244ff><b>{0}</b></color>: {1}", from, text);
                     break;
 
-                case Logic.ChatMessageType.System:
+                case ChatMessageType.System:
                     messageObj.text = string.Format("<color=#ffff77><b>{0}</b></color>", text);
                     break;
             }

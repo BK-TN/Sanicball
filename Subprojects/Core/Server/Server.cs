@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
+
+//using System.Net.Http;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
+
+//using System.Threading.Tasks;
 using Lidgren.Network;
 using Newtonsoft.Json;
-using Sanicball;
-using Sanicball.Data;
-using Sanicball.Logic;
+using SanicballCore.MatchMessages;
 
 namespace SanicballCore.Server
 {
@@ -267,7 +267,7 @@ namespace SanicballCore.Server
             });
             AddCommandHandler("setStageRotationMode", cmd =>
             {
-                StageRotationMode rotMode;
+                /*StageRotationMode rotMode;
                 if (Enum.TryParse(cmd.Content, out rotMode))
                 {
                     matchSettings.StageRotationMode = rotMode;
@@ -279,7 +279,7 @@ namespace SanicballCore.Server
                     string[] modes = Enum.GetNames(typeof(StageRotationMode));
                     string modesStr = string.Join("|", modes);
                     Log("Usage: setStageRotationMode [" + modesStr + "]");
-                }
+                }*/
             });
             AddCommandHandler("setVoteRatio", cmd =>
             {
@@ -415,7 +415,7 @@ namespace SanicballCore.Server
             debugMode = true;
 #endif
 
-            NetPeerConfiguration config = new NetPeerConfiguration(OnlineMatchMessenger.APP_ID);
+            NetPeerConfiguration config = new NetPeerConfiguration(Consts.APP_ID);
             config.Port = this.config.PrivatePort;
             config.MaximumConnections = this.config.MaxPlayers;
             config.EnableMessageType(NetIncomingMessageType.ConnectionApproval);
@@ -428,7 +428,7 @@ namespace SanicballCore.Server
 
             if (this.config.ShowInBrowser)
             {
-                AddToServerBrowser();
+                //AddToServerBrowser();
                 serverBrowserPingTimer.Start();
             }
 
@@ -485,7 +485,7 @@ namespace SanicballCore.Server
             return false;
         }
 
-        private async void AddToServerBrowser()
+        /*private async void AddToServerBrowser()
         {
             using (var client = new HttpClient())
             {
@@ -507,7 +507,7 @@ namespace SanicballCore.Server
                     Log("Failed adding server to server browser - " + response.ReasonPhrase, LogType.Warning);
                 }
             }
-        }
+        }*/
 
         private void MessageLoop()
         {
@@ -520,8 +520,9 @@ namespace SanicballCore.Server
                 {
                     if (serverBrowserPingTimer.Elapsed.TotalSeconds >= serverBrowserPingGoal)
                     {
-                        AddToServerBrowser();
-                        serverBrowserPingTimer.Restart();
+                        //AddToServerBrowser();
+                        serverBrowserPingTimer.Reset();
+                        serverBrowserPingTimer.Start();
                     }
                 }
 
@@ -966,7 +967,8 @@ namespace SanicballCore.Server
                                             //As long as all players are racing, timeouts should be reset.
                                             if (players.All(a => a.CurrentlyRacing))
                                             {
-                                                player.RacingTimeout.Restart();
+                                                player.RacingTimeout.Reset();
+                                                player.RacingTimeout.Start();
                                                 if (player.TimeoutMessageSent)
                                                 {
                                                     player.TimeoutMessageSent = false;

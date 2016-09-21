@@ -1,4 +1,5 @@
 ﻿using Lidgren.Network;
+using SanicballCore;
 using UnityEngine;
 
 namespace Sanicball.Logic
