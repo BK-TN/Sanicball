@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Sanicball.Data;
+using Sanicball.Logic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -40,6 +41,7 @@ namespace Sanicball.UI
         private RectTransform markerContainer;
 
         private Marker checkpointMarker;
+        private List<Marker> playerMarkers = new List<Marker>();
 
         private RacePlayer targetPlayer;
         private RaceManager targetManager;
@@ -54,11 +56,46 @@ namespace Sanicball.UI
                 if (targetPlayer != null)
                 {
                     targetPlayer.NextCheckpointPassed -= TargetPlayer_NextCheckpointPassed;
+                    Destroy(checkpointMarker.gameObject);
+                    foreach (Marker m in playerMarkers)
+                    {
+                        Destroy(m.gameObject);
+                    }
                 }
 
                 targetPlayer = value;
 
                 targetPlayer.NextCheckpointPassed += TargetPlayer_NextCheckpointPassed;
+
+                //Marker following next checkpoint
+                checkpointMarker = Instantiate(markerPrefab);
+                checkpointMarker.transform.SetParent(markerContainer, false);
+                checkpointMarker.Text = "Checkpoint";
+                checkpointMarker.Clamp = true;
+
+                //Markers following each player
+                for (int i = 0; i < TargetManager.PlayerCount; i++)
+                {
+                    RacePlayer p = TargetManager[i];
+                    if (p == TargetPlayer) continue;
+
+                    var playerMarker = Instantiate(markerPrefab);
+                    playerMarker.transform.SetParent(markerContainer, false);
+                    playerMarker.Text = p.Name;
+                    playerMarker.Target = p.Transform;
+                    playerMarker.Clamp = false;
+
+                    //Disabled for now, glitchy as fuck
+                    //playerMarker.HideImageWhenInSight = true;
+
+                    Data.CharacterInfo character = ActiveData.Characters[p.Character];
+                    //playerMarker.Sprite = character.icon;
+                    Color c = character.color;
+                    c.a = 0.2f;
+                    playerMarker.Color = c;
+
+                    playerMarkers.Add(playerMarker);
+                }
             }
         }
 
@@ -76,7 +113,7 @@ namespace Sanicball.UI
         private void TargetPlayer_NextCheckpointPassed(object sender, NextCheckpointPassArgs e)
         {
             UISound.Play(checkpointSound);
-            checkpointTimeField.text = GetTimeString(e.CurrentLapTime);
+            checkpointTimeField.text = Utils.GetTimeString(e.CurrentLapTime);
             checkpointTimeField.GetComponent<ToggleCanvasGroup>().ShowTemporarily(2f);
 
             if (TargetPlayer.LapRecordsEnabled)
@@ -94,7 +131,7 @@ namespace Sanicball.UI
                     bool faster = diff < 0;
                     TimeSpan diffSpan = TimeSpan.FromSeconds(Mathf.Abs(diff));
 
-                    checkpointTimeDiffField.text = (faster ? "-" : "+") + GetTimeString(diffSpan);
+                    checkpointTimeDiffField.text = (faster ? "-" : "+") + Utils.GetTimeString(diffSpan);
                     checkpointTimeDiffField.color = faster ? Color.blue : Color.red;
                     checkpointTimeDiffField.GetComponent<ToggleCanvasGroup>().ShowTemporarily(2f);
 
@@ -117,9 +154,6 @@ namespace Sanicball.UI
 
         private void Start()
         {
-            checkpointMarker = Instantiate(markerPrefab);
-            checkpointMarker.transform.SetParent(markerContainer, false);
-            checkpointMarker.Text = "Checkpoint";
         }
 
         private void Update()
@@ -156,33 +190,50 @@ namespace Sanicball.UI
             speedFieldLabel.text = postfix;
 
             //Lap counter
-            if (TargetPlayer.Lap < TargetManager.Settings.Laps + 1)
+            if (!TargetPlayer.RaceFinished)
             {
                 lapField.text = "Lap " + TargetPlayer.Lap + "/" + TargetManager.Settings.Laps;
             }
             else
             {
-                lapField.text = "Race finished";
-                lapField.color = finishedColor;
+                if (TargetPlayer.FinishReport.Disqualified)
+                {
+                    lapField.text = "Disqualified";
+                    lapField.color = Color.red;
+                }
+                else
+                {
+                    lapField.text = "Race finished";
+                    lapField.color = finishedColor;
+                }
             }
 
             //Race time
-            System.TimeSpan timeToUse = TargetManager.RaceTime;
+            TimeSpan timeToUse = TargetManager.RaceTime;
             if (TargetPlayer.FinishReport != null)
             {
                 timeToUse = TargetPlayer.FinishReport.Time;
                 timeField.color = finishedColor;
             }
-            timeField.text = GetTimeString(timeToUse);
+            timeField.text = Utils.GetTimeString(timeToUse);
+
+            if (TargetPlayer.Timeout > 0)
+            {
+                timeField.text += Environment.NewLine + "<b>Timeout</b> " + Utils.GetTimeString(TimeSpan.FromSeconds(TargetPlayer.Timeout));
+            }
 
             //Checkpoint marker
-            checkpointMarker.Target = TargetPlayer.NextCheckpoint.transform;
+            if (TargetPlayer.NextCheckpoint != null)
+                checkpointMarker.Target = TargetPlayer.NextCheckpoint.transform;
+            else
+                checkpointMarker.Target = null;
             checkpointMarker.CameraToUse = TargetCamera;
-        }
 
-        private string GetTimeString(System.TimeSpan timeToUse)
-        {
-            return string.Format("{0:00}:{1:00}.{2:000}", timeToUse.Minutes, timeToUse.Seconds, timeToUse.Milliseconds);
+            playerMarkers.RemoveAll(a => a == null); //Remove destroyed markers from the list (Markers are destroyed if the player they're following leaves)
+            foreach (Marker m in playerMarkers.ToList())
+            {
+                m.CameraToUse = TargetCamera;
+            }
         }
     }
 }

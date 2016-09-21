@@ -20,7 +20,9 @@ namespace Sanicball.UI
             }
             else
             {
-                optionsPanel.SetNickname(nickname.text);
+                string nick = nickname.text.Trim();
+                Data.ActiveData.GameSettings.nickname = nick;
+                optionsPanel.SetNickname(nick);
                 GetComponent<Popup>().Close();
             }
         }

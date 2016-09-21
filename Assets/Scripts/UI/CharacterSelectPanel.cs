@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using Sanicball.Data;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,18 +20,25 @@ namespace Sanicball.UI
 
     public class CharacterSelectPanel : MonoBehaviour
     {
-        public RectTransform characterIconContainer;
-        public RectTransform characterIconPrefab;
-        public Text characterNameLabel;
+        [SerializeField]
+        private RectTransform entryContainer = null;
+        [SerializeField]
+        private CharacterSelectEntry entryPrefab = null;
+        [SerializeField]
+        private Text characterNameLabel;
 
-        public float scrollSpeed = 1f;
+        [SerializeField]
+        private float scrollSpeed = 1f;
 
-        public float normalIconSize = 64;
-        public float selectedIconSize = 96;
+        [SerializeField]
+        private float normalIconSize = 64;
+        [SerializeField]
+        private float selectedIconSize = 96;
+
         private int selected = 0;
-
+        private Data.CharacterInfo selectedChar;
         private float targetX = 0;
-        private RectTransform[] ballIcons;
+        private List<CharacterSelectEntry> activeEntries = new List<CharacterSelectEntry>();
 
         [SerializeField]
         private Sprite cancelIconSprite;
@@ -38,36 +48,24 @@ namespace Sanicball.UI
 
         private IEnumerator Start()
         {
-            var charList = Data.ActiveData.Characters;
+            var charList = ActiveData.Characters.OrderBy(a => a.hyperspeed).ToArray();
 
-            ballIcons = new RectTransform[charList.Length + 1];
-
-            ballIcons[0] = Instantiate(characterIconPrefab);
-            ballIcons[0].GetComponent<Image>().sprite = cancelIconSprite;
-            ballIcons[0].transform.SetParent(characterIconContainer.transform, false);
+            CharacterSelectEntry cancelEnt = Instantiate(entryPrefab);
+            cancelEnt.IconImage.sprite = cancelIconSprite;
+            cancelEnt.transform.SetParent(entryContainer.transform, false);
+            activeEntries.Add(cancelEnt);
 
             for (int i = 0; i < charList.Length; i++)
             {
-				if(!charList[i].hyperspeed)
-				{
-					RectTransform ballIcon = Instantiate(characterIconPrefab);
+                if (!charList[i].hidden)
+                {
+                    CharacterSelectEntry characterEnt = Instantiate(entryPrefab);
 
-					ballIcon.GetComponent<Image>().sprite = charList[i].icon;
-					ballIcon.transform.SetParent(characterIconContainer.transform, false);
-					ballIcons[i + 1] = ballIcon;
-				}
+                    characterEnt.Init(charList[i]);
+                    characterEnt.transform.SetParent(entryContainer.transform, false);
+                    activeEntries.Add(characterEnt);
+                }
             }
-			for (int i = 0; i < charList.Length; i++)
-			{
-				if(charList[i].hyperspeed)
-				{
-					RectTransform ballIcon = Instantiate(characterIconPrefab);
-
-					ballIcon.GetComponent<Image>().sprite = charList[i].icon;
-					ballIcon.transform.SetParent(characterIconContainer.transform, false);
-					ballIcons[i + 1] = ballIcon;
-				}
-			}
 
             //Wait a single frame before selecting the first character.
             yield return null;
@@ -76,66 +74,46 @@ namespace Sanicball.UI
 
         public void NextCharacter()
         {
-			if (selected == 13)
-				Select (15);
-			else if (selected == Data.ActiveData.Characters.Length)
-				Select (14);
-			else if (selected == 14)
-				Select (selected);
-			else if (selected < ballIcons.Length - 1 && (selected != 13 || selected != Data.ActiveData.Characters.Length))
-				Select (selected + 1);
+            if (selected < activeEntries.Count - 1) Select(selected + 1); else Select(0);
         }
 
         public void PrevCharacter()
         {
-			if (selected == 15)
-				Select (13);
-			else if (selected == 14)
-				Select (Data.ActiveData.Characters.Length);
-			else if (selected > 0) 
-				Select(selected - 1);
-			
+            if (selected > 0) Select(selected - 1); else Select(activeEntries.Count - 1);
         }
 
         private void Select(int newSelection)
         {
-            if (newSelection == 0)
+            selected = newSelection;
+            selectedChar = activeEntries[selected].Character;
+
+            if (selected == 0)
                 characterNameLabel.text = "Leave match";
             else
-				characterNameLabel.text = Data.ActiveData.Characters[newSelection - 1].name /*+ " (ID: " + newSelection.ToString() + ")"*/;
-
-            selected = newSelection;
+                characterNameLabel.text = selectedChar.name;
         }
 
         private void Update()
         {
             //Find the container's target X to center the selected character
-            targetX = characterIconContainer.sizeDelta.x / 2 - ballIcons[selected].anchoredPosition.x;
-            if (!Mathf.Approximately(characterIconContainer.anchoredPosition.x, targetX))
+            targetX = entryContainer.sizeDelta.x / 2 - activeEntries[selected].RectTransform.anchoredPosition.x;
+            if (!Mathf.Approximately(entryContainer.anchoredPosition.x, targetX))
             {
-                float x = Mathf.Lerp(characterIconContainer.anchoredPosition.x, targetX, scrollSpeed * Time.deltaTime);
+                float x = Mathf.Lerp(entryContainer.anchoredPosition.x, targetX, scrollSpeed * Time.deltaTime);
 
-                characterIconContainer.anchoredPosition = new Vector2(x, characterIconContainer.anchoredPosition.y);
+                entryContainer.anchoredPosition = new Vector2(x, entryContainer.anchoredPosition.y);
             }
 
-            //Make selected element bigger
-            var selectedElement = ballIcons[selected].GetComponent<LayoutElement>();
-            if (!Mathf.Approximately(selectedElement.preferredWidth, selectedIconSize) || !Mathf.Approximately(selectedElement.preferredHeight, selectedIconSize))
+            //Resize all elements
+            for (int i = 0; i < activeEntries.Count; i++)
             {
-                selectedElement.preferredWidth = Mathf.Lerp(selectedElement.preferredWidth, selectedIconSize, scrollSpeed * Time.deltaTime);
-                selectedElement.preferredHeight = Mathf.Lerp(selectedElement.preferredHeight, selectedIconSize, scrollSpeed * Time.deltaTime);
-            }
+                var element = activeEntries[i];
 
-            //Make all other elements normal sized
-            for (int i = 0; i < ballIcons.Length; i++)
-            {
-                if (i == selected) continue;
-                var element = ballIcons[i].GetComponent<LayoutElement>();
+                float targetSize = (i == selected) ? selectedIconSize : normalIconSize;
 
-                if (!Mathf.Approximately(element.preferredWidth, normalIconSize) || !Mathf.Approximately(element.preferredHeight, normalIconSize))
+                if (!Mathf.Approximately(element.Size, targetSize))
                 {
-                    element.preferredWidth = Mathf.Lerp(element.preferredWidth, normalIconSize, scrollSpeed * Time.deltaTime);
-                    element.preferredHeight = Mathf.Lerp(element.preferredHeight, normalIconSize, scrollSpeed * Time.deltaTime);
+                    element.Size = Mathf.Lerp(element.Size, targetSize, scrollSpeed * Time.deltaTime);
                 }
             }
         }
@@ -150,7 +128,7 @@ namespace Sanicball.UI
             else
             {
                 if (CharacterSelected != null)
-                    CharacterSelected(this, new CharacterSelectionArgs(selected - 1));
+                    CharacterSelected(this, new CharacterSelectionArgs(Array.IndexOf(ActiveData.Characters, selectedChar)));
             }
         }
 

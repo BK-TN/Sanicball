@@ -13,6 +13,13 @@ namespace Sanicball.Data
         Dank
     }
 
+    public enum StageRotationMode
+    {
+        None,
+        Sequenced,
+        Random,
+    }
+
     public struct MatchSettings
     {
         [Newtonsoft.Json.JsonProperty]
@@ -22,6 +29,12 @@ namespace Sanicball.Data
         public int Laps { get; set; }
         public int AICount { get; set; }
         public AISkillLevel AISkill { get; set; }
+
+        public int AutoStartTime { get; set; }
+        public int AutoStartMinPlayers { get; set; }
+        public int AutoReturnTime { get; set; }
+        public float VoteRatio { get; set; }
+        public StageRotationMode StageRotationMode { get; set; }
 
         /// <summary>
         /// Creates a MatchSettings object with the game's default settings.
@@ -35,7 +48,13 @@ namespace Sanicball.Data
                 Laps = 2,
                 AICount = 7,
                 AISkill = AISkillLevel.Average,
-                aiCharacters = "1,2,3,4,5,6,7,8,9,10,11,12"
+                aiCharacters = "1,2,3,4,5,6,7,8,9,10,11,12",
+
+                AutoStartTime = 60,
+                AutoStartMinPlayers = 2,
+                AutoReturnTime = 15,
+                VoteRatio = 1f,
+                StageRotationMode = StageRotationMode.None
             };
         }
 

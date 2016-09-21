@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using Sanicball.Logic;
 using UnityEngine;
 
 namespace Sanicball.UI
@@ -11,9 +12,6 @@ namespace Sanicball.UI
         [SerializeField]
         private Transform portraitContainer = null;
 
-        [SerializeField]
-        private RectTransform finishedText;
-
         public RaceManager TargetManager { get; set; }
 
         private void Start()
@@ -24,11 +22,6 @@ namespace Sanicball.UI
                 p.transform.SetParent(portraitContainer, false);
                 p.TargetPlayer = TargetManager[i];
             }
-        }
-
-        public void ShowFinishedText()
-        {
-            finishedText.gameObject.SetActive(true);
         }
     }
 }

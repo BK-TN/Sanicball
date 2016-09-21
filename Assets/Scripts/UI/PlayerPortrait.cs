@@ -1,11 +1,13 @@
-﻿using UnityEngine;
+﻿using Sanicball.Data;
+using Sanicball.Logic;
+using UnityEngine;
 using UnityEngine.UI;
 
 namespace Sanicball.UI
 {
     public class PlayerPortrait : MonoBehaviour
     {
-        private const int spacing = 64 + 10;
+        private const int spacing = 64;
 
         private int targetPosition = 0;
 
@@ -13,7 +15,7 @@ namespace Sanicball.UI
         private Text positionField;
 
         [SerializeField]
-        private Image icon;
+        private Image characterImage;
 
         [SerializeField]
         private Text nameField;
@@ -30,39 +32,34 @@ namespace Sanicball.UI
         private void Start()
         {
             trans = GetComponent<RectTransform>();
+
+            TargetPlayer.Destroyed += DestroyedCallback;
+        }
+
+        private void DestroyedCallback(object sender, System.EventArgs e)
+        {
+            if (this)
+                Destroy(gameObject);
+            TargetPlayer.Destroyed -= DestroyedCallback;
         }
 
         // Update is called once per frame
         private void Update()
         {
-            if (TargetPlayer != null)
-            {
-                targetPosition = TargetPlayer.RaceFinished ? (TargetPlayer.FinishReport.Position) : (TargetPlayer.Position);
-                //Position field
-                positionField.text = targetPosition + GetPostfix(targetPosition);
-                if (TargetPlayer.RaceFinished) positionField.color = new Color(0f, 0.5f, 1f);
-                //Ball icon
-                icon.sprite = Data.ActiveData.Characters[TargetPlayer.Character].icon;
-                //Name field
-                if (TargetPlayer.CtrlType != ControlType.None)
-                    nameField.text = Utils.CtrlTypeStr(TargetPlayer.CtrlType);
-                else
-                    nameField.text = "";
-            }
+            targetPosition = TargetPlayer.RaceFinished ? (TargetPlayer.FinishReport.Position) : (TargetPlayer.Position);
+            //Position field
+            positionField.text = Utils.GetPosString(targetPosition);
+            if (TargetPlayer.RaceFinished) positionField.color = new Color(0f, 0.5f, 1f);
+            //Image representing character
+            characterImage.color = ActiveData.Characters[TargetPlayer.Character].color;
+            //Name field
+            nameField.text = TargetPlayer.Name;
 
             float y = trans.anchoredPosition.y;
 
             y = Mathf.Lerp(y, -(targetPosition - 1) * spacing, Time.deltaTime * 10);
 
             trans.anchoredPosition = new Vector2(trans.anchoredPosition.x, y);
-        }
-
-        private string GetPostfix(int i)
-        {
-            if (i % 10 == 1 && i % 100 != 11) return "st";
-            if (i % 10 == 2 && i % 100 != 12) return "nd";
-            if (i % 10 == 3 && i % 100 != 13) return "rd";
-            return "th";
         }
     }
 }

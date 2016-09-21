@@ -29,6 +29,8 @@ namespace Sanicball
         private float slidePosition;
         private float slidePositionMax = 20;
 
+        private AudioSource aSource;
+
         public void Play()
         {
             Play(playlist[currentSongID].name);
@@ -40,38 +42,40 @@ namespace Sanicball
             currentSongCredits = "Now playing: " + credits;
             if (FindObjectOfType<MlgMode>() != null)
             {//IS MLG MODE
-                GetComponent<AudioSource>().clip = mlgSong;
+                aSource.clip = mlgSong;
                 currentSongCredits = "Now playing: old memes";
                 FindObjectOfType<MlgMode>().StartTheShit();//Start the wubs
             }
             isPlaying = true;
-            if (!GetComponent<AudioSource>().mute)
+            if (!aSource.mute)
             {
                 timer = 8;
             }
-            GetComponent<AudioSource>().Play();
+            aSource.Play();
         }
 
         public void Pause()
         {
-            GetComponent<AudioSource>().Pause();
+            aSource.Pause();
             isPlaying = false;
         }
 
         private void Start()
         {
+            aSource = GetComponent<AudioSource>();
+
             slidePosition = slidePositionMax;
             ShuffleSongs();
-            GetComponent<AudioSource>().clip = playlist[0].clip;
+            aSource.clip = playlist[0].clip;
             currentSongID = 0;
-            isPlaying = GetComponent<AudioSource>().isPlaying;
+            isPlaying = aSource.isPlaying;
             if (startPlaying && ActiveData.GameSettings.music)
             {
                 Play();
             }
             if (fadeIn)
             {
-                GetComponent<AudioSource>().volume = 0f;
+                aSource.volume = 0f;
             }
             if (!ActiveData.GameSettings.music)
             {
@@ -81,12 +85,12 @@ namespace Sanicball
 
         private void Update()
         {
-            if (fadeIn && GetComponent<AudioSource>().volume < 0.5f)
+            if (fadeIn && aSource.volume < 0.5f)
             {
-                GetComponent<AudioSource>().volume = Mathf.Min(GetComponent<AudioSource>().volume + Time.deltaTime * 0.1f, 0.5f);
+                aSource.volume = Mathf.Min(aSource.volume + Time.deltaTime * 0.1f, 0.5f);
             }
             //If it's not playing but supposed to play, change song
-            if ((!GetComponent<AudioSource>().isPlaying || GameInput.IsChangingSong()) && isPlaying)
+            if ((!aSource.isPlaying || GameInput.IsChangingSong()) && isPlaying)
             {
                 if (currentSongID < playlist.Length - 1)
                 {
@@ -96,7 +100,7 @@ namespace Sanicball
                 {
                     currentSongID = 0;
                 }
-                GetComponent<AudioSource>().clip = playlist[currentSongID].clip;
+                aSource.clip = playlist[currentSongID].clip;
                 slidePosition = slidePositionMax;
                 Play();
             }
@@ -109,12 +113,12 @@ namespace Sanicball
             if (fastMode && fastSource.volume < 1)
             {
                 fastSource.volume = Mathf.Min(1, fastSource.volume + Time.deltaTime * 0.25f);
-                GetComponent<AudioSource>().volume = 0.5f - fastSource.volume / 2;
+                aSource.volume = 0.5f - fastSource.volume / 2;
             }
             if (!fastMode && fastSource.volume > 0)
             {
                 fastSource.volume = Mathf.Max(0, fastSource.volume - Time.deltaTime * 0.5f);
-                GetComponent<AudioSource>().volume = 0.5f - fastSource.volume / 2;
+                aSource.volume = 0.5f - fastSource.volume / 2;
             }
             if (timer > 0)
             {

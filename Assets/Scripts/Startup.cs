@@ -10,9 +10,6 @@ namespace Sanicball
         public CanvasGroup setNicknameGroup;
         public InputField nicknameField;
 
-        [SerializeField]
-        private bool skipNickname = true;
-
         public void ValidateNickname()
         {
             if (nicknameField.text.Trim() != "")
@@ -25,11 +22,7 @@ namespace Sanicball
 
         private void Start()
         {
-            if (skipNickname)
-            {
-                ActiveData.GameSettings.nickname = "Player";
-            }
-            if (string.IsNullOrEmpty(ActiveData.GameSettings.nickname))
+            if (string.IsNullOrEmpty(ActiveData.GameSettings.nickname) || ActiveData.GameSettings.nickname == "Player")
             {
                 //Set nickname before continuing
                 setNicknameGroup.alpha = 1f;

@@ -1,30 +1,18 @@
-﻿using System.Collections;
-using UnityEngine;
+﻿using System;
+using System.Collections;
 
-namespace Sanicball
+public static class Utils
 {
-    public static class Utils
+    public static string GetTimeString(TimeSpan timeToUse)
     {
-        public static string CtrlTypeStr(ControlType ctrlType)
-        {
-            switch (ctrlType)
-            {
-                case ControlType.Keyboard:
-                    return "Keyboard";
+        return string.Format("{0:00}:{1:00}.{2:000}", timeToUse.Minutes, timeToUse.Seconds, timeToUse.Milliseconds);
+    }
 
-                case ControlType.Joystick1:
-                    return "Joystick #1";
-
-                case ControlType.Joystick2:
-                    return "Joystick #2";
-
-                case ControlType.Joystick3:
-                    return "Joystick #3";
-
-                case ControlType.Joystick4:
-                    return "Joystick #4";
-            }
-            return "None";
-        }
+    public static string GetPosString(int pos)
+    {
+        if (pos % 10 == 1 && pos % 100 != 11) return pos + "st";
+        if (pos % 10 == 2 && pos % 100 != 12) return pos + "nd";
+        if (pos % 10 == 3 && pos % 100 != 13) return pos + "rd";
+        return pos + "th";
     }
 }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Sanicball.Logic;
+using UnityEngine;
 
 namespace Sanicball
 {

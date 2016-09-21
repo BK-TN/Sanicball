@@ -369,12 +369,12 @@ namespace Sanicball
 
         public static bool IsChangingSong()
         {
-            return Input.GetKey(ActiveData.Keybinds[Keybind.NextSong]) && !KeyboardDisabled;
+            return Input.GetKeyDown(ActiveData.Keybinds[Keybind.NextSong]) && !KeyboardDisabled;
         }
 
         public static bool IsOpeningChat()
         {
-            return Input.GetKey(ActiveData.Keybinds[Keybind.Chat]) && !KeyboardDisabled;
+            return Input.GetKeyDown(ActiveData.Keybinds[Keybind.Chat]) && !KeyboardDisabled;
         }
 
         #endregion Keyboard only input

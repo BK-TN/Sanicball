@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Sanicball.Logic;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -45,6 +46,10 @@ namespace Sanicball.UI
             {
                 contextSensitiveButtonLabel.text = "Change match settings";
                 contextSensitiveButton.onClick.AddListener(MatchSettings);
+                if (OnlineMode)
+                {
+                    contextSensitiveButton.interactable = false;
+                }
             }
             else
             {
@@ -80,10 +85,11 @@ namespace Sanicball.UI
 
         public void BackToLobby()
         {
-            var matchManager = FindObjectOfType<Match.MatchManager>();
+            var matchManager = FindObjectOfType<MatchManager>();
             if (matchManager)
             {
-                matchManager.GoToLobby();
+                matchManager.RequestLoadLobby();
+                Close();
             }
             else
             {
@@ -93,7 +99,7 @@ namespace Sanicball.UI
 
         public void QuitMatch()
         {
-            var matchManager = FindObjectOfType<Match.MatchManager>();
+            var matchManager = FindObjectOfType<MatchManager>();
             if (matchManager)
             {
                 matchManager.QuitMatch();

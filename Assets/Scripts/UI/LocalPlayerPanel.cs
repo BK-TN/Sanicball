@@ -1,4 +1,5 @@
 ﻿using Sanicball.Data;
+using Sanicball.Logic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -15,7 +16,10 @@ namespace Sanicball.UI
         public ImageColorToggle readyIndicator;
 
         [SerializeField]
-        private LocalPlayerInfoBox infoBox = null;
+        private Image ctrlTypeImageField = null;
+
+        [SerializeField]
+        private Text helpTextField = null;
 
         [SerializeField]
         private Sprite[] controlTypeIcons;
@@ -24,7 +28,7 @@ namespace Sanicball.UI
         private CharacterSelectPanel characterSelectSubpanel = null;
 
         public ControlType AssignedCtrlType { get; set; }
-        public Match.MatchPlayer AssignedPlayer { get; set; }
+        public MatchPlayer AssignedPlayer { get; set; }
 
         private bool uiPressed = false;
 
@@ -35,27 +39,25 @@ namespace Sanicball.UI
 
             playerManager.LocalPlayerJoined += PlayerManager_LocalPlayerJoined;
 
-            infoBox.SetIcon(controlTypeIcons[(int)AssignedCtrlType]);
+            ctrlTypeImageField.sprite = controlTypeIcons[(int)AssignedCtrlType];
 
-            //string kbButton = GameInput.GetKeyCodeName(ActiveData.Keybinds[Keybind.Menu]);
-            //infoBox.SetLines("<b>" + kbButton + "</b>: Join with keyboard", "<b>Start</b>: Join with joystick");
+            ShowCharacterSelectHelp();
         }
 
         private void Update()
         {
             //This method handles input from the assigned controltype (if any)
             if (PauseMenu.GamePaused) return; //Short circuit if paused
-
-            if (GameInput.IsRespawning(AssignedCtrlType))
-            {
-                ToggleReady();
-            }
-
             bool accept = GameInput.IsOpeningMenu(AssignedCtrlType);
             bool left = GameInput.UILeft(AssignedCtrlType);
             bool right = GameInput.UIRight(AssignedCtrlType);
 
             var cActive = characterSelectSubpanel.gameObject.activeSelf;
+
+            if (GameInput.IsRespawning(AssignedCtrlType) && !cActive)
+            {
+                ToggleReady();
+            }
 
             if (accept || left || right)
             {
@@ -64,9 +66,15 @@ namespace Sanicball.UI
                     if (accept)
                     {
                         if (cActive)
+                        {
                             characterSelectSubpanel.Accept();
+                            ShowMainHelp();
+                        }
                         else
+                        {
                             characterSelectSubpanel.gameObject.SetActive(true);
+                            ShowCharacterSelectHelp();
+                        }
                     }
                     if (left && cActive)
                     {
@@ -106,7 +114,6 @@ namespace Sanicball.UI
         {
             if (AssignedPlayer == null)
             {
-                Debug.Log("A player panel just requested creating a player");
                 playerManager.CreatePlayerForControlType(AssignedCtrlType, c);
             }
             else
@@ -119,12 +126,11 @@ namespace Sanicball.UI
             }
         }
 
-        private void PlayerManager_LocalPlayerJoined(object sender, Match.MatchPlayerEventArgs e)
+        private void PlayerManager_LocalPlayerJoined(object sender, MatchPlayerEventArgs e)
         {
             if (e.Player.CtrlType == AssignedCtrlType)
             {
                 AssignedPlayer = e.Player;
-                Debug.Log("A player panel just got a player assigned");
             }
         }
 
@@ -146,7 +152,35 @@ namespace Sanicball.UI
             {
                 LeaveMatch();
             }
-            //SetActiveSubpanel(null);
+        }
+
+        private void ShowMainHelp()
+        {
+            string kbConfirm = GameInput.GetKeyCodeName(ActiveData.Keybinds[Keybind.Menu]);
+            const string joyConfirm = "X";
+            string kbAction = GameInput.GetKeyCodeName(ActiveData.Keybinds[Keybind.Respawn]);
+            const string joyAction = "Y";
+
+            string confirm = AssignedCtrlType == ControlType.Keyboard ? kbConfirm : joyConfirm;
+            string action = AssignedCtrlType == ControlType.Keyboard ? kbAction : joyAction;
+
+            helpTextField.text = string.Format("<b>{0}</b>: Change character\n<b>{1}</b>: Toggle ready to play", confirm, action);
+        }
+
+        private void ShowCharacterSelectHelp()
+        {
+            const string kbLeft = "Left";
+            const string joyLeft = kbLeft;
+            const string kbRight = "Right";
+            const string joyRight = kbRight;
+            string kbConfirm = GameInput.GetKeyCodeName(ActiveData.Keybinds[Keybind.Menu]);
+            const string joyConfirm = "X";
+
+            string left = AssignedCtrlType == ControlType.Keyboard ? kbLeft : joyLeft;
+            string right = AssignedCtrlType == ControlType.Keyboard ? kbRight : joyRight;
+            string confirm = AssignedCtrlType == ControlType.Keyboard ? kbConfirm : joyConfirm;
+
+            helpTextField.text = string.Format("<b>{0}</b>/<b>{1}</b>: Select character\n<b>{2}</b>: Confirm", left, right, confirm);
         }
     }
 }

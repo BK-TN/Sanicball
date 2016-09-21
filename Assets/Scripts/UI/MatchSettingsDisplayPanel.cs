@@ -1,4 +1,5 @@
 ﻿using Sanicball.Data;
+using Sanicball.Logic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,38 +21,36 @@ namespace Sanicball.UI
         private Animation settingsChangedAnimation = null;
 
         [SerializeField]
-        private Camera stageLayoutCamera;
+        private Camera stageLayoutCamera = null;
+
+        private MatchManager manager;
 
         private void Start()
         {
-            var manager = FindObjectOfType<Match.MatchManager>();
-            if (manager)
-            {
-                manager.MatchSettingsChanged += Manager_MatchSettingsChanged;
-            }
+            manager = FindObjectOfType<MatchManager>();
+            manager.MatchSettingsChanged += Manager_MatchSettingsChanged;
+
+            //Invoke callback immediately to set initial settings
             Manager_MatchSettingsChanged(this, System.EventArgs.Empty);
         }
 
         private void Manager_MatchSettingsChanged(object sender, System.EventArgs e)
         {
-            var manager = FindObjectOfType<Match.MatchManager>();
-            if (manager)
+            MatchSettings s = manager.CurrentSettings;
+
+            targetStageCamPos = new Vector3(s.StageId * 50, stageLayoutCamera.transform.position.y, stageLayoutCamera.transform.position.z);
+            stageName.text = ActiveData.Stages[s.StageId].name;
+            stageImage.sprite = ActiveData.Stages[s.StageId].picture;
+            lapCount.text = s.Laps + (s.Laps == 1 ? " lap" : " laps");
+            aiOpponents.text = "";
+            /*foreach (var i in s.aiCharacters)
             {
-                MatchSettings s = manager.CurrentSettings;
+                aiOpponents.text += ActiveData.Characters[i].name + "\n";
+            }*/
+            aiSkill.text = "AI Skill: " + s.AISkill;
 
-                targetStageCamPos = new Vector3(s.StageId * 50, stageLayoutCamera.transform.position.y, stageLayoutCamera.transform.position.z);
-                stageName.text = ActiveData.Stages[s.StageId].name;
-                stageImage.sprite = ActiveData.Stages[s.StageId].picture;
-                lapCount.text = s.Laps + (s.Laps == 1 ? " lap" : " laps");
-                aiOpponents.text = "";
-                /*foreach (var i in s.aiCharacters)
-                {
-                    aiOpponents.text += ActiveData.Characters[i].name + "\n";
-                }*/
-                aiSkill.text = "AI Skill: " + s.AISkill;
-
-                settingsChangedAnimation.Play();
-            }
+            settingsChangedAnimation.Rewind();
+            settingsChangedAnimation.Play();
         }
 
         private void Update()
@@ -64,6 +63,11 @@ namespace Sanicball.UI
                     stageLayoutCamera.transform.position = targetStageCamPos;
                 }
             }
+        }
+
+        private void OnDestroy()
+        {
+            manager.MatchSettingsChanged -= Manager_MatchSettingsChanged;
         }
     }
 }

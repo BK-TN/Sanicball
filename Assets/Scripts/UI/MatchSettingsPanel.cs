@@ -1,4 +1,5 @@
 ﻿using Sanicball.Data;
+using Sanicball.Logic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -39,7 +40,7 @@ namespace Sanicball.UI
 
         public void RevertSettings()
         {
-            var manager = FindObjectOfType<Match.MatchManager>();
+            var manager = FindObjectOfType<MatchManager>();
             if (manager)
             {
                 tempSettings = manager.CurrentSettings;
@@ -49,7 +50,7 @@ namespace Sanicball.UI
 
         public void SaveSettings()
         {
-            var manager = FindObjectOfType<Match.MatchManager>();
+            var manager = FindObjectOfType<MatchManager>();
             if (manager)
             {
                 manager.RequestSettingsChange(tempSettings);
@@ -59,7 +60,7 @@ namespace Sanicball.UI
 
         public void DefaultSettings()
         {
-            tempSettings = new MatchSettings();
+            tempSettings = MatchSettings.CreateDefault();
             UpdateUiFields();
         }
 
@@ -135,11 +136,14 @@ namespace Sanicball.UI
         public void IncrementAICharacter(int pos)
         {
             int characterId = tempSettings.GetAICharacter(pos);
-            characterId++;
-            if (characterId >= ActiveData.Characters.Length)
+            do
             {
-                characterId = 0;
-            }
+                characterId++;
+                if (characterId >= ActiveData.Characters.Length)
+                {
+                    characterId = 0;
+                }
+            } while (ActiveData.Characters[characterId].hidden);
 
             tempSettings.SetAICharacter(pos, characterId);
             UpdateUiFields();
@@ -148,11 +152,14 @@ namespace Sanicball.UI
         public void DecrementAICharacter(int pos)
         {
             int characterId = tempSettings.GetAICharacter(pos);
-            characterId--;
-            if (characterId < 0)
+            do
             {
-                characterId = ActiveData.Characters.Length - 1;
-            }
+                characterId--;
+                if (characterId < 0)
+                {
+                    characterId = ActiveData.Characters.Length - 1;
+                }
+            } while (ActiveData.Characters[characterId].hidden);
 
             tempSettings.SetAICharacter(pos, characterId);
             UpdateUiFields();

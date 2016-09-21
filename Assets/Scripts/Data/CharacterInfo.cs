@@ -11,11 +11,13 @@ namespace Sanicball.Data
         public BallStats stats;
         public Material material;
         public Sprite icon;
+        public Color color = Color.white;
         public Material minimapIcon;
         public Material trail;
         public float ballSize = 1;
         public Mesh alternativeMesh = null;
         public Mesh collisionMesh = null;
         public bool hyperspeed;
+        public bool hidden = false;
     }
 }
