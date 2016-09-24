@@ -43,6 +43,7 @@ GameObject:
   serializedVersion: 4
   m_Component:
   - 4: {fileID: 433438}
+  - 114: {fileID: 11410426}
   m_Layer: 0
   m_Name: PalmTree
   m_TagString: Untagged
@@ -169,6 +170,19 @@ MeshCollider:
   serializedVersion: 2
   m_Convex: 0
   m_Mesh: {fileID: 4300004, guid: dff55f68915b04342843d6b6631d9047, type: 3}
+--- !u!114 &11410426
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 180092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad50892e1e6d9634caadec86b6ac5655, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxRandomRotation: {x: 12, y: 360, z: 12}
+  maxRandomScale: 1
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

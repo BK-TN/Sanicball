@@ -15,4 +15,14 @@ public static class Utils
         if (pos % 10 == 3 && pos % 100 != 13) return pos + "rd";
         return pos + "th";
     }
+
+    /// <summary>
+    /// Gets a random float between -1.0f and 1.0f
+    /// </summary>
+    /// <param name="rand"></param>
+    /// <returns></returns>
+    public static float NextFloatUniform(this Random rand)
+    {
+        return ((float)rand.NextDouble() - 0.5f) * 2f;
+    }
 }
