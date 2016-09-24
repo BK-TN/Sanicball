@@ -26,7 +26,13 @@ namespace Sanicball.Gameplay
             var bc = other.GetComponent<Ball>();
             if (bc != null)
             {
-                other.GetComponent<Rigidbody>().AddForce(transform.rotation * Vector3.forward * speed, ForceMode.VelocityChange);
+                Rigidbody rb = other.GetComponent<Rigidbody>();
+                if (rb)
+                {
+                    float speed = rb.velocity.magnitude;
+                    speed += this.speed;
+                    rb.velocity = transform.rotation * Vector3.forward * speed;
+                }
             }
         }
     }

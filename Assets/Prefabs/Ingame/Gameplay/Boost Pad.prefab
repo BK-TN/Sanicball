@@ -41,9 +41,10 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100000}
-  m_LocalRotation: {x: -.0978507772, y: -.0518462248, z: .0195448846, w: .993657529}
-  m_LocalPosition: {x: -1833.13953, y: -100.663116, z: -41.2366219}
+  m_LocalRotation: {x: -0.016411036, y: -0.60245985, z: 0.030681571, w: 0.79739046}
+  m_LocalPosition: {x: 617.53, y: 12.17, z: 164.44}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0.6186, y: -74.123695, z: 3.9397998}
   m_Children:
   - {fileID: 400002}
   m_Father: {fileID: 0}
@@ -54,9 +55,10 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100002}
-  m_LocalRotation: {x: .0978507772, y: .0518462248, z: -.0195448846, w: .993657529}
-  m_LocalPosition: {x: .0647907779, y: 1.29624116, z: .254508615}
+  m_LocalRotation: {x: 0.09785078, y: 0.051846225, z: -0.019544885, w: 0.9936575}
+  m_LocalPosition: {x: 0.06479078, y: 1.2962412, z: 0.2545086}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 400000}
   m_RootOrder: 0
@@ -79,8 +81,10 @@ MeshRenderer:
   m_ProbeAnchor: {fileID: 0}
   m_ScaleInLightmap: 1
   m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
   m_ImportantGI: 0
-  m_AutoUVMaxDistance: .5
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
@@ -103,7 +107,7 @@ BoxCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Size: {x: 5, y: 2, z: 7}
-  m_Center: {x: 0, y: .5, z: 0}
+  m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!108 &10800000
 Light:
   m_ObjectHideFlags: 1
@@ -122,8 +126,9 @@ Light:
     m_Type: 0
     m_Resolution: -1
     m_Strength: 1
-    m_Bias: .0500000007
-    m_NormalBias: .400000006
+    m_Bias: 0.05
+    m_NormalBias: 0.4
+    m_NearPlane: 0.2
   m_Cookie: {fileID: 0}
   m_DrawHalo: 0
   m_Flare: {fileID: 0}
@@ -147,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ceb7483a616f2774d825dca4cd78ec36, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 100
+  speed: 60
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
