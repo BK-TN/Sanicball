@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Sanicball.Data;
+using SanicballCore;
+using SanicballCore.MatchMessages;
 using UnityEngine;
 
 namespace Sanicball.Logic

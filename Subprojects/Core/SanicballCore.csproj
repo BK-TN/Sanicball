@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{ED8D5D1E-E70F-4005-A3BA-F03794FF7A40}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SanicballCore</RootNamespace>
+    <AssemblyName>SanicballCore</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile>Unity Full v3.5</TargetFrameworkProfile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Lidgren.Network, Version=3.5.1.1679, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Assets\Assemblies\Lidgren\Lidgren.Network.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\..\Assets\Assemblies\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>C:\Program Files\Unity\Editor\Data\Managed\UnityEngine.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ClientInfo.cs" />
+    <Compile Include="Consts.cs" />
+    <Compile Include="ControlType.cs" />
+    <Compile Include="GameVersion.cs" />
+    <Compile Include="MatchMessage.cs" />
+    <Compile Include="MatchMessages\AutoStartTimerMessage.cs" />
+    <Compile Include="MatchMessages\ChangedReadyMessage.cs" />
+    <Compile Include="MatchMessages\CharacterChangedMessage.cs" />
+    <Compile Include="MatchMessages\ChatMessage.cs" />
+    <Compile Include="MatchMessages\CheckpointPassedMessage.cs" />
+    <Compile Include="MatchMessages\ClientJoinedMessage.cs" />
+    <Compile Include="MatchMessages\ClientLeftMessage.cs" />
+    <Compile Include="MatchMessages\DoneRacingMessage.cs" />
+    <Compile Include="MatchMessages\LoadLobbyMessage.cs" />
+    <Compile Include="MatchMessages\LoadRaceMessage.cs" />
+    <Compile Include="MatchMessages\PlayerJoinedMessage.cs" />
+    <Compile Include="MatchMessages\PlayerLeftMessage.cs" />
+    <Compile Include="MatchMessages\PlayerMovementMessage.cs" />
+    <Compile Include="MatchMessages\RaceFinishedMessage.cs" />
+    <Compile Include="MatchMessages\RaceTimeoutMessage.cs" />
+    <Compile Include="MatchSettings.cs" />
+    <Compile Include="MatchState.cs" />
+    <Compile Include="MessageType.cs" />
+    <Compile Include="Server\Command.cs" />
+    <Compile Include="Server\CommandQueue.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Server\ServClient.cs" />
+    <Compile Include="Server\Server.cs" />
+    <Compile Include="Server\ServerConfig.cs" />
+    <Compile Include="Server\ServerInfo.cs" />
+    <Compile Include="Server\ServPlayer.cs" />
+    <Compile Include="MatchMessages\SettingsChangedMessage.cs" />
+    <Compile Include="MatchMessages\StartRaceMessage.cs" />
+    <Compile Include="Utils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy "$(TargetPath)" "$(SolutionDir)\..\Assets\Assemblies"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
