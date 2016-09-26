@@ -43,7 +43,7 @@ namespace Sanicball.Gameplay
 
         private void OnDrawGizmos()
         {
-            Gizmos.color = Color.blue;
+            Gizmos.color = new Color(0.3f, 0.8f, 1f);
             if (firstAINode != null)
             {
                 Gizmos.DrawLine(transform.position, firstAINode.transform.position);
