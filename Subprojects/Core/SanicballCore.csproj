@@ -54,7 +54,6 @@
     <Compile Include="ControlType.cs" />
     <Compile Include="GameVersion.cs" />
     <Compile Include="MatchMessage.cs" />
-    <Compile Include="MatchMessages\MatchMessagePacker.cs" />
     <Compile Include="MatchMessages\AutoStartTimerMessage.cs" />
     <Compile Include="MatchMessages\ChangedReadyMessage.cs" />
     <Compile Include="MatchMessages\CharacterChangedMessage.cs" />
