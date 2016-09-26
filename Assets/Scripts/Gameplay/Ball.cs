@@ -59,14 +59,11 @@ namespace Sanicball.Gameplay
         [SerializeField]
         private PivotCamera oldCamera;
         [SerializeField]
-        private AITarget aiTarget;
-        [SerializeField]
         private ParticleSystem removalParticles;
 
         public DriftySmoke Smoke { get { return smoke; } }
         public OmniCamera Camera { get { return camera; } }
         public PivotCamera OldCamera { get { return oldCamera; } }
-        public AITarget AiTarget { get { return aiTarget; } }
         public ParticleSystem RemovalParticles { get { return removalParticles; } }
     }
 
@@ -210,14 +207,6 @@ namespace Sanicball.Gameplay
             {
                 //Create AI component
                 var ai = gameObject.AddComponent<BallControlAI>();
-                ai.pathToFollow = FindObjectOfType<Path>();
-
-                //Create target for the AI
-                AITarget pFollower = Instantiate(prefabs.AiTarget);
-                pFollower.GetComponent<PathFollower>().path = ai.pathToFollow;
-                pFollower.stupidness = ai.stupidness;
-                pFollower.GetComponent<Patroller>().target = gameObject;
-                ai.target = pFollower;
             }
         }
 
