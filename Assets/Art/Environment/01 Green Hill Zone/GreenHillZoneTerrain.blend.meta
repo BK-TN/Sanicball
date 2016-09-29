@@ -28,6 +28,10 @@ ModelImporter:
     100040: MainIsland_MeshPart0
     100042: MainIsland_MeshPart1
     100044: SideIsland
+    100046: BridgeCurve
+    100048: BridgePlanks
+    100050: BridgePlanks_ExtraCollider
+    100052: BridgePlanks_Collider
     400000: Cube
     400002: Cube_001
     400004: //RootNode
@@ -51,6 +55,10 @@ ModelImporter:
     400040: MainIsland_MeshPart0
     400042: MainIsland_MeshPart1
     400044: SideIsland
+    400046: BridgeCurve
+    400048: BridgePlanks
+    400050: BridgePlanks_ExtraCollider
+    400052: BridgePlanks_Collider
     2300000: Cube
     2300002: Cube_001
     2300004: Terrain_002_MeshPart0
@@ -71,6 +79,10 @@ ModelImporter:
     2300034: MainIsland_MeshPart0
     2300036: MainIsland_MeshPart1
     2300038: SideIsland
+    2300040: BridgeCurve
+    2300042: BridgePlanks
+    2300044: BridgePlanks_ExtraCollider
+    2300046: BridgePlanks_Collider
     3300000: Cube
     3300002: Cube_001
     3300004: Terrain_002_MeshPart0
@@ -91,6 +103,10 @@ ModelImporter:
     3300034: MainIsland_MeshPart0
     3300036: MainIsland_MeshPart1
     3300038: SideIsland
+    3300040: BridgeCurve
+    3300042: BridgePlanks
+    3300044: BridgePlanks_ExtraCollider
+    3300046: BridgePlanks_Collider
     4300000: Cube_001
     4300002: Terrain_002_MeshPart0
     4300004: Terrain_002_MeshPart1
@@ -111,6 +127,10 @@ ModelImporter:
     4300034: MainIsland_MeshPart0
     4300036: MainIsland_MeshPart1
     4300038: SideIsland
+    4300040: BridgeCurve
+    4300042: BridgePlanks
+    4300044: BridgePlanks_ExtraCollider
+    4300046: BridgePlanks_Collider
     7400000: Default Take
     9500000: //RootNode
   materials:
