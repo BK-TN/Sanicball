@@ -60,7 +60,7 @@ LightmapSettings:
     m_TextureHeight: 1024
     m_AOMaxDistance: 10
     m_Padding: 2
-    m_CompAOExponent: 2
+    m_CompAOExponent: 1
     m_LightmapParameters: {fileID: 0}
     m_TextureCompression: 1
     m_FinalGather: 0
@@ -17107,6 +17107,10 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 480570, guid: d6c6f17b58b648c42ad2f5a56baf06f9, type: 2}
       propertyPath: m_LocalScale.y
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2361180, guid: d6c6f17b58b648c42ad2f5a56baf06f9, type: 2}
+      propertyPath: m_ReceiveShadows
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -36406,7 +36410,7 @@ Light:
   m_SpotAngle: 30
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 1
+    m_Type: 2
     m_Resolution: -1
     m_Strength: 0.7
     m_Bias: 0.13
