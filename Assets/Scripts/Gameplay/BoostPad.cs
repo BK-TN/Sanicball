@@ -66,6 +66,12 @@ namespace Sanicball.Gameplay
                     float speed = rb.velocity.magnitude;
                     speed += this.speed;
                     rb.velocity = transform.rotation * Vector3.forward * speed;
+
+                    AudioSource aSource = GetComponent<AudioSource>();
+                    if (aSource)
+                    {
+                        aSource.Play();
+                    }
                 }
             }
         }
