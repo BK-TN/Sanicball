@@ -98,6 +98,7 @@ namespace Sanicball.Gameplay
         private BallControlInput input;
         private bool grounded = false;
         private float groundedTimer = 0;
+        private float upResetTimer = 0;
         private DriftySmoke smoke;
 
         public bool CanMove { get { return canMove; } set { canMove = value; } }
@@ -312,11 +313,23 @@ namespace Sanicball.Gameplay
             //Grounded timer
             if (groundedTimer > 0)
             {
-                groundedTimer = Mathf.Max(0, groundedTimer - Time.deltaTime);
+                groundedTimer -= Time.deltaTime;
                 if (groundedTimer <= 0)
                 {
                     grounded = false;
-                    Up = Vector3.up;
+                    upResetTimer = 1f;
+                }
+            }
+
+            if (!grounded)
+            {
+                if (upResetTimer > 0)
+                {
+                    upResetTimer -= Time.deltaTime;
+                }
+                else
+                {
+                    Up = Vector3.MoveTowards(Up, Vector3.up, Time.deltaTime * 10);
                 }
             }
 
