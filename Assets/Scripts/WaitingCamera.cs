@@ -12,6 +12,8 @@ namespace Sanicball
         private int currentOrientation = 0;
         private float timer = switchTime;
 
+        private float vol = 0;
+
         // Use this for initialization
         private void Start()
         {
@@ -20,6 +22,7 @@ namespace Sanicball
             AlignWithCurrentOrientation();
 
             CameraFade.StartAlphaFade(Color.black, true, 4f);
+            AudioListener.volume = vol;
         }
 
         // Update is called once per frame
@@ -38,6 +41,17 @@ namespace Sanicball
             }
 
             transform.Translate(Vector3.forward * moveSpeed * Time.deltaTime);
+
+            if (vol < 1f)
+            {
+                vol = Mathf.Min(1f, vol + Time.deltaTime / 4);
+                AudioListener.volume = Mathf.Lerp(0, Data.ActiveData.GameSettings.soundVolume, vol);
+            }
+        }
+
+        public void OnDestroy()
+        {
+            AudioListener.volume = Data.ActiveData.GameSettings.soundVolume;
         }
 
         private void AlignWithCurrentOrientation()
