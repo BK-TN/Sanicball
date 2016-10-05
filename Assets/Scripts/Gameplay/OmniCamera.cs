@@ -64,7 +64,7 @@ namespace Sanicball.Gameplay
                 {
                     targetUp = bc.Up;
                 }
-                up = Vector3.Lerp(up, targetUp, Time.deltaTime * 20);
+                up = Vector3.Lerp(up, targetUp, Time.deltaTime * 100);
 
                 //Based on how fast the target is moving, create a rotation bending towards its velocity.
                 Quaternion towardsVelocity = (Target.velocity != Vector3.zero) ? Quaternion.LookRotation(Target.velocity, up) : Quaternion.identity;

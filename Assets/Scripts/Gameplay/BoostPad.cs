@@ -21,6 +21,9 @@ namespace Sanicball.Gameplay
         private float speed = 1f;
 
         [SerializeField]
+        private float speedLimit = 200f;
+
+        [SerializeField]
         private LayerMask placementLayers;
 
         private float offset;
@@ -43,7 +46,7 @@ namespace Sanicball.Gameplay
             GetComponent<Renderer>().materials[1].SetTextureOffset("_MainTex", new Vector2(0f, offset));
         }
 
-        private void OnDrawGizmosSelected()
+        private void OnDrawGizmos()
         {
             Gizmos.color = Color.red;
             PosRot placement = CalcTargetPlacement();
@@ -64,7 +67,7 @@ namespace Sanicball.Gameplay
                 if (rb)
                 {
                     float speed = rb.velocity.magnitude;
-                    speed += this.speed;
+                    speed = Mathf.Min(speed + this.speed, speedLimit);
                     rb.velocity = transform.rotation * Vector3.forward * speed;
 
                     AudioSource aSource = GetComponent<AudioSource>();
