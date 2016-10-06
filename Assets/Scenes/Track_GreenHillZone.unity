@@ -8610,7 +8610,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 178192, guid: 15c7ed3ff76289b4680e4b9f1f52fb22, type: 2}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 15c7ed3ff76289b4680e4b9f1f52fb22, type: 2}
@@ -9612,7 +9612,7 @@ Prefab:
     m_Modifications:
     - target: {fileID: 488496, guid: e2350ad605e831043b4c1548b8fbf160, type: 2}
       propertyPath: m_LocalPosition.x
-      value: -1303.8
+      value: -1322.7
       objectReference: {fileID: 0}
     - target: {fileID: 488496, guid: e2350ad605e831043b4c1548b8fbf160, type: 2}
       propertyPath: m_LocalPosition.y
@@ -9620,7 +9620,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 488496, guid: e2350ad605e831043b4c1548b8fbf160, type: 2}
       propertyPath: m_LocalPosition.z
-      value: 720.8
+      value: 714.2
       objectReference: {fileID: 0}
     - target: {fileID: 488496, guid: e2350ad605e831043b4c1548b8fbf160, type: 2}
       propertyPath: m_LocalRotation.x
@@ -15892,10 +15892,10 @@ Transform:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 580187340}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 850.43, y: 4.7, z: -238.2363}
+  m_LocalRotation: {x: 0, y: -0.33792475, z: 0, w: 0.94117314}
+  m_LocalPosition: {x: -762.869, y: 66.736, z: -1025.528}
   m_LocalScale: {x: 0.1, y: 1.95, z: 1.95}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: -39.501, z: 0}
   m_Children: []
   m_Father: {fileID: 1801014962}
   m_RootOrder: 3
@@ -56265,7 +56265,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2061090140}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -1, z: 0}
+  m_LocalPosition: {x: 0, y: -8, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
@@ -56285,7 +56285,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_DisablePixelLights: 1
   m_TextureSize: 1024
-  m_ClipPlaneOffset: 0.07
+  m_ClipPlaneOffset: 8
   m_ReflectLayers:
     serializedVersion: 2
     m_Bits: 4294967295
