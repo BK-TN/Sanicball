@@ -64,7 +64,7 @@ namespace Sanicball.Gameplay
                 {
                     targetUp = bc.Up;
                 }
-                up = Vector3.Lerp(up, targetUp, Time.deltaTime * 10);
+                up = Vector3.Lerp(up, targetUp, Time.deltaTime * 100);
 
                 //Based on how fast the target is moving, create a rotation bending towards its velocity.
                 Quaternion towardsVelocity = (Target.velocity != Vector3.zero) ? Quaternion.LookRotation(Target.velocity, up) : Quaternion.identity;
@@ -72,7 +72,7 @@ namespace Sanicball.Gameplay
                 Quaternion finalTargetDir = Quaternion.Slerp(currentDirection, towardsVelocity, Mathf.Max(0, Mathf.Min(-10 + Target.velocity.magnitude, maxTrans) / maxTrans));
 
                 //Lerp towards the final rotation
-                currentDirection = Quaternion.Slerp(currentDirection, finalTargetDir, Time.deltaTime * 2);
+                currentDirection = Quaternion.Slerp(currentDirection, finalTargetDir, Time.deltaTime * 4);
 
                 //Look for a BallControlInput and set its look direction
                 BallControlInput bci = Target.GetComponent<BallControlInput>();

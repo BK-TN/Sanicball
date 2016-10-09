@@ -294,7 +294,10 @@ namespace Sanicball.Logic
 
         private void DoneRacingCallback(DoneRacingMessage msg, float travelTime)
         {
-            RacePlayer rp = players.FirstOrDefault(a => a.AssociatedMatchPlayer.ClientGuid == msg.ClientGuid && a.AssociatedMatchPlayer.CtrlType == msg.CtrlType);
+            RacePlayer rp = players.FirstOrDefault(a => a.AssociatedMatchPlayer != null
+            && a.AssociatedMatchPlayer.ClientGuid == msg.ClientGuid
+            && a.AssociatedMatchPlayer.CtrlType == msg.CtrlType);
+
             DoneRacingInner(rp, msg.RaceTime, msg.Disqualified);
         }
 

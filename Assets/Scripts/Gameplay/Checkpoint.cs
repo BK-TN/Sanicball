@@ -5,9 +5,13 @@ namespace Sanicball.Gameplay
     public class Checkpoint : MonoBehaviour
     {
         //Data object to hold and hide things that are mostly not changed
-        public CheckpointData data;
+        [SerializeField]
+        private CheckpointData data;
 
-        public CheckpointToAIPathConnection[] AIPathConnections;
+        [SerializeField]
+        private AINode firstAINode = null;
+
+        public AINode FirstAINode { get { return firstAINode; } }
 
         public void Show()
         {
@@ -37,18 +41,20 @@ namespace Sanicball.Gameplay
             Hide();
         }
 
+        private void OnDrawGizmos()
+        {
+            Gizmos.color = new Color(0.3f, 0.8f, 1f);
+            if (firstAINode != null)
+            {
+                Gizmos.DrawLine(transform.position, firstAINode.transform.position);
+            }
+        }
+
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.red;
             Gizmos.DrawLine(transform.position, GetRespawnPoint());
             Gizmos.DrawSphere(GetRespawnPoint(), 3);
-            foreach (var conn in AIPathConnections)
-            {
-                if (conn.node != null)
-                {
-                    Gizmos.DrawLine(transform.position, conn.node.transform.position);
-                }
-            }
         }
     }
 
@@ -69,10 +75,17 @@ namespace Sanicball.Gameplay
     [System.Serializable]
     public class CheckpointToAIPathConnection
     {
-        public string routeName;
-        public AINode node;
-        public float risk = 1f;
-        public float reward = 1f;
-        public bool usedByBig = true;
+        [SerializeField]
+        private string name;
+        [SerializeField]
+        private AINode firstNode;
+        [SerializeField]
+        private float selectionWeight = 1f;
+        [SerializeField]
+        private bool usedByBig = true;
+
+        public AINode FirstNode { get { return firstNode; } }
+        public float SelectionWeight { get { return selectionWeight; } }
+        public bool UsedByBig { get { return usedByBig; } }
     }
 }

@@ -14,6 +14,8 @@ public class Water : MonoBehaviour
 
     public int noiseIterations = 2;
 
+    public float speed = 1;
+
     public float[,] points;
     private float t = 0;
 
@@ -39,7 +41,7 @@ public class Water : MonoBehaviour
     private void Update()
     {
         t += Time.deltaTime * 10f;
-        t = Time.realtimeSinceStartup;
+        t = Time.time * speed;
 
         points = new float[triangleCount, triangleCount];
         for (var x = 0; x < points.GetLength(0); x++)

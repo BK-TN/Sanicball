@@ -59,14 +59,11 @@ namespace Sanicball.Gameplay
         [SerializeField]
         private PivotCamera oldCamera;
         [SerializeField]
-        private AITarget aiTarget;
-        [SerializeField]
         private ParticleSystem removalParticles;
 
         public DriftySmoke Smoke { get { return smoke; } }
         public OmniCamera Camera { get { return camera; } }
         public PivotCamera OldCamera { get { return oldCamera; } }
-        public AITarget AiTarget { get { return aiTarget; } }
         public ParticleSystem RemovalParticles { get { return removalParticles; } }
     }
 
@@ -101,6 +98,7 @@ namespace Sanicball.Gameplay
         private BallControlInput input;
         private bool grounded = false;
         private float groundedTimer = 0;
+        private float upResetTimer = 0;
         private DriftySmoke smoke;
 
         public bool CanMove { get { return canMove; } set { canMove = value; } }
@@ -210,14 +208,6 @@ namespace Sanicball.Gameplay
             {
                 //Create AI component
                 var ai = gameObject.AddComponent<BallControlAI>();
-                ai.pathToFollow = FindObjectOfType<Path>();
-
-                //Create target for the AI
-                AITarget pFollower = Instantiate(prefabs.AiTarget);
-                pFollower.GetComponent<PathFollower>().path = ai.pathToFollow;
-                pFollower.stupidness = ai.stupidness;
-                pFollower.GetComponent<Patroller>().target = gameObject;
-                ai.target = pFollower;
             }
         }
 
@@ -323,11 +313,23 @@ namespace Sanicball.Gameplay
             //Grounded timer
             if (groundedTimer > 0)
             {
-                groundedTimer = Mathf.Max(0, groundedTimer - Time.deltaTime);
+                groundedTimer -= Time.deltaTime;
                 if (groundedTimer <= 0)
                 {
                     grounded = false;
-                    Up = Vector3.up;
+                    upResetTimer = 1f;
+                }
+            }
+
+            if (!grounded)
+            {
+                if (upResetTimer > 0)
+                {
+                    upResetTimer -= Time.deltaTime;
+                }
+                else
+                {
+                    Up = Vector3.MoveTowards(Up, Vector3.up, Time.deltaTime * 10);
                 }
             }
 

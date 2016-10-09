@@ -94,6 +94,7 @@ namespace Sanicball.Logic
         public MatchPlayer AssociatedMatchPlayer { get { return associatedMatchPlayer; } }
         public bool LapRecordsEnabled { get; set; }
         public int Position { get; set; }
+        public Checkpoint NextCheckpoint { get { return nextCheckpoint; } }
 
         public RacePlayer(Ball ball, MatchMessenger matchMessenger, MatchPlayer associatedMatchPlayer)
         {
@@ -146,8 +147,6 @@ namespace Sanicball.Logic
                 throw new InvalidOperationException("RacePlayer tried to finish a race twice for some reason");
             }
         }
-
-        public Checkpoint NextCheckpoint { get { return nextCheckpoint; } }
 
         public float CalculateRaceProgress()
         {
@@ -253,6 +252,9 @@ namespace Sanicball.Logic
             }
 
             SetNextCheckpoint();
+
+            //Set next target node if this is an AI ball
+            TrySetAITarget();
         }
 
         private void Ball_RespawnRequested(object sender, EventArgs e)
@@ -263,6 +265,19 @@ namespace Sanicball.Logic
             if (ballCamera != null)
             {
                 ballCamera.SetDirection(sr.checkpoints[currentCheckpointIndex].transform.rotation);
+            }
+
+            //Set next target node if this is an AI ball
+            TrySetAITarget();
+        }
+
+        private void TrySetAITarget()
+        {
+            BallControlAI ai = ball.GetComponent<BallControlAI>();
+            if (ai)
+            {
+                Checkpoint activeCheckpoint = StageReferences.Active.checkpoints[currentCheckpointIndex];
+                ai.Target = activeCheckpoint.FirstAINode;
             }
         }
 
