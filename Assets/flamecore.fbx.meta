@@ -13,8 +13,10 @@ ModelImporter:
     400004: NewTerrain
     2300000: LavaPlane
     2300002: NewTerrain
+    2300004: //RootNode
     3300000: LavaPlane
     3300002: NewTerrain
+    3300004: //RootNode
     4300000: LavaPlane
     4300002: NewTerrain
   materials:
@@ -57,9 +59,9 @@ ModelImporter:
     secondaryUVPackMargin: 4
     useFileScale: 1
   tangentSpace:
-    normalSmoothAngle: 60
+    normalSmoothAngle: 178
     normalImportMode: 0
-    tangentImportMode: 3
+    tangentImportMode: 0
   importAnimation: 1
   copyAvatar: 0
   humanDescription:
