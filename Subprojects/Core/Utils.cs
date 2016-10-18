@@ -18,28 +18,28 @@ namespace SanicballCore
             return pos + "th";
         }
 
-        public static void WriteGuidToBuffer(Lidgren.Network.NetBuffer target, Guid guid)
+        public static void Write(this Lidgren.Network.NetBuffer target, Guid guid)
         {
             byte[] guidBytes = guid.ToByteArray();
             target.Write(guidBytes.Length);
             target.Write(guidBytes);
         }
 
-        public static Guid ReadGuidFromBuffer(Lidgren.Network.NetBuffer target)
+        public static Guid ReadGuid(this Lidgren.Network.NetBuffer target)
         {
             int guidLength = target.ReadInt32();
             byte[] guidBytes = target.ReadBytes(guidLength);
             return new Guid(guidBytes);
         }
-		
-		/// <summary>
-		/// Gets a random float between -1.0f and 1.0f
-		/// </summary>
-		/// <param name="rand"></param>
-		/// <returns></returns>
-		public static float NextFloatUniform(this Random rand)
-		{
-			return ((float)rand.NextDouble() - 0.5f) * 2f;
-		}
+
+        /// <summary>
+        /// Gets a random float between -1.0f and 1.0f
+        /// </summary>
+        /// <param name="rand"></param>
+        /// <returns></returns>
+        public static float NextFloatUniform(this Random rand)
+        {
+            return ((float)rand.NextDouble() - 0.5f) * 2f;
+        }
     }
 }

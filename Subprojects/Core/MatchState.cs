@@ -29,7 +29,7 @@ namespace SanicballCore
             {
                 MatchClientState c = Clients[i];
                 //Write guid (as byte array)
-                Utils.WriteGuidToBuffer(message, c.Guid);   //Byte array w size
+                message.Write(c.Guid);                      //Byte array w size
                 //Write name
                 message.Write(c.Name);                      //String
             }
@@ -40,7 +40,7 @@ namespace SanicballCore
             {
                 MatchPlayerState p = Players[i];
                 //Client GUID (as byte array)
-                Utils.WriteGuidToBuffer(message, p.ClientGuid); //Byte array w size
+                message.Write(p.ClientGuid);                //Byte array w size
                 //Control type enum as int
                 message.Write((int)p.CtrlType);             //Int32 (Cast to ControlType)
                 //Ready to race bool
@@ -72,7 +72,7 @@ namespace SanicballCore
             List<MatchClientState> clients = new List<MatchClientState>();
             for (int i = 0; i < clientCount; i++)
             {
-                System.Guid guid = Utils.ReadGuidFromBuffer(message);
+                System.Guid guid = message.ReadGuid();
                 string name = message.ReadString();
 
                 clients.Add(new MatchClientState(guid, name));
@@ -82,7 +82,7 @@ namespace SanicballCore
             List<MatchPlayerState> players = new List<MatchPlayerState>();
             for (int i = 0; i < playerCount; i++)
             {
-                System.Guid clientGuid = Utils.ReadGuidFromBuffer(message);
+                System.Guid clientGuid = message.ReadGuid();
                 ControlType ctrlType = (ControlType)message.ReadInt32();
                 bool readyToRace = message.ReadBoolean();
                 int characterId = message.ReadInt32();

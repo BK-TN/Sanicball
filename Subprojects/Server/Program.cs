@@ -49,6 +49,10 @@ namespace SanicballServer
                     Thread inputThread = new Thread(InputLoop);
                     inputThread.Start();
 
+#if DEBUG
+                    serv.Start();
+                    serverClosed = true;
+#else
                     try
                     {
                         serv.Start();
@@ -63,7 +67,9 @@ namespace SanicballServer
                         string exText = ex.GetType() + ": " + ex.Message + Environment.NewLine + ex.StackTrace;
                         serv.Log(exText, LogType.Normal);
                         Thread.Sleep(1000);
+                        throw ex;
                     }
+#endif
 
                     inputThread.Abort();
                     inputThread.Join();

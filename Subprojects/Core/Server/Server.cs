@@ -742,6 +742,15 @@ namespace SanicballCore.Server
                             byte messageType = msg.ReadByte();
                             switch (messageType)
                             {
+                                case MessageType.PlayerMovementMessage:
+                                    //Forward the message to all other clients
+                                    NetOutgoingMessage outgoingMsg = netServer.CreateMessage();
+                                    outgoingMsg.Write(msg.Data);
+                                    List<NetConnection> recipients = netServer.Connections.Where(a => a != msg.SenderConnection).ToList();
+                                    if (recipients.Count > 0)
+                                        netServer.SendMessage(outgoingMsg, recipients, NetDeliveryMethod.Unreliable, 0);
+                                    break;
+
                                 case MessageType.MatchMessage:
 
                                     double timestamp = msg.ReadTime(false);
@@ -983,11 +992,6 @@ namespace SanicballCore.Server
                                         }
                                     }
 
-                                    if (matchMessage is PlayerMovementMessage)
-                                    {
-                                        SendToAll(matchMessage);
-                                    }
-
                                     if (matchMessage is DoneRacingMessage)
                                     {
                                         var castedMsg = (DoneRacingMessage)matchMessage;
@@ -1124,10 +1128,7 @@ namespace SanicballCore.Server
 
         private void SendToAll(MatchMessage matchMsg)
         {
-            if (matchMsg.Reliable)
-            {
-                Log("Sending message of type " + matchMsg.GetType() + " to " + netServer.Connections.Count + " connection(s)", LogType.Debug);
-            }
+            Log("Sending message of type " + matchMsg.GetType() + " to " + netServer.Connections.Count + " connection(s)", LogType.Debug);
             if (netServer.ConnectionsCount == 0) return;
             string matchMsgSerialized = JsonConvert.SerializeObject(matchMsg, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
 
@@ -1135,7 +1136,7 @@ namespace SanicballCore.Server
             netMsg.Write(MessageType.MatchMessage);
             netMsg.WriteTime(false);
             netMsg.Write(matchMsgSerialized);
-            netServer.SendMessage(netMsg, netServer.Connections, matchMsg.Reliable ? NetDeliveryMethod.ReliableOrdered : NetDeliveryMethod.Unreliable, 0);
+            netServer.SendMessage(netMsg, netServer.Connections, NetDeliveryMethod.ReliableOrdered, 0);
         }
 
         /// <summary>

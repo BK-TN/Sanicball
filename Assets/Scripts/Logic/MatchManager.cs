@@ -275,17 +275,6 @@ namespace Sanicball.Logic
             autoStartTimer = currentSettings.AutoStartTime - travelTime;
         }
 
-        private void PlayerMovementCallback(PlayerMovementMessage msg, float travelTime)
-        {
-            if (msg.ClientGuid == myGuid) return;
-
-            MatchPlayer player = players.FirstOrDefault(a => a.ClientGuid == msg.ClientGuid && a.CtrlType == msg.CtrlType);
-            if (player != null && player.BallObject != null)
-            {
-                player.ProcessMovementMessage(msg);
-            }
-        }
-
         #endregion Match message callbacks
 
         #region Match initializing
@@ -330,11 +319,13 @@ namespace Sanicball.Logic
             autoStartTimer = matchState.CurAutoStartTime;
 
             //Create messenger
-            messenger = new OnlineMatchMessenger(client);
-            ((OnlineMatchMessenger)messenger).Disconnected += (sender, e) =>
+            OnlineMatchMessenger messenger = new OnlineMatchMessenger(client);
+            this.messenger = messenger;
+            messenger.Disconnected += (sender, e) =>
             {
                 QuitMatch(e.Reason);
             };
+            messenger.OnPlayerMovement += OnlinePlayerMovement;
 
             //Create chat
             activeChat = Instantiate(chatPrefab);
@@ -371,7 +362,6 @@ namespace Sanicball.Logic
             messenger.CreateListener<ChatMessage>(ChatCallback);
             messenger.CreateListener<LoadLobbyMessage>(LoadLobbyCallback);
             messenger.CreateListener<AutoStartTimerMessage>(AutoStartTimerCallback);
-            messenger.CreateListener<PlayerMovementMessage>(PlayerMovementCallback);
 
             //Create this client
             myGuid = Guid.NewGuid();
@@ -382,6 +372,15 @@ namespace Sanicball.Logic
         {
             MatchClient myClient = clients.FirstOrDefault(a => a.Guid == myGuid);
             messenger.SendMessage(new ChatMessage(myClient.Name, ChatMessageType.User, args.Text));
+        }
+
+        private void OnlinePlayerMovement(object sender, PlayerMovementArgs e)
+        {
+            MatchPlayer player = players.FirstOrDefault(a => a.ClientGuid == e.Movement.ClientGuid && a.CtrlType == e.Movement.CtrlType);
+            if (player != null && player.BallObject != null)
+            {
+                player.ProcessMovement(e.Timestamp, e.Movement);
+            }
         }
 
         private void Update()
@@ -434,17 +433,7 @@ namespace Sanicball.Logic
                     {
                         if (player.ClientGuid == myGuid && player.BallObject)
                         {
-                            Rigidbody ballRb = player.BallObject.GetComponent<Rigidbody>();
-                            messenger.SendMessage(new PlayerMovementMessage(
-                                DateTime.Now,
-                                myGuid,
-                                player.CtrlType,
-                                player.BallObject.transform.position.ToSimpleVector3(),
-                                player.BallObject.transform.rotation.eulerAngles.ToSimpleVector3(),
-                                ballRb.velocity.ToSimpleVector3(),
-                                ballRb.angularVelocity.ToSimpleVector3(),
-                                player.BallObject.DirectionVector.ToSimpleVector3()
-                                ));
+                            ((OnlineMatchMessenger)messenger).SendPlayerMovement(player);
                         }
                     }
                 }

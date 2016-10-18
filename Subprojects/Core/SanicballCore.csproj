@@ -66,7 +66,6 @@
     <Compile Include="MatchMessages\LoadRaceMessage.cs" />
     <Compile Include="MatchMessages\PlayerJoinedMessage.cs" />
     <Compile Include="MatchMessages\PlayerLeftMessage.cs" />
-    <Compile Include="MatchMessages\PlayerMovementMessage.cs" />
     <Compile Include="MatchMessages\RaceFinishedMessage.cs" />
     <Compile Include="MatchMessages\RaceTimeoutMessage.cs" />
     <Compile Include="MatchSettings.cs" />

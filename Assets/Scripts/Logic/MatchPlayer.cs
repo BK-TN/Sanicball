@@ -25,7 +25,7 @@ namespace Sanicball.Logic
     {
         private Guid clientGuid;
         private ControlType ctrlType;
-        private DateTime latestMovementMessageTime = DateTime.Now;
+        private double latestMovementTimestamp = 0;
 
         public MatchPlayer(Guid clientGuid, ControlType ctrlType, int initialCharacterId)
         {
@@ -40,19 +40,19 @@ namespace Sanicball.Logic
         public Gameplay.Ball BallObject { get; set; }
         public bool ReadyToRace { get; set; }
 
-        public void ProcessMovementMessage(PlayerMovementMessage msg)
+        public void ProcessMovement(double timestamp, PlayerMovement movement)
         {
-            if (msg.Timestamp > latestMovementMessageTime)
+            if (timestamp > latestMovementTimestamp)
             {
                 Rigidbody ballRb = BallObject.GetComponent<Rigidbody>();
 
-                BallObject.transform.position = msg.Position.ToVector3();
-                BallObject.transform.rotation = Quaternion.Euler(msg.Rotation.ToVector3());
-                ballRb.velocity = msg.Velocity.ToVector3();
-                ballRb.angularVelocity = msg.AngularVelocity.ToVector3();
-                BallObject.DirectionVector = msg.DirectionVector.ToVector3();
+                BallObject.transform.position = movement.Position;
+                BallObject.transform.rotation = movement.Rotation;
+                ballRb.velocity = movement.Velocity;
+                ballRb.angularVelocity = movement.AngularVelocity;
+                BallObject.DirectionVector = movement.DirectionVector;
 
-                latestMovementMessageTime = msg.Timestamp;
+                latestMovementTimestamp = timestamp;
             }
         }
     }
