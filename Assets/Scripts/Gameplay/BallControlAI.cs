@@ -38,7 +38,7 @@ namespace Sanicball.Gameplay
                 Quaternion towardsVelocity = (velocity != Vector3.zero) ? Quaternion.LookRotation(velocity) : Quaternion.LookRotation(target.transform.position);
 
                 Ray ray = new Ray(transform.position, towardsVelocity * Vector3.forward);
-                float maxDist = Mathf.Min(Vector3.Distance(transform.position, target.transform.position) - 10, velocity.magnitude);
+                float maxDist = Mathf.Min(Vector3.Distance(transform.position, target.transform.position) - 10, velocity.magnitude * 1.2f);
 
                 Vector3 point = transform.position + (ray.direction * maxDist);
 
