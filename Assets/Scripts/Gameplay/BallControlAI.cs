@@ -34,21 +34,25 @@ namespace Sanicball.Gameplay
             ball.Brake = false;
             if (target)
             {
-                Quaternion towardsTargetDir = Quaternion.Euler(0, 90, 0) * Quaternion.LookRotation(target.transform.position - transform.position);
-                Quaternion finalDir = towardsTargetDir;
-
                 Vector3 velocity = GetComponent<Rigidbody>().velocity;
-                if (velocity != Vector3.zero)
+                Quaternion towardsVelocity = (velocity != Vector3.zero) ? Quaternion.LookRotation(velocity) : Quaternion.LookRotation(target.transform.position);
+
+                Ray ray = new Ray(transform.position, towardsVelocity * Vector3.forward);
+                float maxDist = Mathf.Min(Vector3.Distance(transform.position, target.transform.position) - 10, velocity.magnitude);
+
+                Vector3 point = transform.position + (ray.direction * maxDist);
+
+                RaycastHit hit;
+                if (Physics.Raycast(ray, out hit, maxDist, LayerMask.GetMask("Terrain")))
                 {
-                    Quaternion currentDir = Quaternion.Euler(0, 90, 0) * Quaternion.LookRotation(GetComponent<Rigidbody>().velocity);
-                    finalDir = Quaternion.LerpUnclamped(currentDir, towardsTargetDir, 1.5f);
+                    point = hit.point;
                 }
 
-                Vector3 finalDirVector = finalDir.eulerAngles;
-                finalDir = Quaternion.Euler(0, finalDirVector.y, finalDirVector.z); //We don't want to rotate around the x axis (Causes the ball to spin)
-                //Vector3 moveDir2 = moveDir.eulerAngles;
-                //moveDir = Quaternion.Euler(0, moveDir2.y, moveDir2.z);
-                ball.DirectionVector = finalDir * Vector3.forward;
+                Vector3 targetPoint = target.transform.position;
+                Quaternion directionToGo = Quaternion.LookRotation(point - targetPoint);
+                ball.DirectionVector = directionToGo * Vector3.left;
+
+                Debug.DrawLine(point, targetPoint);
             }
 
             if (ball.CanMove)
