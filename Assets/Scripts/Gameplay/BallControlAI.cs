@@ -34,13 +34,13 @@ namespace Sanicball.Gameplay
             ball.Brake = false;
             if (target)
             {
-                Quaternion towardsTargetDir = Quaternion.LookRotation(target.transform.position - transform.position);
+                Quaternion towardsTargetDir = Quaternion.Euler(0, 90, 0) * Quaternion.LookRotation(target.transform.position - transform.position);
                 Quaternion finalDir = towardsTargetDir;
 
                 Vector3 velocity = GetComponent<Rigidbody>().velocity;
                 if (velocity != Vector3.zero)
                 {
-                    Quaternion currentDir = Quaternion.LookRotation(GetComponent<Rigidbody>().velocity);
+                    Quaternion currentDir = Quaternion.Euler(0, 90, 0) * Quaternion.LookRotation(GetComponent<Rigidbody>().velocity);
                     finalDir = Quaternion.LerpUnclamped(currentDir, towardsTargetDir, 1.5f);
                 }
 
@@ -48,7 +48,7 @@ namespace Sanicball.Gameplay
                 finalDir = Quaternion.Euler(0, finalDirVector.y, finalDirVector.z); //We don't want to rotate around the x axis (Causes the ball to spin)
                 //Vector3 moveDir2 = moveDir.eulerAngles;
                 //moveDir = Quaternion.Euler(0, moveDir2.y, moveDir2.z);
-                ball.DirectionVector = Quaternion.Euler(0, 90, 0) * finalDir * Vector3.forward;
+                ball.DirectionVector = finalDir * Vector3.forward;
             }
 
             if (ball.CanMove)
