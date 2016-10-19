@@ -42,11 +42,11 @@ namespace Sanicball.Gameplay
 
                 Vector3 point = transform.position + (ray.direction * maxDist);
 
-                RaycastHit hit;
+                /*RaycastHit hit;
                 if (Physics.Raycast(ray, out hit, maxDist, LayerMask.GetMask("Terrain")))
                 {
                     point = hit.point;
-                }
+                }*/
 
                 Vector3 targetPoint = target.transform.position;
                 Quaternion directionToGo = Quaternion.LookRotation(point - targetPoint);
