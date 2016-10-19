@@ -240,7 +240,9 @@ namespace Sanicball.Logic
                         DateTime.Now,
                         stage,
                         Character,
-                        checkpointTimes
+                        checkpointTimes,
+                        GameVersion.AS_FLOAT,
+                        GameVersion.IS_TESTING
                         ));
 
                     Debug.Log("Saved lap record (" + TimeSpan.FromSeconds(lapTime) + ")");

@@ -124,7 +124,12 @@ namespace Sanicball.UI
                 int stage = ActiveData.Stages.Where(a => a.sceneName == sceneName).First().id;
 
                 float time = (float)e.CurrentLapTime.TotalSeconds;
-                RaceRecord bestRecord = ActiveData.RaceRecords.Where(a => a.Type == (hyperspeed ? RecordType.HyperspeedLap : RecordType.Lap) && a.Stage == stage).OrderBy(a => a.Time).FirstOrDefault();
+
+                RaceRecord bestRecord = ActiveData.RaceRecords
+                    .Where(a => a.Type == (hyperspeed ? RecordType.HyperspeedLap : RecordType.Lap) && a.Stage == stage && a.GameVersion == GameVersion.AS_FLOAT && a.WasTesting == GameVersion.IS_TESTING)
+                    .OrderBy(a => a.Time)
+                    .FirstOrDefault();
+
                 if (bestRecord != null)
                 {
                     float diff = time - bestRecord.CheckpointTimes[e.IndexOfPreviousCheckpoint];

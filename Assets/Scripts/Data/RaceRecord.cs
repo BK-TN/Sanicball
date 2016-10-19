@@ -17,6 +17,8 @@ namespace Sanicball.Data
         private int stage;
         private int character;
         private float[] checkpointTimes;
+        private float gameVersion;
+        private bool wasTesting;
 
         public RecordType Type { get { return type; } }
         public float Time { get { return time; } }
@@ -24,8 +26,10 @@ namespace Sanicball.Data
         public int Stage { get { return stage; } }
         public int Character { get { return character; } }
         public float[] CheckpointTimes { get { return checkpointTimes; } }
+        public float GameVersion { get { return gameVersion; } }
+        public bool WasTesting { get { return wasTesting; } }
 
-        public RaceRecord(RecordType type, float time, DateTime date, int stage, int character, float[] checkpointTimes)
+        public RaceRecord(RecordType type, float time, DateTime date, int stage, int character, float[] checkpointTimes, float gameVersion, bool isTesting)
         {
             this.type = type;
             this.time = time;
@@ -33,6 +37,8 @@ namespace Sanicball.Data
             this.stage = stage;
             this.character = character;
             this.checkpointTimes = checkpointTimes;
+            this.gameVersion = gameVersion;
+            this.wasTesting = isTesting;
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Sanicball.Data;
+using SanicballCore;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -41,7 +42,7 @@ namespace Sanicball.UI
 
         private void UpdateFields()
         {
-            var records = ActiveData.RaceRecords.Where(a => a.Stage == selectedStage).OrderBy(a => a.Time);
+            var records = ActiveData.RaceRecords.Where(a => a.Stage == selectedStage && a.GameVersion == GameVersion.AS_FLOAT && a.WasTesting == GameVersion.IS_TESTING).OrderBy(a => a.Time);
 
             var bestLapRecord = records.Where(a => a.Type == RecordType.Lap).FirstOrDefault();
             lapRecord.SetRecord(bestLapRecord);
