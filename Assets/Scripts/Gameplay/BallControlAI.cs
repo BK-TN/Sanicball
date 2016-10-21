@@ -50,17 +50,9 @@ namespace Sanicball.Gameplay
 
                 Ray ray = new Ray(transform.position, towardsVelocity * Vector3.forward);
 
-                float maxDist = velocity.magnitude;
+                float maxDist = Mathf.Max(0, Mathf.Min(velocity.magnitude * 0.8f, Vector3.Distance(transform.position, target.transform.position) - 35));
 
                 Vector3 point = transform.position + (ray.direction * maxDist);
-
-                bool fuckthis = false;
-
-                if (maxDist > Vector3.Distance(transform.position, target.transform.position))
-                {
-                    point = transform.position;
-                    fuckthis = true;
-                }
 
                 /*RaycastHit hit;
                 if (Physics.Raycast(ray, out hit, maxDist, LayerMask.GetMask("Terrain")))
@@ -72,7 +64,7 @@ namespace Sanicball.Gameplay
                 Quaternion directionToGo = Quaternion.LookRotation(point - targetPoint);
                 ball.DirectionVector = directionToGo * Vector3.left;
 
-                Debug.DrawLine(point, targetPoint, fuckthis ? Color.red : Color.white);
+                Debug.DrawLine(point, targetPoint, Color.white);
             }
 
             if (ball.CanMove)
