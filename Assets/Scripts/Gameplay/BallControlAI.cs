@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using Sanicball.Logic;
+using SanicballCore;
+using UnityEngine;
 
 namespace Sanicball.Gameplay
 {
@@ -9,6 +11,8 @@ namespace Sanicball.Gameplay
 
         private Ball ball;
         private AINode target = null;
+        private AISkillLevel skillLevel = AISkillLevel.Average;
+
         private float autoRespawnTimer = AUTO_RESPAWN_TIME;
 
         public AINode Target { get { return target; } set { target = value; autoRespawnTimer = AUTO_RESPAWN_TIME; } }
@@ -22,10 +26,17 @@ namespace Sanicball.Gameplay
         private void Start()
         {
             ball = GetComponent<Ball>();
+            //Find AI skill level from race manager
+            RaceManager raceManager = FindObjectOfType<RaceManager>();
+            if (raceManager)
+            {
+                skillLevel = raceManager.Settings.AISkill;
+            }
+
             //Set initial target
             //Doing this from a RacePlayer, as it's done when changing checkpoints, doesn't work - when RacePlayer's
             //constructor runs, this component has not yet been added to the AI ball yet.
-            target = Logic.StageReferences.Active.checkpoints[0].FirstAINode;
+            target = StageReferences.Active.checkpoints[0].FirstAINode;
         }
 
         // Update is called once per frame
@@ -38,9 +49,18 @@ namespace Sanicball.Gameplay
                 Quaternion towardsVelocity = (velocity != Vector3.zero) ? Quaternion.LookRotation(velocity) : Quaternion.LookRotation(target.transform.position);
 
                 Ray ray = new Ray(transform.position, towardsVelocity * Vector3.forward);
-                float maxDist = Mathf.Min(Vector3.Distance(transform.position, target.transform.position) - 10, velocity.magnitude * 1f);
+
+                float maxDist = velocity.magnitude;
 
                 Vector3 point = transform.position + (ray.direction * maxDist);
+
+                bool fuckthis = false;
+
+                if (maxDist > Vector3.Distance(transform.position, target.transform.position))
+                {
+                    point = transform.position;
+                    fuckthis = true;
+                }
 
                 /*RaycastHit hit;
                 if (Physics.Raycast(ray, out hit, maxDist, LayerMask.GetMask("Terrain")))
@@ -52,7 +72,7 @@ namespace Sanicball.Gameplay
                 Quaternion directionToGo = Quaternion.LookRotation(point - targetPoint);
                 ball.DirectionVector = directionToGo * Vector3.left;
 
-                Debug.DrawLine(point, targetPoint);
+                Debug.DrawLine(point, targetPoint, fuckthis ? Color.red : Color.white);
             }
 
             if (ball.CanMove)

@@ -207,7 +207,6 @@ namespace Sanicball.Gameplay
             if (type == BallType.AI)
             {
                 //Create AI component
-                //var ai =
                 gameObject.AddComponent<BallControlAI>();
             }
         }
