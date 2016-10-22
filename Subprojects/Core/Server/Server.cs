@@ -1161,7 +1161,7 @@ namespace SanicballCore.Server
             {
                 if (!debugMode && type == LogType.Debug)
                     return;
-                LogEntry entry = new LogEntry(DateTime.Now, message.ToString(), type);
+                LogEntry entry = new LogEntry(DateTime.Now, "[" + DateTime.Now.ToString("HH:mm:ss") + "] " + message.ToString(), type);
                 OnLog?.Invoke(this, new LogArgs(entry));
                 log.Add(entry);
             }
