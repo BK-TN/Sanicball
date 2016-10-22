@@ -16,11 +16,6 @@ namespace Sanicball
         {
             cam = GetComponent<Camera>();
             listener = GetComponent<AudioListener>();
-            Update();
-        }
-
-        private void Update()
-        {
             var splitters = FindObjectsOfType<CameraSplitter>().ToList();
 
             int count = splitters.Count;
