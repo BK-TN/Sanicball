@@ -97,7 +97,7 @@ GameObject:
   - 65: {fileID: 1821221}
   - 114: {fileID: 1821220}
   m_Layer: 4
-  m_Name: Respawn (1)
+  m_Name: Respawn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13755,8 +13755,9 @@ GameObject:
   - 33: {fileID: 536175544}
   - 23: {fileID: 536175543}
   - 114: {fileID: 536175542}
+  - 114: {fileID: 536175545}
   m_Layer: 4
-  m_Name: CheapWater
+  m_Name: Water
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -13825,6 +13826,19 @@ MeshFilter:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 536175540}
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &536175545
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 536175540}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9680677075487ae4a9b9d866642f99d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  reflection: {fileID: 2061090142}
+  materialAlphaWithReflections: 0.5
 --- !u!4 &536695004 stripped
 Transform:
   m_PrefabParentObject: {fileID: 400002, guid: cfa6de16a37474047966d7b267da6643, type: 2}
@@ -56876,7 +56890,7 @@ GameObject:
   - 114: {fileID: 2061090143}
   - 114: {fileID: 2061090142}
   m_Layer: 4
-  m_Name: Mirror (1)
+  m_Name: Mirror
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

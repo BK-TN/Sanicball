@@ -23,6 +23,7 @@ namespace Sanicball.Data
 
         public bool trails = true;
         public bool shadows = true;
+        public ReflectionQuality reflectionQuality = ReflectionQuality.Medium;
 
         [Header("Gameplay")]
         public bool useOldControls = false;
@@ -54,6 +55,7 @@ namespace Sanicball.Data
             aa = original.aa;
             trails = original.trails;
             shadows = original.shadows;
+            reflectionQuality = original.reflectionQuality;
 
             useOldControls = original.useOldControls;
             oldControlsMouseSpeed = original.oldControlsMouseSpeed;
@@ -115,5 +117,13 @@ namespace Sanicball.Data
             if (music)
                 music.GetComponent<AudioSource>().mute = !music;
         }
+    }
+
+    public enum ReflectionQuality
+    {
+        Off,
+        Low,
+        Medium,
+        High
     }
 }
