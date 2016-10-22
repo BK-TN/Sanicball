@@ -8,10 +8,16 @@ namespace Sanicball.Gameplay
     public class BallControlAI : MonoBehaviour
     {
         private const float AUTO_RESPAWN_TIME = 6.66f;
+        private const float TARGET_OFFSET_CHANGE_TIME = 3.33f;
 
         private Ball ball;
         private AINode target = null;
         private AISkillLevel skillLevel = AISkillLevel.Average;
+
+        private float targetPointMaxOffset = 10f;
+        private Vector3 targetPointOffsetCurrent = Vector3.zero;
+        private Vector3 targetPointOffsetGoal = Vector3.zero;
+        private float targetPointOffsetChangeTimer = TARGET_OFFSET_CHANGE_TIME;
 
         private float autoRespawnTimer = AUTO_RESPAWN_TIME;
 
@@ -31,6 +37,20 @@ namespace Sanicball.Gameplay
             if (raceManager)
             {
                 skillLevel = raceManager.Settings.AISkill;
+                switch (skillLevel)
+                {
+                    case AISkillLevel.Retarded:
+                        targetPointMaxOffset = 200;
+                        break;
+
+                    case AISkillLevel.Average:
+                        targetPointMaxOffset = 20;
+                        break;
+
+                    case AISkillLevel.Dank:
+                        targetPointMaxOffset = 0f;
+                        break;
+                }
             }
 
             //Set initial target
@@ -60,7 +80,7 @@ namespace Sanicball.Gameplay
                     point = hit.point;
                 }*/
 
-                Vector3 targetPoint = target.transform.position;
+                Vector3 targetPoint = target.transform.position + targetPointOffsetCurrent;
                 Quaternion directionToGo = Quaternion.LookRotation(point - targetPoint);
                 ball.DirectionVector = directionToGo * Vector3.left;
 
@@ -75,6 +95,15 @@ namespace Sanicball.Gameplay
                     ball.RequestRespawn();
                     autoRespawnTimer = AUTO_RESPAWN_TIME;
                 }
+            }
+
+            targetPointOffsetCurrent = Vector3.Lerp(targetPointOffsetCurrent, targetPointOffsetGoal, Time.deltaTime);
+
+            targetPointOffsetChangeTimer -= Time.deltaTime;
+            if (targetPointOffsetChangeTimer <= 0)
+            {
+                targetPointOffsetChangeTimer += TARGET_OFFSET_CHANGE_TIME;
+                targetPointOffsetGoal = Random.insideUnitSphere * Random.Range(0, targetPointMaxOffset);
             }
         }
 
