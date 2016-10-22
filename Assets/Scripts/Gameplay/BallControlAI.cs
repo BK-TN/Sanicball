@@ -70,7 +70,7 @@ namespace Sanicball.Gameplay
 
                 Ray ray = new Ray(transform.position, towardsVelocity * Vector3.forward);
 
-                float maxDist = Mathf.Max(0, Mathf.Min(velocity.magnitude * 0.8f, Vector3.Distance(transform.position, target.transform.position) - 35));
+                float maxDist = Mathf.Max(0, Mathf.Min(velocity.magnitude * 1f, Vector3.Distance(transform.position, target.transform.position) - 35));
 
                 Vector3 point = transform.position + (ray.direction * maxDist);
 
