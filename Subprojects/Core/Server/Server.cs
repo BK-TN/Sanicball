@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-
-//using System.Net.Http;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Net;
 using System.Text;
 using System.Threading;
 
@@ -79,18 +78,18 @@ namespace SanicballCore.Server
 
         //Server browser ping timer
         private Stopwatch serverBrowserPingTimer = new Stopwatch();
-        private const float serverBrowserPingGoal = 60;
+        private const float SERVER_BROWSER_PING_INTERVAL = 60;
 
         //Timer for starting a match by all players being ready
         private Stopwatch lobbyTimer = new Stopwatch();
-        private const float lobbyTimerGoal = 3;
+        private const float LOBBY_MATCH_START_TIME = 3;
 
         //Timer for starting a match automatically
         private Stopwatch autoStartTimer = new Stopwatch();
 
         //Timeout for clients loading stage
         private Stopwatch stageLoadingTimeoutTimer = new Stopwatch();
-        private const float stageLoadingTimeoutTimerGoal = 20;
+        private const float STAGE_LOADING_TIMEOUT = 20;
 
         //Timer for going back to lobby at the end of a race
         private Stopwatch backToLobbyTimer = new Stopwatch();
@@ -428,7 +427,7 @@ namespace SanicballCore.Server
 
             if (this.config.ShowInBrowser)
             {
-                //AddToServerBrowser();
+                AddToServerBrowser();
                 serverBrowserPingTimer.Start();
             }
 
@@ -485,29 +484,31 @@ namespace SanicballCore.Server
             return false;
         }
 
-        /*private async void AddToServerBrowser()
+        private void AddToServerBrowser()
         {
-            using (var client = new HttpClient())
+            Thread addThread = new Thread(() =>
             {
-                var values = new Dictionary<string, string>
+                try
                 {
-                    { "ip", config.PublicIP },
-                    { "port", config.PublicPort.ToString() }
-                };
+                    using (var client = new WebClient())
+                    {
+                        var values = new NameValueCollection();
+                        values["ip"] = config.PublicIP;
+                        values["port"] = config.PublicPort.ToString();
 
-                var content = new FormUrlEncodedContent(values);
+                        var response = client.UploadValues("http://www.sanicball.com/servers/add/", values);
+                        string responseString = Encoding.Default.GetString(response);
 
-                var response = await client.PostAsync("http://www.sanicball.com/servers/add/", content);
-                if (response.IsSuccessStatusCode)
-                {
-                    Log("Server browser said: " + await response.Content.ReadAsStringAsync(), LogType.Debug);
+                        Log("Server browser said: " + responseString, LogType.Debug);
+                    }
                 }
-                else
+                catch (WebException ex)
                 {
-                    Log("Failed adding server to server browser - " + response.ReasonPhrase, LogType.Warning);
+                    Log("Failed adding server to browser: " + ex.Message, LogType.Warning);
                 }
-            }
-        }*/
+            });
+            addThread.Start();
+        }
 
         private void MessageLoop()
         {
@@ -518,9 +519,9 @@ namespace SanicballCore.Server
                 //Check server browser ping timer
                 if (serverBrowserPingTimer.IsRunning)
                 {
-                    if (serverBrowserPingTimer.Elapsed.TotalSeconds >= serverBrowserPingGoal)
+                    if (serverBrowserPingTimer.Elapsed.TotalSeconds >= SERVER_BROWSER_PING_INTERVAL)
                     {
-                        //AddToServerBrowser();
+                        AddToServerBrowser();
                         serverBrowserPingTimer.Reset();
                         serverBrowserPingTimer.Start();
                     }
@@ -529,7 +530,7 @@ namespace SanicballCore.Server
                 //Check lobby timer
                 if (lobbyTimer.IsRunning)
                 {
-                    if (lobbyTimer.Elapsed.TotalSeconds >= lobbyTimerGoal)
+                    if (lobbyTimer.Elapsed.TotalSeconds >= LOBBY_MATCH_START_TIME)
                     {
                         Log("The race has been started by all players being ready.");
                         LoadRace();
@@ -539,7 +540,7 @@ namespace SanicballCore.Server
                 //Check stage loading timer
                 if (stageLoadingTimeoutTimer.IsRunning)
                 {
-                    if (stageLoadingTimeoutTimer.Elapsed.TotalSeconds >= stageLoadingTimeoutTimerGoal)
+                    if (stageLoadingTimeoutTimer.Elapsed.TotalSeconds >= STAGE_LOADING_TIMEOUT)
                     {
                         SendToAll(new StartRaceMessage());
                         stageLoadingTimeoutTimer.Reset();
@@ -1156,11 +1157,14 @@ namespace SanicballCore.Server
         /// <param name="type"></param>
         public void Log(object message, LogType type = LogType.Normal)
         {
-            if (!debugMode && type == LogType.Debug)
-                return;
-            LogEntry entry = new LogEntry(DateTime.Now, message.ToString(), type);
-            OnLog?.Invoke(this, new LogArgs(entry));
-            log.Add(entry);
+            lock (log)
+            {
+                if (!debugMode && type == LogType.Debug)
+                    return;
+                LogEntry entry = new LogEntry(DateTime.Now, message.ToString(), type);
+                OnLog?.Invoke(this, new LogArgs(entry));
+                log.Add(entry);
+            }
         }
 
         private List<ServClient> SearchClients(string name)
