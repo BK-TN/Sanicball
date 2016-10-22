@@ -67,7 +67,6 @@ namespace SanicballServer
                         string exText = ex.GetType() + ": " + ex.Message + Environment.NewLine + ex.StackTrace;
                         serv.Log(exText, LogType.Normal);
                         Thread.Sleep(1000);
-                        throw ex;
                     }
 #endif
 

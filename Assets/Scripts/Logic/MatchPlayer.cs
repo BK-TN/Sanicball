@@ -25,7 +25,7 @@ namespace Sanicball.Logic
     {
         private Guid clientGuid;
         private ControlType ctrlType;
-        private double latestMovementTimestamp = 0;
+        private double latestMovementTimestamp = int.MinValue;
 
         public MatchPlayer(Guid clientGuid, ControlType ctrlType, int initialCharacterId)
         {
