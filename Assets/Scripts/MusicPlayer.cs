@@ -40,12 +40,6 @@ namespace Sanicball
         {
             if (!ActiveData.GameSettings.music) return;
             currentSongCredits = "Now playing: " + credits;
-            if (FindObjectOfType<MlgMode>() != null)
-            {//IS MLG MODE
-                aSource.clip = mlgSong;
-                currentSongCredits = "Now playing: old memes";
-                FindObjectOfType<MlgMode>().StartTheShit();//Start the wubs
-            }
             isPlaying = true;
             if (!aSource.mute)
             {

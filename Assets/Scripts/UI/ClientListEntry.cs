@@ -5,7 +5,7 @@ using Sanicball.Logic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Sanicball
+namespace Sanicball.UI
 {
     public class ClientListEntry : MonoBehaviour
     {

@@ -63,7 +63,7 @@ namespace Sanicball
             transform.position = paths[currentPath].startPoint.position;
 
             //TODO: code betr
-            lookTarget.GetComponent<RandomMaterial>().Switch();
+            lookTarget.GetComponent<CycleMaterial>().Switch();
         }
     }
 }

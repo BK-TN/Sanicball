@@ -1,27 +1,30 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-public class WaitingUI : MonoBehaviour
+namespace Sanicball.UI
 {
-    [SerializeField]
-    private UnityEngine.UI.Text stageNameField;
-
-    [SerializeField]
-    private UnityEngine.UI.Text infoField;
-
-    public string StageNameToShow
+    public class WaitingUI : MonoBehaviour
     {
-        set
+        [SerializeField]
+        private UnityEngine.UI.Text stageNameField;
+
+        [SerializeField]
+        private UnityEngine.UI.Text infoField;
+
+        public string StageNameToShow
         {
-            stageNameField.text = value;
+            set
+            {
+                stageNameField.text = value;
+            }
         }
-    }
 
-    public string InfoToShow
-    {
-        set
+        public string InfoToShow
         {
-            infoField.text = value;
+            set
+            {
+                infoField.text = value;
+            }
         }
     }
 }
