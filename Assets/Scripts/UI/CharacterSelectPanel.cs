@@ -20,6 +20,8 @@ namespace Sanicball.UI
 
     public class CharacterSelectPanel : MonoBehaviour
     {
+        private const int COLUMN_COUNT = 4;
+
         [SerializeField]
         private RectTransform entryContainer = null;
         [SerializeField]
@@ -38,6 +40,7 @@ namespace Sanicball.UI
         private int selected = 0;
         private Data.CharacterInfo selectedChar;
         private float targetX = 0;
+        private float targetY = 0;
         private List<CharacterSelectEntry> activeEntries = new List<CharacterSelectEntry>();
 
         [SerializeField]
@@ -72,14 +75,36 @@ namespace Sanicball.UI
             Select(1);
         }
 
-        public void NextCharacter()
+        public void Right()
         {
             if (selected < activeEntries.Count - 1) Select(selected + 1); else Select(0);
         }
 
-        public void PrevCharacter()
+        public void Left()
         {
             if (selected > 0) Select(selected - 1); else Select(activeEntries.Count - 1);
+        }
+
+        public void Up()
+        {
+            int s = selected - COLUMN_COUNT;
+            if (s < 0)
+            {
+                s += activeEntries.Count;
+                //if (s < 0) s = activeEntries.Count - 1;
+            }
+            Select(s);
+        }
+
+        public void Down()
+        {
+            int s = selected + COLUMN_COUNT;
+            if (s > activeEntries.Count - 1)
+            {
+                s -= activeEntries.Count;
+                //if (s > activeEntries.Count) s = 0;
+            }
+            Select(s);
         }
 
         private void Select(int newSelection)
@@ -97,11 +122,18 @@ namespace Sanicball.UI
         {
             //Find the container's target X to center the selected character
             targetX = entryContainer.sizeDelta.x / 2 - activeEntries[selected].RectTransform.anchoredPosition.x;
+            targetY = -entryContainer.sizeDelta.y / 2 - activeEntries[selected].RectTransform.anchoredPosition.y;
+
             if (!Mathf.Approximately(entryContainer.anchoredPosition.x, targetX))
             {
                 float x = Mathf.Lerp(entryContainer.anchoredPosition.x, targetX, scrollSpeed * Time.deltaTime);
-
                 entryContainer.anchoredPosition = new Vector2(x, entryContainer.anchoredPosition.y);
+            }
+
+            if (!Mathf.Approximately(entryContainer.anchoredPosition.y, targetY))
+            {
+                float y = Mathf.Lerp(entryContainer.anchoredPosition.y, targetY, scrollSpeed * Time.deltaTime);
+                entryContainer.anchoredPosition = new Vector2(entryContainer.anchoredPosition.x, y);
             }
 
             //Resize all elements

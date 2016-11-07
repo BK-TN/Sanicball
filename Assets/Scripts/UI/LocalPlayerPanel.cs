@@ -52,6 +52,8 @@ namespace Sanicball.UI
             bool accept = GameInput.IsOpeningMenu(AssignedCtrlType);
             bool left = GameInput.UILeft(AssignedCtrlType);
             bool right = GameInput.UIRight(AssignedCtrlType);
+            bool up = GameInput.UIUp(AssignedCtrlType);
+            bool down = GameInput.UIDown(AssignedCtrlType);
 
             var cActive = characterSelectSubpanel.gameObject.activeSelf;
 
@@ -60,7 +62,7 @@ namespace Sanicball.UI
                 ToggleReady();
             }
 
-            if (accept || left || right)
+            if (accept || left || right || up || down)
             {
                 if (!uiPressed)
                 {
@@ -79,11 +81,19 @@ namespace Sanicball.UI
                     }
                     if (left && cActive)
                     {
-                        characterSelectSubpanel.PrevCharacter();
+                        characterSelectSubpanel.Left();
                     }
                     if (right && cActive)
                     {
-                        characterSelectSubpanel.NextCharacter();
+                        characterSelectSubpanel.Right();
+                    }
+                    if (up && cActive)
+                    {
+                        characterSelectSubpanel.Up();
+                    }
+                    if (down && cActive)
+                    {
+                        characterSelectSubpanel.Down();
                     }
                     uiPressed = true;
                 }
