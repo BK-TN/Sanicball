@@ -1568,7 +1568,7 @@ RectTransform:
   - {fileID: 935100019}
   - {fileID: 26805789}
   m_Father: {fileID: 410813830}
-  m_RootOrder: 8
+  m_RootOrder: 10
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -399.99994, y: 0}
@@ -2857,7 +2857,7 @@ RectTransform:
   - {fileID: 151427782}
   - {fileID: 322528515}
   m_Father: {fileID: 410813830}
-  m_RootOrder: 9
+  m_RootOrder: 8
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -400, y: 0}
@@ -4108,9 +4108,9 @@ RectTransform:
   - {fileID: 86664403}
   - {fileID: 94267168}
   - {fileID: 1150019079}
-  - {fileID: 175151495}
   - {fileID: 317431629}
   - {fileID: 1172321369}
+  - {fileID: 175151495}
   - {fileID: 1014635071}
   m_Father: {fileID: 130951524}
   m_RootOrder: 0
@@ -9924,7 +9924,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 11451262, guid: e5d237d0846d27944a3a24718ef6c22f, type: 2}
       propertyPath: m_Text
-      value: Join by IP adress
+      value: Join by IP address
       objectReference: {fileID: 0}
     - target: {fileID: 22402164, guid: e5d237d0846d27944a3a24718ef6c22f, type: 2}
       propertyPath: m_LocalScale.x
@@ -10811,7 +10811,7 @@ RectTransform:
   - {fileID: 1276829583}
   - {fileID: 1494246743}
   m_Father: {fileID: 410813830}
-  m_RootOrder: 10
+  m_RootOrder: 9
   m_AnchorMin: {x: 1, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: -400, y: 0}
