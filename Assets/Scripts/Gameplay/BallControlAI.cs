@@ -47,7 +47,7 @@ namespace Sanicball.Gameplay
                         targetPointMaxOffset = 20;
                         break;
 
-                    case AISkillLevel.Dank:
+                    case AISkillLevel.Pinpoint:
                         targetPointMaxOffset = 0f;
                         break;
                 }

@@ -9,7 +9,7 @@ namespace SanicballCore
     {
         Retarded,
         Average,
-        Dank
+        Pinpoint
     }
 
     public enum StageRotationMode
