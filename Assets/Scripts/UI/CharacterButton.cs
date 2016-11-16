@@ -13,7 +13,7 @@ namespace Sanicball.UI
 
         private Button buttonComp;
 
-        public UnityEngine.Events.UnityEvent OnClick { get { return buttonComp.onClick; } }
+        public Button ButtonComponent { get { return buttonComp; } }
 
         private void Awake()
         {
