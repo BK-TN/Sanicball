@@ -32,6 +32,9 @@ namespace Sanicball.Data
         [SerializeField]
         private GameJoltInfo gameJoltInfo;
 
+        [SerializeField]
+        private GameObject christmasHat;
+
         #endregion Fields
 
         #region Properties
@@ -44,6 +47,7 @@ namespace Sanicball.Data
         public static StageInfo[] Stages { get { return instance.stages; } }
         public static CharacterInfo[] Characters { get { return instance.characters; } }
         public static GameJoltInfo GameJoltInfo { get { return instance.gameJoltInfo; } }
+        public static GameObject ChristmasHat { get { return instance.christmasHat; } }
 
         #endregion Properties
 

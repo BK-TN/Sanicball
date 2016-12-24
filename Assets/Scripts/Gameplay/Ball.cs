@@ -1,3 +1,4 @@
+using System;
 using Sanicball.Data;
 using SanicballCore;
 using UnityEngine;
@@ -81,6 +82,8 @@ namespace Sanicball.Gameplay
         private int characterId;
         [SerializeField]
         private string nickname;
+        [SerializeField]
+        private GameObject hatPrefab;
 
         public BallType Type { get { return type; } }
         public ControlType CtrlType { get { return ctrlType; } }
@@ -165,6 +168,19 @@ namespace Sanicball.Gameplay
             if (CharacterId >= 0 && CharacterId < ActiveData.Characters.Length)
             {
                 SetCharacter(ActiveData.Characters[CharacterId]);
+            }
+
+            DateTime now = DateTime.Now;
+            if (now.Month == 12 && now.Day > 20 && now.Day <= 31)
+            {
+                hatPrefab = ActiveData.ChristmasHat;
+            }
+
+            //Spawn hat
+            if (hatPrefab)
+            {
+                GameObject hat = Instantiate(hatPrefab);
+                hat.transform.SetParent(transform, false);
             }
 
             //Create objects and components based on ball type
