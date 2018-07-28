@@ -7,7 +7,8 @@ namespace SanicballCore.Server
     public struct ServerConfig
     {
         public string ServerName { get; set; }
-        public bool ShowInBrowser { get; set; }
+        public bool ShowOnList { get; set; }
+		public string[] ServerListURLs { get; set; }
         public int PrivatePort { get; set; }
         public string PublicIP { get; set; }
         public int PublicPort { get; set; }

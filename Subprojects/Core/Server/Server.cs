@@ -51,6 +51,7 @@ namespace SanicballCore.Server
     {
         public const string CONFIG_FILENAME = "ServerConfig.json";
         private const string SETTINGS_FILENAME = "MatchSettings.json";
+		private const string DEFAULT_SERVER_LIST_URL = "https://sanicball.bdgr.zone/servers";
         private const int TICKRATE = 20;
         private const int STAGE_COUNT = 5; //Hardcoded stage count for now.. can't receive the actual count since it's part of a Unity prefab.
         private const float PLAYER_TIMEOUT_NOTIFY = 60; //Time in seconds until players get notified about their time left to race
@@ -266,19 +267,17 @@ namespace SanicballCore.Server
             });
             AddCommandHandler("setStageRotationMode", cmd =>
             {
-                /*StageRotationMode rotMode;
-                if (Enum.TryParse(cmd.Content, out rotMode))
-                {
-                    matchSettings.StageRotationMode = rotMode;
-                    SendToAll(new SettingsChangedMessage(matchSettings));
-                    Log("Stage rotation mode set to " + rotMode);
-                }
-                else
-                {
-                    string[] modes = Enum.GetNames(typeof(StageRotationMode));
-                    string modesStr = string.Join("|", modes);
-                    Log("Usage: setStageRotationMode [" + modesStr + "]");
-                }*/
+					try {
+						StageRotationMode rotMode = (StageRotationMode)Enum.Parse(typeof(StageRotationMode), cmd.Content);
+						matchSettings.StageRotationMode = rotMode;
+						SendToAll(new SettingsChangedMessage(matchSettings));
+						Log("Stage rotation mode set to " + rotMode);
+					}
+					catch (Exception) {
+						string[] modes = Enum.GetNames(typeof(StageRotationMode));
+						string modesStr = string.Join("|", modes);
+						Log("Usage: setStageRotationMode [" + modesStr + "]");
+					}
             });
             AddCommandHandler("setVoteRatio", cmd =>
             {
@@ -345,22 +344,37 @@ namespace SanicballCore.Server
                 bool inputCorrect = false;
                 while (!inputCorrect)
                 {
-                    Console.Write("Show this server in the server browser? (yes|no): ");
+                    Console.Write("Show this server on one or more server lists? (yes|no): ");
                     string input = Console.ReadLine();
                     if (input == "yes")
                     {
-                        newConfig.ShowInBrowser = true;
+						newConfig.ShowOnList = true;
                         inputCorrect = true;
                     }
                     if (input == "no")
                     {
-                        newConfig.ShowInBrowser = false;
+						newConfig.ShowOnList = false;
                         inputCorrect = true;
                     }
                 }
 
-                if (newConfig.ShowInBrowser)
+				if (newConfig.ShowOnList)
                 {
+					while (newConfig.ServerListURLs == null) {
+						Console.Write("Enter URLs for server lists to appear on, seperated by space (Leave blank to use the default list, '" + DEFAULT_SERVER_LIST_URL + "'):");
+						string input = Console.ReadLine().Trim();
+
+						if (string.IsNullOrEmpty(input))
+						{
+							newConfig.ServerListURLs = new string[] { DEFAULT_SERVER_LIST_URL };
+						}
+						else 
+						{
+							var urls = input.Split(' ');
+							newConfig.ServerListURLs = urls;
+						}
+					}
+
                     while (string.IsNullOrEmpty(newConfig.PublicIP))
                     {
                         Console.Write("Enter the public IP adress to use when connecting from the server browser: ");
@@ -425,7 +439,7 @@ namespace SanicballCore.Server
 
             Log("Server started on port " + this.config.PrivatePort + "!");
 
-            if (this.config.ShowInBrowser)
+			if (this.config.ShowOnList)
             {
                 AddToServerBrowser();
                 serverBrowserPingTimer.Start();
