@@ -120,7 +120,7 @@ MonoBehaviour:
     tier: 0
     hidden: 0
   - name: Ame Roes
-    artBy: /u/o_opc
+    artBy: Reddit user o_opc
     stats:
       rollSpeed: 100
       airSpeed: 15
@@ -154,7 +154,7 @@ MonoBehaviour:
     tier: 0
     hidden: 0
   - name: Roge
-    artBy: Tyson Hesse
+    artBy: Artist Tyson Hesse
     stats:
       rollSpeed: 100
       airSpeed: 15
@@ -188,7 +188,7 @@ MonoBehaviour:
     tier: 0
     hidden: 0
   - name: Big
-    artBy: /r/EdulokoX
+    artBy: Reddit user EdulokoX
     stats:
       rollSpeed: 100
       airSpeed: 15
@@ -205,7 +205,7 @@ MonoBehaviour:
     tier: 1
     hidden: 0
   - name: Dr. Aggmen
-    artBy: Tyson Hesse
+    artBy: Artist Tyson Hesse
     stats:
       rollSpeed: 100
       airSpeed: 15
@@ -225,8 +225,8 @@ MonoBehaviour:
     artBy: DazeDream
     stats:
       rollSpeed: 60
-      airSpeed: 25
-      jumpHeight: 20
+      airSpeed: 18
+      jumpHeight: 30
       grip: 0
     material: {fileID: 2100000, guid: b1d42e999a8f60746831e0a43b2ca2cd, type: 2}
     icon: {fileID: 21300000, guid: 95b3481512f3b4b489b578b08c88ca20, type: 3}
