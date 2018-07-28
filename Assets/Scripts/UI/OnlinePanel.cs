@@ -93,6 +93,7 @@ namespace Sanicball.UI
                 else
                 {
                     Debug.LogError("Failed to receive servers - " + serverBrowserRequester.error);
+					serverCountField.text = "Cannot access server list.";
                 }
 
                 serverBrowserRequester = null;

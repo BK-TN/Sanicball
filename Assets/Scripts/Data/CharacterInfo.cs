@@ -6,7 +6,6 @@ namespace Sanicball.Data
     public class CharacterInfo
     {
         public string name;
-        public string title;
         public string artBy;
         public BallStats stats;
         public Material material;
@@ -17,7 +16,14 @@ namespace Sanicball.Data
         public float ballSize = 1;
         public Mesh alternativeMesh = null;
         public Mesh collisionMesh = null;
-        public bool hyperspeed;
+		public CharacterTier tier = CharacterTier.Normal;
         public bool hidden = false;
     }
+
+	public enum CharacterTier
+	{
+		Normal,
+		Odd,
+		Hyperspeed
+	}
 }

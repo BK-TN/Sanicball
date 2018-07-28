@@ -2,16 +2,11 @@
 
 namespace Sanicball.Data
 {
-    public enum RecordType
-    {
-        Lap,
-        HyperspeedLap
-    }
 
     [Serializable]
     public class RaceRecord
     {
-        private RecordType type;
+		private CharacterTier tier;
         private float time;
         private DateTime date;
         private int stage;
@@ -20,7 +15,7 @@ namespace Sanicball.Data
         private float gameVersion;
         private bool wasTesting;
 
-        public RecordType Type { get { return type; } }
+		public CharacterTier Tier { get { return tier; } }
         public float Time { get { return time; } }
         public DateTime Date { get { return date; } }
         public int Stage { get { return stage; } }
@@ -29,9 +24,9 @@ namespace Sanicball.Data
         public float GameVersion { get { return gameVersion; } }
         public bool WasTesting { get { return wasTesting; } }
 
-        public RaceRecord(RecordType type, float time, DateTime date, int stage, int character, float[] checkpointTimes, float gameVersion, bool isTesting)
+		public RaceRecord(CharacterTier tier, float time, DateTime date, int stage, int character, float[] checkpointTimes, float gameVersion, bool isTesting)
         {
-            this.type = type;
+            this.tier = tier;
             this.time = time;
             this.date = date;
             this.stage = stage;

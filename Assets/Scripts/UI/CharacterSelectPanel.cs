@@ -51,7 +51,7 @@ namespace Sanicball.UI
 
         private IEnumerator Start()
         {
-            var charList = ActiveData.Characters.OrderBy(a => a.hyperspeed).ToArray();
+            var charList = ActiveData.Characters.OrderBy(a => a.tier).ToArray();
 
             CharacterSelectEntry cancelEnt = Instantiate(entryPrefab);
             cancelEnt.IconImage.sprite = cancelIconSprite;

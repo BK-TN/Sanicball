@@ -230,12 +230,12 @@ namespace Sanicball.Logic
 
                 if (LapRecordsEnabled)
                 {
-                    bool hyperspeed = ActiveData.Characters[Character].hyperspeed;
+					CharacterTier tier = ActiveData.Characters[Character].tier;
                     string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
                     int stage = ActiveData.Stages.Where(a => a.sceneName == sceneName).First().id;
 
                     ActiveData.RaceRecords.Add(new RaceRecord(
-                        hyperspeed ? RecordType.HyperspeedLap : RecordType.Lap,
+						tier,
                         lapTime,
                         DateTime.Now,
                         stage,

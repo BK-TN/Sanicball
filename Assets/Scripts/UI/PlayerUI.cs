@@ -119,14 +119,14 @@ namespace Sanicball.UI
 
             if (TargetPlayer.LapRecordsEnabled)
             {
-                bool hyperspeed = ActiveData.Characters[targetPlayer.Character].hyperspeed;
+				CharacterTier tier = ActiveData.Characters[targetPlayer.Character].tier;
                 string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
                 int stage = ActiveData.Stages.Where(a => a.sceneName == sceneName).First().id;
 
                 float time = (float)e.CurrentLapTime.TotalSeconds;
 
                 RaceRecord bestRecord = ActiveData.RaceRecords
-                    .Where(a => a.Type == (hyperspeed ? RecordType.HyperspeedLap : RecordType.Lap) && a.Stage == stage && a.GameVersion == GameVersion.AS_FLOAT && a.WasTesting == GameVersion.IS_TESTING)
+                    .Where(a => a.Tier == tier && a.Stage == stage && a.GameVersion == GameVersion.AS_FLOAT && a.WasTesting == GameVersion.IS_TESTING)
                     .OrderBy(a => a.Time)
                     .FirstOrDefault();
 
