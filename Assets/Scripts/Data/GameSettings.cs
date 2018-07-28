@@ -5,8 +5,9 @@ namespace Sanicball.Data
     [System.Serializable]
     public class GameSettings
     {
-        [Header("General")]
+        [Header("Online")]
         public string nickname = "";
+		public string serverListURL = "https://sanicball.bdgr.zone/servers/";
 
         public string gameJoltUsername;
         public string gameJoltToken;
@@ -23,7 +24,7 @@ namespace Sanicball.Data
 
         public bool trails = true;
         public bool shadows = true;
-        public ReflectionQuality reflectionQuality = ReflectionQuality.Medium;
+		public ReflectionQuality reflectionQuality = ReflectionQuality.Off;
 
         [Header("Gameplay")]
         public bool useOldControls = false;
@@ -44,6 +45,7 @@ namespace Sanicball.Data
         public void CopyValues(GameSettings original)
         {
             nickname = original.nickname;
+			serverListURL = original.serverListURL;
             gameJoltUsername = original.gameJoltUsername;
             gameJoltToken = original.gameJoltToken;
 

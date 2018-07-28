@@ -7,7 +7,7 @@ namespace Sanicball.UI
 {
     public class RecordTypeControl : MonoBehaviour
     {
-		public Text tierField;
+		public Text titleField;
         public Text timeField;
         public Text characterField;
         public Text dateField;

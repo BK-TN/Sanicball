@@ -6,7 +6,9 @@ namespace Sanicball.UI
 {
     public class OptionsPanel : MonoBehaviour
     {
+		[Header("Online")]
         public Text nickname;
+		public Text serverListURL;
         public Text gameJoltAccount;
 
         [Header("Display")]
@@ -50,7 +52,10 @@ namespace Sanicball.UI
 
         public void ResetToDefault()
         {
+			//Do not reset nickname!!
+			var nickname = tempSettings.nickname;
             tempSettings = new GameSettings();
+			tempSettings.nickname = nickname;
             UpdateFields();
         }
 
@@ -59,6 +64,7 @@ namespace Sanicball.UI
             if (!gameObject.activeInHierarchy) return;
 
             nickname.text = tempSettings.nickname;
+			serverListURL.text = tempSettings.serverListURL;
             gameJoltAccount.text = (!string.IsNullOrEmpty(tempSettings.gameJoltToken)) ? "Linked as " + tempSettings.gameJoltUsername : "Not linked";
 
             if (Screen.resolutions.Length > 0)
@@ -81,7 +87,7 @@ namespace Sanicball.UI
             shadows.text = tempSettings.shadows ? "On" : "Off";
             reflectionQuality.text = tempSettings.reflectionQuality.ToString();
 
-            controlMode.text = tempSettings.useOldControls ? "Rotate manually" : "Follow velocity";
+			controlMode.text = tempSettings.useOldControls ? "Rotate manually (Precise)" : "Follow velocity (Intuitive)";
             cameraSpeedMouse.text = tempSettings.oldControlsMouseSpeed.ToString("n1");
             cameraSpeedKeyboard.text = tempSettings.oldControlsKbSpeed.ToString("n1");
 
@@ -103,6 +109,12 @@ namespace Sanicball.UI
             UpdateFields();
         }
 
+		public void SetServerListURL(string url)
+		{
+			tempSettings.serverListURL = url;
+			UpdateFields ();
+		}
+
         public void SetGameJoltInfo(string username, string token)
         {
             tempSettings.gameJoltUsername = username;
@@ -115,6 +127,11 @@ namespace Sanicball.UI
         {
             return tempSettings.nickname;
         }
+
+		public string GetServerListURL()
+		{
+			return tempSettings.serverListURL;
+		}
 
         public string GetGameJoltUsername()
         {

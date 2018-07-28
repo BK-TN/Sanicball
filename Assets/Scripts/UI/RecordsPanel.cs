@@ -45,12 +45,14 @@ namespace Sanicball.UI
         {
 			foreach (CharacterTier tier in System.Enum.GetValues (typeof(CharacterTier)).Cast<CharacterTier>())
 			{
+				RectTransform header = Instantiate(sectionHeaderPrefab);
+				header.GetComponentInChildren<Text>().text = tier.ToString () + " balls"; //yes
+				header.SetParent (recordTypeContainer, false);
+
 				RecordTypeControl ctrl = Instantiate (recordTypeControlPrefab);
 				ctrl.transform.SetParent (recordTypeContainer, false);
-				ctrl.tierField.text = tier.ToString () + " balls"; //yes
+				ctrl.titleField.text = "Lap record";
 				recordTypes.Add (ctrl);
-				RectTransform header = Instantiate(sectionHeaderPrefab);
-				header.SetParent (recordTypeContainer, false);
 			}
 
             UpdateFields();

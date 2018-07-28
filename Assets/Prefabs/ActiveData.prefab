@@ -69,7 +69,6 @@ MonoBehaviour:
     overviewPrefab: {fileID: 181008, guid: cfb95fbdd5d7c3b40965abafdb30631c, type: 2}
   characters:
   - name: Sanic
-    title: 
     artBy: Deviantart user franz888
     stats:
       rollSpeed: 100
@@ -84,10 +83,9 @@ MonoBehaviour:
     ballSize: 1
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
-    hyperspeed: 0
+    tier: 0
     hidden: 0
   - name: Knackles
-    title: 
     artBy: an unknown artist
     stats:
       rollSpeed: 100
@@ -102,10 +100,9 @@ MonoBehaviour:
     ballSize: 1
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
-    hyperspeed: 0
+    tier: 0
     hidden: 0
   - name: Taels
-    title: 
     artBy: Deviantart user Mew087123
     stats:
       rollSpeed: 100
@@ -120,10 +117,9 @@ MonoBehaviour:
     ballSize: 1
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
-    hyperspeed: 0
+    tier: 0
     hidden: 0
   - name: Ame Roes
-    title: 
     artBy: /u/o_opc
     stats:
       rollSpeed: 100
@@ -138,10 +134,9 @@ MonoBehaviour:
     ballSize: 1
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
-    hyperspeed: 0
+    tier: 0
     hidden: 0
   - name: Shedew
-    title: 
     artBy: Deviantart user GalaxyTheHedgehog1
     stats:
       rollSpeed: 100
@@ -156,10 +151,9 @@ MonoBehaviour:
     ballSize: 1
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
-    hyperspeed: 0
+    tier: 0
     hidden: 0
   - name: Roge
-    title: 
     artBy: Tyson Hesse
     stats:
       rollSpeed: 100
@@ -174,10 +168,9 @@ MonoBehaviour:
     ballSize: 1
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
-    hyperspeed: 0
+    tier: 0
     hidden: 0
   - name: Asspio
-    title: 
     artBy: BK-TN
     stats:
       rollSpeed: 100
@@ -192,10 +185,9 @@ MonoBehaviour:
     ballSize: 1
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
-    hyperspeed: 0
+    tier: 0
     hidden: 0
   - name: Big
-    title: 
     artBy: /r/EdulokoX
     stats:
       rollSpeed: 100
@@ -210,10 +202,9 @@ MonoBehaviour:
     ballSize: 2
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
-    hyperspeed: 0
+    tier: 1
     hidden: 0
   - name: Dr. Aggmen
-    title: 
     artBy: Tyson Hesse
     stats:
       rollSpeed: 100
@@ -228,15 +219,14 @@ MonoBehaviour:
     ballSize: 1
     alternativeMesh: {fileID: 4300000, guid: f7e58024306f668428fe7ffa6a2cc208, type: 3}
     collisionMesh: {fileID: 0}
-    hyperspeed: 0
+    tier: 0
     hidden: 0
   - name: Chermy Bee
-    title: 
     artBy: DazeDream
     stats:
-      rollSpeed: 100
-      airSpeed: 15
-      jumpHeight: 14
+      rollSpeed: 60
+      airSpeed: 25
+      jumpHeight: 20
       grip: 0
     material: {fileID: 2100000, guid: b1d42e999a8f60746831e0a43b2ca2cd, type: 2}
     icon: {fileID: 21300000, guid: 95b3481512f3b4b489b578b08c88ca20, type: 3}
@@ -246,10 +236,9 @@ MonoBehaviour:
     ballSize: 0.8
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
-    hyperspeed: 0
+    tier: 1
     hidden: 0
   - name: Sulver
-    title: 
     artBy: DazeDream
     stats:
       rollSpeed: 100
@@ -264,10 +253,9 @@ MonoBehaviour:
     ballSize: 1
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
-    hyperspeed: 0
+    tier: 0
     hidden: 0
   - name: Bloze
-    title: 
     artBy: Deviantart user RoyalJellySandwich
     stats:
       rollSpeed: 100
@@ -282,10 +270,9 @@ MonoBehaviour:
     ballSize: 1
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
-    hyperspeed: 0
+    tier: 0
     hidden: 0
   - name: Vactor
-    title: 
     artBy: I don't even
     stats:
       rollSpeed: 100
@@ -300,10 +287,9 @@ MonoBehaviour:
     ballSize: 1
     alternativeMesh: {fileID: 4300000, guid: 62feaf2fb2598524dab37715d8a44e7a, type: 3}
     collisionMesh: {fileID: 0}
-    hyperspeed: 0
+    tier: 0
     hidden: 0
   - name: Super Sanic
-    title: 
     artBy: Deviantart user franz888
     stats:
       rollSpeed: 400
@@ -318,10 +304,9 @@ MonoBehaviour:
     ballSize: 1
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
-    hyperspeed: 1
+    tier: 2
     hidden: 0
   - name: Metal Sanic
-    title: 
     artBy: Deviantart user franz888
     stats:
       rollSpeed: 100
@@ -336,10 +321,9 @@ MonoBehaviour:
     ballSize: 1
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
-    hyperspeed: 0
+    tier: 1
     hidden: 0
   - name: Ogre
-    title: 
     artBy: didney
     stats:
       rollSpeed: 99
@@ -354,7 +338,7 @@ MonoBehaviour:
     ballSize: 1.5
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
-    hyperspeed: 0
+    tier: 1
     hidden: 1
   gameJoltInfo:
     gameID: 0
