@@ -12,6 +12,6 @@
         public const string AS_STRING = "alpha v0.8.2";
 
         //Something stupid, usually unique for every version
-        public const string TAGLINE = "With 20% less salt";
+        public const string TAGLINE = "20% less salt";
     }
 }

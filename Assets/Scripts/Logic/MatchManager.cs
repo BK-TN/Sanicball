@@ -159,6 +159,7 @@ namespace Sanicball.Logic
         private void SettingsChangedCallback(SettingsChangedMessage msg, float travelTime)
         {
             currentSettings = msg.NewMatchSettings;
+            Debug.Log("new settings - " + currentSettings.AllowedTiers);
             if (MatchSettingsChanged != null)
                 MatchSettingsChanged(this, EventArgs.Empty);
         }

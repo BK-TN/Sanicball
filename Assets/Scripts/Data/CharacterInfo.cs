@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using SanicballCore;
 
 namespace Sanicball.Data
 {
@@ -19,11 +20,4 @@ namespace Sanicball.Data
 		public CharacterTier tier = CharacterTier.Normal;
         public bool hidden = false;
     }
-
-	public enum CharacterTier
-	{
-		Normal,
-		Odd,
-		Hyperspeed
-	}
 }

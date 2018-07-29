@@ -218,8 +218,8 @@ MonoBehaviour:
     trail: {fileID: 2100000, guid: 701830a908a9cb248b59a019e7a2eea0, type: 2}
     ballSize: 1
     alternativeMesh: {fileID: 4300000, guid: f7e58024306f668428fe7ffa6a2cc208, type: 3}
-    collisionMesh: {fileID: 0}
-    tier: 0
+    collisionMesh: {fileID: 4300000, guid: 8bad5274dce3b554baa16f737265cba4, type: 3}
+    tier: 1
     hidden: 0
   - name: Chermy Bee
     artBy: DazeDream
@@ -321,7 +321,7 @@ MonoBehaviour:
     ballSize: 1
     alternativeMesh: {fileID: 0}
     collisionMesh: {fileID: 0}
-    tier: 1
+    tier: 0
     hidden: 0
   - name: Ogre
     artBy: didney
