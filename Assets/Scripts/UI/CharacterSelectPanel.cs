@@ -52,6 +52,10 @@ namespace Sanicball.UI
         private IEnumerator Start()
         {
             var charList = ActiveData.Characters.OrderBy(a => a.tier).ToArray();
+            if (ActiveData.GameSettings.eSportsReady)
+            {
+                charList = charList.Where(a => a.tier == SanicballCore.CharacterTier.Hyperspeed).ToArray();
+            }
 
             CharacterSelectEntry cancelEnt = Instantiate(entryPrefab);
             cancelEnt.IconImage.sprite = cancelIconSprite;
@@ -87,6 +91,8 @@ namespace Sanicball.UI
 
         public void Up()
         {
+            if (activeEntries.Count <= COLUMN_COUNT) return;
+
             int s = selected - COLUMN_COUNT;
             if (s < 0)
             {
@@ -98,6 +104,8 @@ namespace Sanicball.UI
 
         public void Down()
         {
+            if (activeEntries.Count <= COLUMN_COUNT) return;
+
             int s = selected + COLUMN_COUNT;
             if (s > activeEntries.Count - 1)
             {

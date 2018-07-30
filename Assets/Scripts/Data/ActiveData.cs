@@ -37,6 +37,8 @@ namespace Sanicball.Data
         [SerializeField]
         private Material eSportsTrail;
         [SerializeField]
+        private GameObject eSportsHat;
+        [SerializeField]
         private AudioClip eSportsMusic;
         [SerializeField]
         private ESportMode eSportsPrefab;
@@ -55,6 +57,7 @@ namespace Sanicball.Data
         public static GameJoltInfo GameJoltInfo { get { return instance.gameJoltInfo; } }
         public static GameObject ChristmasHat { get { return instance.christmasHat; } }
         public static Material ESportsTrail {get{return instance.eSportsTrail;}}
+        public static GameObject ESportsHat {get{return instance.eSportsHat;}}
         public static AudioClip ESportsMusic {get{return instance.eSportsMusic;}}
         public static ESportMode ESportsPrefab {get{return instance.eSportsPrefab;}}
 

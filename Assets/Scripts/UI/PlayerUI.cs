@@ -34,6 +34,8 @@ namespace Sanicball.UI
 
         [SerializeField]
         private AudioClip checkpointSound;
+        [SerializeField]
+        private AudioClip respawnSound;
 
         [SerializeField]
         private Marker markerPrefab;
@@ -57,6 +59,7 @@ namespace Sanicball.UI
                 if (targetPlayer != null)
                 {
                     targetPlayer.NextCheckpointPassed -= TargetPlayer_NextCheckpointPassed;
+                    targetPlayer.Respawned -= TargetPlayer_Respawned;
                     Destroy(checkpointMarker.gameObject);
                     foreach (Marker m in playerMarkers)
                     {
@@ -67,6 +70,7 @@ namespace Sanicball.UI
                 targetPlayer = value;
 
                 targetPlayer.NextCheckpointPassed += TargetPlayer_NextCheckpointPassed;
+                targetPlayer.Respawned += TargetPlayer_Respawned;
 
                 //Marker following next checkpoint
                 checkpointMarker = Instantiate(markerPrefab);
@@ -110,6 +114,18 @@ namespace Sanicball.UI
         }
 
         public Camera TargetCamera { get; set; }
+        
+        private void TargetPlayer_Respawned(object sender, EventArgs e)
+        {
+            UISound.Play(respawnSound);
+
+            checkpointTimeField.text = "Respawn lap time penalty";
+            checkpointTimeField.GetComponent<ToggleCanvasGroup>().ShowTemporarily(2f);
+
+            checkpointTimeDiffField.color = Color.red;
+            checkpointTimeDiffField.text = "+" + Utils.GetTimeString(TimeSpan.FromSeconds(5));
+            checkpointTimeDiffField.GetComponent<ToggleCanvasGroup>().ShowTemporarily(2f);
+        }
 
         private void TargetPlayer_NextCheckpointPassed(object sender, NextCheckpointPassArgs e)
         {

@@ -31,6 +31,8 @@ namespace Sanicball.Gameplay
         private Quaternion currentDirectionWithOffset = Quaternion.Euler(0, 0, 0);
         private Vector3 up = Vector3.up;
 
+        public float fovOffset = 0;
+
         public void SetDirection(Quaternion dir)
         {
             currentDirection = dir;
@@ -82,7 +84,7 @@ namespace Sanicball.Gameplay
                 }
 
                 //Set camera FOV to get higher with more velocity
-                AttachedCamera.fieldOfView = Mathf.Lerp(AttachedCamera.fieldOfView, Mathf.Min(60f + (Target.velocity.magnitude), 100f), Time.deltaTime * 4);
+                AttachedCamera.fieldOfView = Mathf.Lerp(AttachedCamera.fieldOfView, Mathf.Min(60f + (Target.velocity.magnitude), 100f) + fovOffset, Time.deltaTime * 20);
 
                 currentDirectionWithOffset = Quaternion.Slerp(currentDirectionWithOffset, currentDirection * targetDirectionOffset, Time.deltaTime * 6);
                 transform.position = Target.transform.position + Vector3.up * orbitHeight + currentDirectionWithOffset * (Vector3.back * orbitDistance);

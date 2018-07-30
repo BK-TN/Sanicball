@@ -23,6 +23,8 @@ namespace Sanicball.UI
 
         public Text trails;
         public Text shadows;
+        public Text motionBlur;
+        public Text bloom;
         public Text reflectionQuality;
         public Text eSportsReady;
 
@@ -86,6 +88,8 @@ namespace Sanicball.UI
             aa.text = tempSettings.aa == 0 ? "Off" : ("x" + tempSettings.aa);
             trails.text = tempSettings.trails ? "On" : "Off";
             shadows.text = tempSettings.shadows ? "On" : "Off";
+            motionBlur.text = tempSettings.motionBlur ? "On" : "Off";
+            bloom.text = tempSettings.bloom ? "On" : "Off";
             reflectionQuality.text = tempSettings.reflectionQuality.ToString();
             eSportsReady.text = tempSettings.eSportsReady ? "Born ready" : "No way";
 
@@ -242,6 +246,18 @@ namespace Sanicball.UI
         public void ShadowsToggle()
         {
             tempSettings.shadows = !tempSettings.shadows;
+            UpdateFields();
+        }
+
+        public void MotionBlurToggle()
+        {
+            tempSettings.motionBlur = !tempSettings.motionBlur;
+            UpdateFields();
+        }
+
+        public void BloomToggle()
+        {
+            tempSettings.bloom = !tempSettings.bloom;
             UpdateFields();
         }
 

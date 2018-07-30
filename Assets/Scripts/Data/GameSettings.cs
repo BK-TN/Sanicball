@@ -25,6 +25,8 @@ namespace Sanicball.Data
 
         public bool trails = true;
         public bool shadows = true;
+        public bool motionBlur = false;
+        public bool bloom = false;
 		public ReflectionQuality reflectionQuality = ReflectionQuality.Off;
         public bool eSportsReady = false;
 
@@ -60,6 +62,8 @@ namespace Sanicball.Data
             aa = original.aa;
             trails = original.trails;
             shadows = original.shadows;
+            motionBlur = original.motionBlur;
+            bloom = original.bloom;
             reflectionQuality = original.reflectionQuality;
             eSportsReady = original.eSportsReady;
 
@@ -122,6 +126,11 @@ namespace Sanicball.Data
             MusicPlayer music = GameObject.FindObjectOfType<MusicPlayer>();
             if (music)
                 music.GetComponent<AudioSource>().mute = !music;
+            //Camera effects
+            foreach(var cam in GameObject.FindObjectsOfType<CameraEffects>())
+            {
+                cam.EnableEffects();
+            }
         }
     }
 

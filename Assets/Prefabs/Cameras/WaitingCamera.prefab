@@ -14,6 +14,7 @@ GameObject:
   - 81: {fileID: 8120996}
   - 114: {fileID: 11449898}
   - 114: {fileID: 11403724}
+  - 114: {fileID: 11469708}
   m_Layer: 0
   m_Name: WaitingCamera
   m_TagString: MainCamera
@@ -105,6 +106,35 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ee654265f8940894183db03d1978b182, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &11469708
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 168092}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9205a40d5b4cc948bc47088b4f164f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isOmniCam: 0
+  bloomLensFlareVignetteMask: {fileID: 2800000, guid: 95ef4804fe0be4c999ddaa383536cde8,
+    type: 3}
+  bloomLensFlareShader: {fileID: 4800000, guid: 459fe69d2f6d74ddb92f04dbf45a866b,
+    type: 3}
+  bloomScreenBlendShader: {fileID: 4800000, guid: 7856cbff0a0ca45c787d5431eb805bb0,
+    type: 3}
+  bloomBlurAndFlaresShader: {fileID: 4800000, guid: be6e39cf196f146d5be72fbefb18ed75,
+    type: 3}
+  bloomBrightPassFilter: {fileID: 4800000, guid: 0aeaa4cb29f5d4e9c8455f04c8575c8c,
+    type: 3}
+  motionBlurShader: {fileID: 4800000, guid: 85a88efa8c871af4a9d17c64791b6f4f, type: 3}
+  motionBlurDX11Shader: {fileID: 4800000, guid: f1b13d7a80660504a858ea24cfa418c6,
+    type: 3}
+  motionBlurReplacementClearShader: {fileID: 4800000, guid: 7699c5fbfa27745a1abe111ab7bf9785,
+    type: 3}
+  motionBlurNoiseTexture: {fileID: 2800000, guid: 31f5a8611c4ed1245b18456206e798dc,
+    type: 3}
 --- !u!124 &12473154
 Behaviour:
   m_ObjectHideFlags: 1

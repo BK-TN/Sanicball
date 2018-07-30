@@ -186,6 +186,11 @@ namespace Sanicball.Gameplay
                 hatPrefab = ActiveData.ChristmasHat;
             }
 
+            if (ActiveData.GameSettings.eSportsReady)
+            {
+                hatPrefab = ActiveData.ESportsHat;
+            }
+
             //Spawn hat
             if (hatPrefab)
             {
