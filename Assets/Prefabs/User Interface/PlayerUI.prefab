@@ -634,6 +634,7 @@ MonoBehaviour:
   checkpointTimeField: {fileID: 11443988}
   checkpointTimeDiffField: {fileID: 11403742}
   checkpointSound: {fileID: 8300000, guid: c62a98546a3cbd14ab99f49a02fe104b, type: 3}
+  respawnSound: {fileID: 8300000, guid: f6c0369fe0a85bc48b85c87aa40f00a6, type: 3}
   markerPrefab: {fileID: 11459252, guid: 4beca760f831c984e9f5e1b517aff2c2, type: 2}
   markerContainer: {fileID: 22462306}
 --- !u!222 &22209640
