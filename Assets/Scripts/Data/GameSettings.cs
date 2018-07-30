@@ -18,6 +18,7 @@ namespace Sanicball.Data
         public bool fullscreen = true;
         public bool vsync = false;
         public bool useImperial = false;
+        public bool showControlsWhileWaiting = true;
 
         [Header("Graphics")]
         public int aa = 0;
@@ -25,6 +26,7 @@ namespace Sanicball.Data
         public bool trails = true;
         public bool shadows = true;
 		public ReflectionQuality reflectionQuality = ReflectionQuality.Off;
+        public bool eSportsReady = false;
 
         [Header("Gameplay")]
         public bool useOldControls = false;
@@ -53,11 +55,13 @@ namespace Sanicball.Data
             fullscreen = original.fullscreen;
             vsync = original.vsync;
             useImperial = original.useImperial;
+            showControlsWhileWaiting = original.showControlsWhileWaiting;
 
             aa = original.aa;
             trails = original.trails;
             shadows = original.shadows;
             reflectionQuality = original.reflectionQuality;
+            eSportsReady = original.eSportsReady;
 
             useOldControls = original.useOldControls;
             oldControlsMouseSpeed = original.oldControlsMouseSpeed;

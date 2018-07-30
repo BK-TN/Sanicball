@@ -61,11 +61,14 @@ namespace Sanicball.Gameplay
         private PivotCamera oldCamera;
         [SerializeField]
         private ParticleSystem removalParticles;
+        [SerializeField]
+        private SpeedFire speedFire;
 
         public DriftySmoke Smoke { get { return smoke; } }
         public OmniCamera Camera { get { return camera; } }
         public PivotCamera OldCamera { get { return oldCamera; } }
         public ParticleSystem RemovalParticles { get { return removalParticles; } }
+        public SpeedFire SpeedFire{ get { return speedFire; } }
     }
 
     [RequireComponent(typeof(Rigidbody))]
@@ -103,6 +106,7 @@ namespace Sanicball.Gameplay
         private float groundedTimer = 0;
         private float upResetTimer = 0;
         private DriftySmoke smoke;
+        private SpeedFire speedFire;
 
         public bool CanMove { get { return canMove; } set { canMove = value; } }
         public bool AutoBrake { get; set; }
@@ -156,6 +160,7 @@ namespace Sanicball.Gameplay
             smoke.target = this;
             smoke.DriftAudio = sounds.Brake;
 
+
             //Grab reference to Rigidbody
             rb = GetComponent<Rigidbody>();
             //Set angular velocity (This is necessary for fast)
@@ -170,6 +175,11 @@ namespace Sanicball.Gameplay
                 SetCharacter(ActiveData.Characters[CharacterId]);
             }
 
+            //Set up speed effect
+            speedFire = Instantiate(prefabs.SpeedFire);
+            speedFire.Init(this);
+
+            //Crimbus
             DateTime now = DateTime.Now;
             if (now.Month == 12 && now.Day > 20 && now.Day <= 31)
             {
@@ -231,6 +241,9 @@ namespace Sanicball.Gameplay
         {
             GetComponent<Renderer>().material = c.material;
             GetComponent<TrailRenderer>().material = c.trail;
+            if (c.name == "Super Sanic" && ActiveData.GameSettings.eSportsReady) {
+                GetComponent<TrailRenderer>().material = ActiveData.ESportsTrail;
+            }
             transform.localScale = new Vector3(c.ballSize, c.ballSize, c.ballSize);
             if (c.alternativeMesh != null)
             {
@@ -251,9 +264,7 @@ namespace Sanicball.Gameplay
                     Debug.LogWarning("Vertex count for " + c.name + "'s collision mesh is bigger than 255!");
                 }
             }
-            Ball motion = GetComponent<Ball>();
-            if (motion != null)
-                motion.characterStats = c.stats;
+            characterStats = c.stats;
         }
 
         private void FixedUpdate()

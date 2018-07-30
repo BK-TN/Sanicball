@@ -117,6 +117,7 @@ namespace Sanicball.Logic
 
         public bool AutoStartTimerOn { get { return autoStartTimerOn; } }
         public float AutoStartTimer { get { return autoStartTimer; } }
+        public bool InLobby {get{return inLobby;}}
 
         #endregion Properties
 
@@ -159,7 +160,6 @@ namespace Sanicball.Logic
         private void SettingsChangedCallback(SettingsChangedMessage msg, float travelTime)
         {
             currentSettings = msg.NewMatchSettings;
-            Debug.Log("new settings - " + currentSettings.AllowedTiers);
             if (MatchSettingsChanged != null)
                 MatchSettingsChanged(this, EventArgs.Empty);
         }

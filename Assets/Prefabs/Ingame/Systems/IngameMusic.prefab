@@ -214,7 +214,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52fb0f49a8aba084b8297d67cd65862f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skin: {fileID: 0}
+  playerCanvasPrefab: {fileID: 11496758, guid: 8cee92b7e27d99042b0a050e833b027a, type: 2}
   startPlaying: 0
   fadeIn: 0
   playlist:
@@ -249,7 +249,6 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: 22208ce0732d0284cbb8dd1506ea252f, type: 3}
   - name: Initial D - Deja Vu
     clip: {fileID: 8300000, guid: 8e6a1b8eeb5643741871ab2b85cdef38, type: 3}
-  mlgSong: {fileID: 8300000, guid: 65eed12773deb844185037ac6ee1ebff, type: 3}
   fastSource: {fileID: 8200002}
 --- !u!1001 &100100000
 Prefab:

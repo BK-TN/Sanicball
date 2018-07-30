@@ -224,7 +224,7 @@ MonoBehaviour:
   - name: Chermy Bee
     artBy: DazeDream
     stats:
-      rollSpeed: 60
+      rollSpeed: 50
       airSpeed: 18
       jumpHeight: 30
       grip: 0
@@ -319,9 +319,9 @@ MonoBehaviour:
     minimapIcon: {fileID: 2100000, guid: 6d6fc2becdad49744b2537d691a9e969, type: 2}
     trail: {fileID: 2100000, guid: 9ce71dd0ced43204d80391225a2d06fa, type: 2}
     ballSize: 1
-    alternativeMesh: {fileID: 0}
-    collisionMesh: {fileID: 0}
-    tier: 0
+    alternativeMesh: {fileID: 4300000, guid: 8271211632fa8aa4e8b7c3f1bd3abbdb, type: 3}
+    collisionMesh: {fileID: 4300000, guid: 8271211632fa8aa4e8b7c3f1bd3abbdb, type: 3}
+    tier: 1
     hidden: 0
   - name: Ogre
     artBy: didney
@@ -346,6 +346,9 @@ MonoBehaviour:
     verbose: 1
     disabled: 1
   christmasHat: {fileID: 132204, guid: 59d3895ecfc783e4289b0c51098a0429, type: 2}
+  eSportsTrail: {fileID: 2100000, guid: 535ce71ad14791d40b6cbe98a2276283, type: 2}
+  eSportsMusic: {fileID: 8300000, guid: 44aeddca0c186224090a76d97139eaa4, type: 3}
+  eSportsPrefab: {fileID: 11400000, guid: f55190f64bbb0c349bcd0f128756a753, type: 2}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

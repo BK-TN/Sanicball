@@ -24,6 +24,7 @@ namespace Sanicball.UI
         public Text trails;
         public Text shadows;
         public Text reflectionQuality;
+        public Text eSportsReady;
 
         [Header("Gameplay")]
         public Text controlMode;
@@ -86,6 +87,7 @@ namespace Sanicball.UI
             trails.text = tempSettings.trails ? "On" : "Off";
             shadows.text = tempSettings.shadows ? "On" : "Off";
             reflectionQuality.text = tempSettings.reflectionQuality.ToString();
+            eSportsReady.text = tempSettings.eSportsReady ? "Born ready" : "No way";
 
 			controlMode.text = tempSettings.useOldControls ? "Rotate manually (Precise)" : "Follow velocity (Intuitive)";
             cameraSpeedMouse.text = tempSettings.oldControlsMouseSpeed.ToString("n1");
@@ -256,6 +258,12 @@ namespace Sanicball.UI
             int q = (int)tempSettings.reflectionQuality;
             q = Mathf.Max(q - 1, 0);
             tempSettings.reflectionQuality = (ReflectionQuality)q;
+            UpdateFields();
+        }
+
+        public void ESportsToggle()
+        {
+            tempSettings.eSportsReady = !tempSettings.eSportsReady;
             UpdateFields();
         }
 

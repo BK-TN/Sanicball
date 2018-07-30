@@ -561,12 +561,13 @@ MonoBehaviour:
   ctrlType: 0
   characterId: 0
   nickname: Unknown ball
+  hatPrefab: {fileID: 0}
   prefabs:
     smoke: {fileID: 11400002, guid: 83f9c6324dcbb7042a24b3478b9efcbe, type: 2}
     camera: {fileID: 11443186, guid: 1f3ec1af904b6b54b9cfc2b288854f02, type: 2}
     oldCamera: {fileID: 11400000, guid: 395e30509a198fc4fb2aac437f95e4c0, type: 2}
-    aiTarget: {fileID: 11400006, guid: 97eba7661fd1a27439ece48ef79ce6d0, type: 2}
     removalParticles: {fileID: 19835562, guid: e8c684b001602cc4295dfd027bb84014, type: 2}
+    speedFire: {fileID: 11405568, guid: 05801caa43fa986428513178add4eac3, type: 2}
   sounds:
     jump: {fileID: 8245922}
     roll: {fileID: 8294728}
