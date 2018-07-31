@@ -70,7 +70,7 @@ namespace SanicballCore.Server
             CharacterTier.Normal,       //Bloze
             CharacterTier.Normal,       //Vactor
             CharacterTier.Hyperspeed,   //Super Sanic
-            CharacterTier.Normal,       //Metal Sanic
+            CharacterTier.Odd,       //Metal Sanic
             CharacterTier.Odd,          //Ogre
         };
 
@@ -261,6 +261,20 @@ namespace SanicballCore.Server
                 {
                     CorrectPlayerTiers();
                     SendToAll(new SettingsChangedMessage(matchSettings));
+                }
+            });
+            AddCommandHandler("reloadMOTD",
+            "Reloads message of the day from the default file, or optionally a custom file path.",
+            cmd =>
+            {
+                bool success = false;
+                if (cmd.Content.Trim() != string.Empty)
+                {
+                    LoadMOTD(cmd.Content.Trim());
+                }
+                else
+                {
+                    LoadMOTD();
                 }
             });
             AddCommandHandler("setStage",
@@ -636,7 +650,14 @@ namespace SanicballCore.Server
             }
             else
             {
-                Log("No message of the day found. You can display a message to joining players by creating a file named '" + MOTD_FILENAME + "' next to the server executable.");
+		if (path == MOTD_FILENAME)
+		{
+                Log("No message of the day found. You can display a message to joining players by creating a file named '" + MOTD_FILENAME + "' next to the server executable.",LogType.Warning);
+		}
+		else
+		{
+		Log("Could not load MOTD from this file.",LogType.Error);
+		}
             }
         }
 
@@ -690,7 +711,7 @@ namespace SanicballCore.Server
                 {
                     if (lobbyTimer.Elapsed.TotalSeconds >= LOBBY_MATCH_START_TIME)
                     {
-                        Log("The race has been started by all players being ready.");
+                        Log("The race has been started by all players being ready.",LogType.Debug);
                         LoadRace();
                     }
                 }
@@ -715,7 +736,7 @@ namespace SanicballCore.Server
                 {
                     if (autoStartTimer.Elapsed.TotalSeconds >= matchSettings.AutoStartTime)
                     {
-                        Log("The race has been automatically started.");
+                        Log("The race has been automatically started.",LogType.Debug);
                         LoadRace();
                     }
                 }
@@ -864,14 +885,14 @@ namespace SanicballCore.Server
                                         //If no players are left and we're in a race, return to lobby
                                         if (players.Count == 0 && inRace)
                                         {
-                                            Log("No players left in race!");
+                                            Log("No players left in race!",LogType.Debug);
                                             ReturnToLobby();
                                         }
 
                                         //If there are now less players than AutoStartMinPlayers, stop the auto start timer
                                         if (players.Count < matchSettings.AutoStartMinPlayers && autoStartTimer.IsRunning)
                                         {
-                                            Log("Too few players, match auto start timer stopped");
+                                            Log("Too few players, match auto start timer stopped",LogType.Debug);
                                             StopAutoStartTimer();
                                         }
 
@@ -885,7 +906,7 @@ namespace SanicballCore.Server
                                     }
                                     else
                                     {
-                                        Log("Unknown client disconnected (Client was most likely not done connecting)");
+                                        Log("Unknown client disconnected (Client was most likely not done connecting)",LogType.Debug);
                                     }
                                     break;
 
@@ -963,7 +984,7 @@ namespace SanicballCore.Server
 
                                                 if (players.Count >= matchSettings.AutoStartMinPlayers && !autoStartTimer.IsRunning && matchSettings.AutoStartTime > 0)
                                                 {
-                                                    Log("Match will auto start in " + matchSettings.AutoStartTime + " seconds.");
+                                                    Log("Match will auto start in " + matchSettings.AutoStartTime + " seconds.",LogType.Debug);
                                                     StartAutoStartTimer();
                                                 }
                                             }
@@ -994,7 +1015,7 @@ namespace SanicballCore.Server
 
                                             if (players.Count < matchSettings.AutoStartMinPlayers && autoStartTimer.IsRunning)
                                             {
-                                                Log("Too few players, match auto start timer stopped");
+                                                Log("Too few players, match auto start timer stopped",LogType.Debug);
                                                 StopAutoStartTimer();
                                             }
                                         }
@@ -1089,7 +1110,7 @@ namespace SanicballCore.Server
                                             clientsLoadingStage--;
                                             if (clientsLoadingStage > 0)
                                             {
-                                                Log("Waiting for " + clientsLoadingStage + " client(s) to load");
+                                                Log("Waiting for " + clientsLoadingStage + " client(s) to load",LogType.Debug);
                                             }
                                             else
                                             {
@@ -1240,7 +1261,7 @@ namespace SanicballCore.Server
                 switch (matchSettings.StageRotationMode)
                 {
                     case StageRotationMode.Random:
-                        Log("Picking random stage");
+                        Log("Picking random stage", LogType.Debug);
                         int newStage = matchSettings.StageId;
 
                         while (newStage == matchSettings.StageId)
@@ -1251,7 +1272,7 @@ namespace SanicballCore.Server
                         break;
 
                     case StageRotationMode.Sequenced:
-                        Log("Picking next stage");
+                        Log("Picking next stage", LogType.Debug);
                         int nextStage = matchSettings.StageId + 1;
                         if (nextStage >= STAGE_COUNT) nextStage = 0;
                         matchSettings.StageId = nextStage;
@@ -1407,7 +1428,7 @@ namespace SanicballCore.Server
         }
 
         private void Whisper(ServClient reciever, string text) {
-            Log("Sending whisper to client " + reciever.Name + "(Text: " + text + ")");
+            Log("Sending whisper to client " + reciever.Name + "(Text: " + text + ")", LogType.Debug);
             SendTo(new ChatMessage("Server", ChatMessageType.System, text), reciever);
         }
 
