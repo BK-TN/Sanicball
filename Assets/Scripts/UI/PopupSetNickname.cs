@@ -21,7 +21,6 @@ namespace Sanicball.UI
             else
             {
                 string nick = nickname.text.Trim();
-                Data.ActiveData.GameSettings.nickname = nick;
                 optionsPanel.SetNickname(nick);
                 GetComponent<Popup>().Close();
             }

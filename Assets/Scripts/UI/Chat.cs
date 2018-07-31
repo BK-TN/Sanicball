@@ -101,7 +101,7 @@ namespace Sanicball.UI
             switch (type)
             {
                 case ChatMessageType.User:
-                    messageObj.text = string.Format("<color=#2244ff><b>{0}</b></color>: {1}", from, text);
+                    messageObj.text = string.Format("<color=#6688ff><b>{0}</b></color>: {1}", from, text);
                     break;
 
                 case ChatMessageType.System:

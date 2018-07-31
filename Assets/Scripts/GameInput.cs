@@ -370,7 +370,7 @@ namespace Sanicball
 
         public static bool IsChangingSong()
         {
-            return Input.GetKeyDown(ActiveData.Keybinds[Keybind.NextSong]) && !KeyboardDisabled;
+            return (Input.GetKeyDown(ActiveData.Keybinds[Keybind.NextSong]) && !KeyboardDisabled) || Input.GetKeyDown(KeyCode.JoystickButton6);
         }
 
         public static bool IsOpeningChat()

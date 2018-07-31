@@ -51,16 +51,35 @@ namespace SanicballCore.Server
     {
         public const string CONFIG_FILENAME = "ServerConfig.json";
         private const string SETTINGS_FILENAME = "MatchSettings.json";
+        private const string MOTD_FILENAME = "MOTD.txt";
+		private const string DEFAULT_SERVER_LIST_URL = "https://sanicball.bdgr.zone/servers";
         private const int TICKRATE = 20;
         private const int STAGE_COUNT = 5; //Hardcoded stage count for now.. can't receive the actual count since it's part of a Unity prefab.
-        private const float PLAYER_TIMEOUT_NOTIFY = 60; //Time in seconds until players get notified about their time left to race
-        private const float PLAYER_TIMEOUT_DISQUALIFY = 120; //Time in seconds until players are disqualified
+        private readonly CharacterTier[] characterTiers = new[] { //Hardcoded character tiers, same reason
+            CharacterTier.Normal,       //Sanic
+            CharacterTier.Normal,       //Knackles
+            CharacterTier.Normal,       //Taels
+            CharacterTier.Normal,       //Ame
+            CharacterTier.Normal,       //Shedew
+            CharacterTier.Normal,       //Roge
+            CharacterTier.Normal,       //Asspio
+            CharacterTier.Odd,          //Big
+            CharacterTier.Odd,          //Aggmen
+            CharacterTier.Odd,          //Chermy
+            CharacterTier.Normal,       //Sulver
+            CharacterTier.Normal,       //Bloze
+            CharacterTier.Normal,       //Vactor
+            CharacterTier.Hyperspeed,   //Super Sanic
+            CharacterTier.Odd,       //Metal Sanic
+            CharacterTier.Odd,          //Ogre
+        };
 
         public event EventHandler<LogArgs> OnLog;
 
         //Server utilities
         private List<LogEntry> log = new List<LogEntry>();
         private Dictionary<string, CommandHandler> commandHandlers = new Dictionary<string, CommandHandler>();
+        private Dictionary<string, string> commandHelp = new Dictionary<string, string>();
         private NetServer netServer;
         private CommandQueue commandQueue;
         private Random random = new Random();
@@ -72,13 +91,14 @@ namespace SanicballCore.Server
         private List<ServClient> clients = new List<ServClient>();
         private List<ServPlayer> players = new List<ServPlayer>();
         private MatchSettings matchSettings;
+        private string motd;
         private bool inRace;
 
         #region Timers
 
         //Server browser ping timer
-        private Stopwatch serverBrowserPingTimer = new Stopwatch();
-        private const float SERVER_BROWSER_PING_INTERVAL = 60;
+        private Stopwatch serverListPingTimer = new Stopwatch();
+        private const float SERVER_BROWSER_PING_INTERVAL = 600;
 
         //Timer for starting a match by all players being ready
         private Stopwatch lobbyTimer = new Stopwatch();
@@ -104,24 +124,44 @@ namespace SanicballCore.Server
 
             #region Command handlers
 
-            AddCommandHandler("help", cmd =>
+            AddCommandHandler("help",
+            "help help help",
+            cmd =>
             {
-                Log("Available commands:");
-                foreach (string name in commandHandlers.Keys)
+                if (cmd.Content.Trim() == string.Empty)
                 {
-                    Log(name);
+                    Log("Available commands:");
+                    foreach (string name in commandHandlers.Keys)
+                    {
+                        Log(name);
+                    }
+                    Log("Use 'help [command name]' for a command decription");
+                }
+                else
+                {
+                    string help;
+                    if (commandHelp.TryGetValue(cmd.Content.Trim(), out help))
+                    {
+                        Log(help);
+                    }
                 }
             });
-            AddCommandHandler("toggleDebug", cmd =>
+            AddCommandHandler("toggleDebug",
+            "Debug mode displays a ton of extra technical output. Useful if you suspect something is wrong with the server.",
+            cmd =>
             {
                 debugMode = !debugMode;
                 Log("Debug mode set to " + debugMode);
             });
-            AddCommandHandler("stop", cmd =>
+            AddCommandHandler("stop",
+            "Stops the server. I recommend stopping it this way - any other probably won't save the server log.",
+            cmd =>
             {
                 running = false;
             });
-            AddCommandHandler("say", cmd =>
+            AddCommandHandler("say",
+            "Chat to clients on the server.",
+            cmd =>
             {
                 if (cmd.Content.Trim() == string.Empty)
                 {
@@ -133,7 +173,9 @@ namespace SanicballCore.Server
                     Log("Chat message sent");
                 }
             });
-            AddCommandHandler("clients", cmd =>
+            AddCommandHandler("clients",
+            "Displays a list of connected clients. (A client is a technical term another Sanicball instance)",
+            cmd =>
             {
                 Log(clients.Count + " connected client(s)");
                 foreach (ServClient client in clients)
@@ -141,11 +183,15 @@ namespace SanicballCore.Server
                     Log(client.Name);
                 }
             });
-            AddCommandHandler("players", cmd =>
+            AddCommandHandler("players",
+            "Displays a list of active players. Clients can have multiple players for splitscreen, or none at all to spectate.",
+            cmd =>
                 {
                     Log(clients.Count + " players(s) in match");
                 });
-            AddCommandHandler("kick", cmd =>
+            AddCommandHandler("kick", 
+            "Kicks a player from the server. Of course he could just re-join, but hopefully he'll get the message.",
+            cmd =>
             {
                 if (cmd.Content.Trim() == string.Empty)
                 {
@@ -172,11 +218,15 @@ namespace SanicballCore.Server
                     }
                 }
             });
-            AddCommandHandler("returnToLobby", cmd =>
+            AddCommandHandler("returnToLobby",
+            "Force exits any ongoing race.",
+            cmd =>
             {
                 ReturnToLobby();
             });
-            AddCommandHandler("forceStart", cmd =>
+            AddCommandHandler("forceStart",
+            "Force starts a race when in the lobby. Use this carefully, players may not be ready for racing",
+            cmd =>
             {
                 if (inRace == false)
                 {
@@ -188,11 +238,15 @@ namespace SanicballCore.Server
                     Log("Race can only be force started in the lobby.");
                 }
             });
-            AddCommandHandler("showSettings", cmd =>
+            AddCommandHandler("showSettings",
+            "Shows match settings. Settings like stage rotation are just shown as a number (Example: if StageRotationMode shows '1', it means 'Sequenced')",
+            cmd =>
             {
                 Log(JsonConvert.SerializeObject(matchSettings, Formatting.Indented));
             });
-            AddCommandHandler("loadSettings", cmd =>
+            AddCommandHandler("reloadSettings",
+            "Reloads match settings from the default file, or optionally a custom file path.",
+            cmd =>
             {
                 bool success = false;
                 if (cmd.Content.Trim() != string.Empty)
@@ -205,15 +259,33 @@ namespace SanicballCore.Server
                 }
                 if (success)
                 {
+                    CorrectPlayerTiers();
                     SendToAll(new SettingsChangedMessage(matchSettings));
                 }
             });
-            AddCommandHandler("setStage", cmd =>
+            AddCommandHandler("reloadMOTD",
+            "Reloads message of the day from the default file, or optionally a custom file path.",
+            cmd =>
+            {
+                bool success = false;
+                if (cmd.Content.Trim() != string.Empty)
+                {
+                    LoadMOTD(cmd.Content.Trim());
+                }
+                else
+                {
+                    LoadMOTD();
+                }
+            });
+            AddCommandHandler("setStage",
+            "Sets the stage by index. 0 = Green Hill, 1 = Flame Core, 2 = Ice Mountain, 3 = Rainbow Road, 4 = Dusty Desert",
+            cmd =>
             {
                 int inputInt;
                 if (int.TryParse(cmd.Content, out inputInt) && inputInt >= 0 && inputInt < STAGE_COUNT)
                 {
                     matchSettings.StageId = inputInt;
+                    SaveMatchSettings();
                     SendToAll(new SettingsChangedMessage(matchSettings));
                     Log("Stage set to " + inputInt);
                 }
@@ -222,76 +294,142 @@ namespace SanicballCore.Server
                     Log("Usage: setStage [0-" + (STAGE_COUNT - 1) + "]");
                 }
             });
-            AddCommandHandler("setLaps", cmd =>
+            AddCommandHandler("setLaps",
+            "Sets the number of laps per race. Laps are pretty long so 2 or 3 is recommended.",
+            cmd =>
             {
                 int inputInt;
                 if (int.TryParse(cmd.Content, out inputInt) && inputInt > 0)
                 {
                     matchSettings.Laps = inputInt;
+                    SaveMatchSettings();
                     SendToAll(new SettingsChangedMessage(matchSettings));
                     Log("Lap count set to " + inputInt);
                 }
                 else
                 {
-                    Log("Usage: setLaps [>=0]");
+                    Log("Usage: setLaps [>0]");
                 }
             });
-            AddCommandHandler("setAutoStartTime", cmd =>
+            AddCommandHandler("setAutoStartTime",
+            "Sets the time required (in seconds) with enough players in the lobby before a race is automatically started.", 
+            cmd =>
             {
                 int inputInt;
                 if (int.TryParse(cmd.Content, out inputInt) && inputInt > 0)
                 {
                     matchSettings.AutoStartTime = inputInt;
+                    SaveMatchSettings();
                     SendToAll(new SettingsChangedMessage(matchSettings));
                     Log("Match auto start time set to " + inputInt);
                 }
                 else
                 {
-                    Log("Usage: setAutoStartTime [>=0]");
+                    Log("Usage: setAutoStartTime [>0]");
                 }
             });
-            AddCommandHandler("setAutoStartMinPlayers", cmd =>
+            AddCommandHandler("setAutoStartMinPlayers",
+            "Sets the minimum amount of players needed in the lobby before the auto start countdown begins.",
+            cmd =>
             {
                 int inputInt;
                 if (int.TryParse(cmd.Content, out inputInt) && inputInt > 0)
                 {
                     matchSettings.AutoStartMinPlayers = inputInt;
+                    SaveMatchSettings();
                     SendToAll(new SettingsChangedMessage(matchSettings));
                     Log("Match auto start minimum players set to " + inputInt);
                 }
                 else
                 {
-                    Log("Usage: setAutoStartMinPlayers [>=0]");
+                    Log("Usage: setAutoStartMinPlayers [>0]");
                 }
             });
-            AddCommandHandler("setStageRotationMode", cmd =>
+            AddCommandHandler("setStageRotationMode",
+            "If not set to None, stages will change either randomly or in sequence every time the server returns to lobby.",
+            cmd =>
             {
-                /*StageRotationMode rotMode;
-                if (Enum.TryParse(cmd.Content, out rotMode))
-                {
+                try {
+                    StageRotationMode rotMode = (StageRotationMode)Enum.Parse(typeof(StageRotationMode), cmd.Content);
                     matchSettings.StageRotationMode = rotMode;
+                    SaveMatchSettings();
                     SendToAll(new SettingsChangedMessage(matchSettings));
                     Log("Stage rotation mode set to " + rotMode);
                 }
-                else
-                {
+                catch (Exception) {
                     string[] modes = Enum.GetNames(typeof(StageRotationMode));
                     string modesStr = string.Join("|", modes);
                     Log("Usage: setStageRotationMode [" + modesStr + "]");
-                }*/
+                }
             });
-            AddCommandHandler("setVoteRatio", cmd =>
+            AddCommandHandler("setAllowedTiers",
+            "Controls what ball tiers players can use.",
+            cmd =>
+            {
+                try {
+                    AllowedTiers tiers = (AllowedTiers)Enum.Parse(typeof(AllowedTiers), cmd.Content);
+                    matchSettings.AllowedTiers = tiers;
+                    SaveMatchSettings();
+                    SendToAll(new SettingsChangedMessage(matchSettings));
+                    CorrectPlayerTiers();
+                    Broadcast(GetAllowedTiersText());
+                    Log("Allowed tiers set to " + tiers);
+                }
+                catch (Exception) {
+                    string[] modes = Enum.GetNames(typeof(AllowedTiers));
+                    string modesStr = string.Join("|", modes);
+                    Log("Usage: setAllowedTiers [" + modesStr + "]");
+                }
+            });
+            AddCommandHandler("setTierRotationMode",
+            "If not None, allowed ball tiers will change (To either NormalOnly, OddOnly or HyperspeedOnly) each time the server returns to lobby. WeightedRandom has a 10/14 chance of picking NormalOnly, 3/14 of OddOnly and 1/14 of HyperspeedOnly.",
+            cmd =>
+            {
+                try {
+                    TierRotationMode mode = (TierRotationMode)Enum.Parse(typeof(TierRotationMode), cmd.Content);
+                    matchSettings.TierRotationMode = mode;
+                    SaveMatchSettings();
+                    SendToAll(new SettingsChangedMessage(matchSettings));
+                    Log("Tier rotation mode set to " + mode);
+                }
+                catch (Exception) {
+                    string[] modes = Enum.GetNames(typeof(TierRotationMode));
+                    string modesStr = string.Join("|", modes);
+                    Log("Usage: setTierRotationMode [" + modesStr + "]");
+                }
+            });
+            AddCommandHandler("setVoteRatio",
+            "Sets the fraction of players required to select 'return to lobby' before the server returns to lobby. 1.0, the default, requires all players. Something like 0.8 would be good for a very big server.",
+            cmd =>
             {
                 float newVoteRatio;
                 if (float.TryParse(cmd.Content, out newVoteRatio) && newVoteRatio >= 0f && newVoteRatio <= 1f)
                 {
                     matchSettings.VoteRatio = newVoteRatio;
+                    SaveMatchSettings();
                     SendToAll(new SettingsChangedMessage(matchSettings));
                     Log("Match vote ratio set to " + newVoteRatio);
                 }
                 else
                 {
                     Log("Usage: setVoteRatio [0.0-1.0]");
+                }
+            });
+            AddCommandHandler("setDisqualificationTime",
+            "Sets the time a player needs to loiter around without passing any checkpoints before they are disqualified from a race. If too low, players might get DQ'd just for being slow. 0 disables disqualifying.",
+            cmd =>
+            {
+                int inputInt;
+                if (int.TryParse(cmd.Content, out inputInt) && inputInt >= 0)
+                {
+                    matchSettings.DisqualificationTime = inputInt;
+                    SaveMatchSettings();
+                    SendToAll(new SettingsChangedMessage(matchSettings));
+                    Log("Disqualification time set to " + inputInt);
+                }
+                else
+                {
+                    Log("Usage: setDisqualificationTime [>=0]");
                 }
             });
 
@@ -345,31 +483,46 @@ namespace SanicballCore.Server
                 bool inputCorrect = false;
                 while (!inputCorrect)
                 {
-                    Console.Write("Show this server in the server browser? (yes|no): ");
+                    Console.Write("Show this server on one or more server lists? If no, players can still connect by IP (yes|no): ");
                     string input = Console.ReadLine();
                     if (input == "yes")
                     {
-                        newConfig.ShowInBrowser = true;
+						newConfig.ShowOnList = true;
                         inputCorrect = true;
                     }
                     if (input == "no")
                     {
-                        newConfig.ShowInBrowser = false;
+						newConfig.ShowOnList = false;
                         inputCorrect = true;
                     }
                 }
 
-                if (newConfig.ShowInBrowser)
+				if (newConfig.ShowOnList)
                 {
+					while (newConfig.ServerListURLs == null) {
+						Console.Write("Enter one or more URL(s) for server lists this server should appear on, seperated by space (Leave blank to use the default list, '" + DEFAULT_SERVER_LIST_URL + "'):");
+						string input = Console.ReadLine().Trim();
+
+						if (string.IsNullOrEmpty(input))
+						{
+							newConfig.ServerListURLs = new string[] { DEFAULT_SERVER_LIST_URL };
+						}
+						else 
+						{
+							var urls = input.Split(' ');
+							newConfig.ServerListURLs = urls;
+						}
+					}
+
                     while (string.IsNullOrEmpty(newConfig.PublicIP))
                     {
-                        Console.Write("Enter the public IP adress to use when connecting from the server browser: ");
+                        Console.Write("Enter the public IP adress to use when connecting from the server browser (If behind a router, remember to port forward): ");
                         newConfig.PublicIP = Console.ReadLine().Trim();
                     }
 
                     while (newConfig.PublicPort == 0)
                     {
-                        Console.Write("Enter the public port use when connecting from the server browser (Leave blank to use private port): ");
+                        Console.Write("Enter the public port use when connecting from the server browser (Leave blank to use private port - if you are unsure just do this): ");
 
                         string input = Console.ReadLine();
                         if (input.Trim() == string.Empty)
@@ -390,7 +543,7 @@ namespace SanicballCore.Server
                 using (StreamWriter sw = new StreamWriter(CONFIG_FILENAME))
                 {
                     sw.Write(JsonConvert.SerializeObject(newConfig));
-                    Console.WriteLine("Config saved!");
+                    Console.WriteLine("Config saved! If you want to modify match settings, this is done using the commands listed when entering 'help'.");
                 }
 
                 #endregion Server config wizard
@@ -404,6 +557,8 @@ namespace SanicballCore.Server
 
             if (!LoadMatchSettings())
                 matchSettings = MatchSettings.CreateDefault();
+
+            LoadMOTD();
 
             //Welcome message
             Log("Welcome! Type 'help' for a list of commands. Type 'stop' to shut down the server.");
@@ -425,10 +580,10 @@ namespace SanicballCore.Server
 
             Log("Server started on port " + this.config.PrivatePort + "!");
 
-            if (this.config.ShowInBrowser)
+			if (this.config.ShowOnList)
             {
-                AddToServerBrowser();
-                serverBrowserPingTimer.Start();
+                AddToServerLists();
+                serverListPingTimer.Start();
             }
 
             MessageLoop();
@@ -448,7 +603,7 @@ namespace SanicballCore.Server
                     }
                     catch (JsonException ex)
                     {
-                        Log("Failed to load server config from " + CONFIG_FILENAME + ", server cannot start. Please fix or delete the file. (" + ex.Message + ")", LogType.Error);
+                        Log("Failed to parse server config from " + CONFIG_FILENAME + ", server cannot start. Please fix or delete the file. (" + ex.Message + ")", LogType.Error);
                     }
                 }
             }
@@ -473,7 +628,7 @@ namespace SanicballCore.Server
                     }
                     catch (JsonException ex)
                     {
-                        Log("Failed to match settings from " + path + ", using default settings instead. (" + ex.Message + ")", LogType.Warning);
+                        Log("Failed to parse settings from " + path + ", using default settings instead. (" + ex.Message + ")", LogType.Warning);
                     }
                 }
             }
@@ -484,27 +639,51 @@ namespace SanicballCore.Server
             return false;
         }
 
-        private void AddToServerBrowser()
+        private void LoadMOTD(string path = MOTD_FILENAME) {
+            if (File.Exists(path))
+            {
+                using (StreamReader sr = new StreamReader(path))
+                {
+                    motd = sr.ReadToEnd();
+                    Log("Loaded message of the day from " + path);
+                }
+            }
+            else
+            {
+		if (path == MOTD_FILENAME)
+		{
+                Log("No message of the day found. You can display a message to joining players by creating a file named '" + MOTD_FILENAME + "' next to the server executable.",LogType.Warning);
+		}
+		else
+		{
+		Log("Could not load MOTD from this file.",LogType.Error);
+		}
+            }
+        }
+
+        private void AddToServerLists()
         {
             Thread addThread = new Thread(() =>
             {
-                try
-                {
-                    using (var client = new WebClient())
+                foreach (string listURL in config.ServerListURLs) {
+                    try
                     {
-                        var values = new NameValueCollection();
-                        values["ip"] = config.PublicIP;
-                        values["port"] = config.PublicPort.ToString();
+                        using (var client = new WebClient())
+                        {
+                            var values = new NameValueCollection();
+                            values["ip"] = config.PublicIP;
+                            values["port"] = config.PublicPort.ToString();
 
-                        var response = client.UploadValues("http://www.sanicball.com/servers/add/", values);
-                        string responseString = Encoding.Default.GetString(response);
+                            var response = client.UploadValues(listURL + "/add/", values);
+                            string responseString = Encoding.Default.GetString(response);
 
-                        Log("Server browser said: " + responseString, LogType.Debug);
+                            Log("Server list at '" + listURL +"' said: " + responseString, LogType.Debug);
+                        }
                     }
-                }
-                catch (WebException ex)
-                {
-                    Log("Failed adding server to browser: " + ex.Message, LogType.Warning);
+                    catch (WebException ex)
+                    {
+                        Log("Failed adding server to server list at '" + listURL + "': " + ex.Message, LogType.Warning);
+                    }
                 }
             });
             addThread.Start();
@@ -517,13 +696,13 @@ namespace SanicballCore.Server
                 Thread.Sleep(1000 / TICKRATE);
 
                 //Check server browser ping timer
-                if (serverBrowserPingTimer.IsRunning)
+                if (serverListPingTimer.IsRunning)
                 {
-                    if (serverBrowserPingTimer.Elapsed.TotalSeconds >= SERVER_BROWSER_PING_INTERVAL)
+                    if (serverListPingTimer.Elapsed.TotalSeconds >= SERVER_BROWSER_PING_INTERVAL)
                     {
-                        AddToServerBrowser();
-                        serverBrowserPingTimer.Reset();
-                        serverBrowserPingTimer.Start();
+                        AddToServerLists();
+                        serverListPingTimer.Reset();
+                        serverListPingTimer.Start();
                     }
                 }
 
@@ -532,7 +711,7 @@ namespace SanicballCore.Server
                 {
                     if (lobbyTimer.Elapsed.TotalSeconds >= LOBBY_MATCH_START_TIME)
                     {
-                        Log("The race has been started by all players being ready.");
+                        Log("The race has been started by all players being ready.",LogType.Debug);
                         LoadRace();
                     }
                 }
@@ -557,7 +736,7 @@ namespace SanicballCore.Server
                 {
                     if (autoStartTimer.Elapsed.TotalSeconds >= matchSettings.AutoStartTime)
                     {
-                        Log("The race has been automatically started.");
+                        Log("The race has been automatically started.",LogType.Debug);
                         LoadRace();
                     }
                 }
@@ -575,17 +754,19 @@ namespace SanicballCore.Server
                 //Check racing timeout timers
                 foreach (ServPlayer p in players)
                 {
-                    if (!p.TimeoutMessageSent && p.RacingTimeout.Elapsed.TotalSeconds > PLAYER_TIMEOUT_NOTIFY)
-                    {
-                        SendToAll(new RaceTimeoutMessage(p.ClientGuid, p.CtrlType, PLAYER_TIMEOUT_DISQUALIFY - PLAYER_TIMEOUT_NOTIFY));
-                        p.TimeoutMessageSent = true;
-                    }
-                    if (p.RacingTimeout.Elapsed.TotalSeconds > PLAYER_TIMEOUT_DISQUALIFY)
-                    {
-                        Log("A player was too slow to race and has been disqualified.");
-                        FinishRace(p);
+                    if (matchSettings.DisqualificationTime > 0) {
+                        if (!p.TimeoutMessageSent && p.RacingTimeout.Elapsed.TotalSeconds > matchSettings.DisqualificationTime / 2.0f)
+                        {
+                            SendToAll(new RaceTimeoutMessage(p.ClientGuid, p.CtrlType, matchSettings.DisqualificationTime / 2.0f));
+                            p.TimeoutMessageSent = true;
+                        }
+                        if (p.RacingTimeout.Elapsed.TotalSeconds > matchSettings.DisqualificationTime)
+                        {
+                            Log("A player was too slow to race and has been disqualified.");
+                            FinishRace(p);
 
-                        SendToAll(new DoneRacingMessage(p.ClientGuid, p.CtrlType, 0, true));
+                            SendToAll(new DoneRacingMessage(p.ClientGuid, p.CtrlType, 0, true));
+                        }
                     }
                 }
 
@@ -687,10 +868,6 @@ namespace SanicballCore.Server
 
                                     state.WriteToMessage(stateMsg);
 
-                                    /*string str = JsonConvert.SerializeObject(state);
-                                    Log("Sending match state: " + str, LogType.Debug);
-                                    stateMsg.Write(str);*/
-
                                     Log("State message size in bytes: " + stateMsg.LengthBytes, LogType.Debug);
 
                                     netServer.SendMessage(stateMsg, msg.SenderConnection, NetDeliveryMethod.ReliableOrdered);
@@ -708,14 +885,14 @@ namespace SanicballCore.Server
                                         //If no players are left and we're in a race, return to lobby
                                         if (players.Count == 0 && inRace)
                                         {
-                                            Log("No players left in race!");
+                                            Log("No players left in race!",LogType.Debug);
                                             ReturnToLobby();
                                         }
 
                                         //If there are now less players than AutoStartMinPlayers, stop the auto start timer
                                         if (players.Count < matchSettings.AutoStartMinPlayers && autoStartTimer.IsRunning)
                                         {
-                                            Log("Too few players, match auto start timer stopped");
+                                            Log("Too few players, match auto start timer stopped",LogType.Debug);
                                             StopAutoStartTimer();
                                         }
 
@@ -729,7 +906,7 @@ namespace SanicballCore.Server
                                     }
                                     else
                                     {
-                                        Log("Unknown client disconnected (Client was most likely not done connecting)");
+                                        Log("Unknown client disconnected (Client was most likely not done connecting)",LogType.Debug);
                                     }
                                     break;
 
@@ -774,6 +951,15 @@ namespace SanicballCore.Server
                                         clients.Add(newClient);
 
                                         Broadcast(castedMsg.ClientName + " has joined the match");
+
+                                        if (motd != null) {
+                                            Whisper(newClient, "Server's message of the day:");
+                                            Whisper(newClient, motd);
+                                        }
+                                        else {
+                                            Whisper(newClient, "Welcome to the server!");
+                                        }
+                                        Whisper(newClient, GetAllowedTiersText());
                                         SendToAll(matchMessage);
                                     }
 
@@ -790,15 +976,23 @@ namespace SanicballCore.Server
                                         }
                                         else
                                         {
-                                            players.Add(new ServPlayer(castedMsg.ClientGuid, castedMsg.CtrlType, castedMsg.InitialCharacter));
-                                            Log("Player " + client.Name + " (" + castedMsg.CtrlType + ") joined", LogType.Debug);
-                                            SendToAll(matchMessage);
-
-                                            if (players.Count >= matchSettings.AutoStartMinPlayers && !autoStartTimer.IsRunning && matchSettings.AutoStartTime > 0)
+                                            if (VerifyCharacterTier(castedMsg.InitialCharacter))
                                             {
-                                                Log("Match will auto start in " + matchSettings.AutoStartTime + " seconds.");
-                                                StartAutoStartTimer();
+                                                players.Add(new ServPlayer(castedMsg.ClientGuid, castedMsg.CtrlType, castedMsg.InitialCharacter));
+                                                Log("Player " + client.Name + " (" + castedMsg.CtrlType + ") joined", LogType.Debug);
+                                                SendToAll(matchMessage);
+
+                                                if (players.Count >= matchSettings.AutoStartMinPlayers && !autoStartTimer.IsRunning && matchSettings.AutoStartTime > 0)
+                                                {
+                                                    Log("Match will auto start in " + matchSettings.AutoStartTime + " seconds.",LogType.Debug);
+                                                    StartAutoStartTimer();
+                                                }
                                             }
+                                            else
+                                            {
+                                                Whisper(client, "You cannot join with this character - " + GetAllowedTiersText());
+                                            }
+
                                         }
                                     }
 
@@ -821,7 +1015,7 @@ namespace SanicballCore.Server
 
                                             if (players.Count < matchSettings.AutoStartMinPlayers && autoStartTimer.IsRunning)
                                             {
-                                                Log("Too few players, match auto start timer stopped");
+                                                Log("Too few players, match auto start timer stopped",LogType.Debug);
                                                 StopAutoStartTimer();
                                             }
                                         }
@@ -842,12 +1036,18 @@ namespace SanicballCore.Server
                                             ServPlayer player = players.FirstOrDefault(a => a.ClientGuid == castedMsg.ClientGuid && a.CtrlType == castedMsg.CtrlType);
                                             if (player != null)
                                             {
-                                                int index = players.IndexOf(player);
-                                                players[index].CharacterId = castedMsg.NewCharacter;
+                                                if (VerifyCharacterTier(castedMsg.NewCharacter))
+                                                {
+                                                    player.CharacterId = castedMsg.NewCharacter;
+                                                    Log("Player " + client.Name + " (" + castedMsg.CtrlType + ") set character to " + castedMsg.NewCharacter, LogType.Debug);
+                                                    SendToAll(matchMessage);
+                                                }
+                                                else
+                                                {
+                                                    Whisper(client, "You can't use this character - " + GetAllowedTiersText());
+                                                    Log("Player " + client.Name + " (" + castedMsg.CtrlType + ") tried to set character to " + castedMsg.NewCharacter + " but the character's tier is not allowed", LogType.Debug);
+                                                }
                                             }
-                                            Log("Player " + client.Name + " (" + castedMsg.CtrlType + ") set character to " + castedMsg.NewCharacter, LogType.Debug);
-
-                                            SendToAll(matchMessage);
                                         }
                                     }
 
@@ -910,7 +1110,7 @@ namespace SanicballCore.Server
                                             clientsLoadingStage--;
                                             if (clientsLoadingStage > 0)
                                             {
-                                                Log("Waiting for " + clientsLoadingStage + " client(s) to load");
+                                                Log("Waiting for " + clientsLoadingStage + " client(s) to load",LogType.Debug);
                                             }
                                             else
                                             {
@@ -932,12 +1132,13 @@ namespace SanicballCore.Server
                                         var castedMsg = (ChatMessage)matchMessage;
                                         Log(string.Format("[{0}] {1}: {2}", castedMsg.Type, castedMsg.From, castedMsg.Text));
 
-                                        if (castedMsg.Text.ToLower().Contains("shrek"))
+                                        if (castedMsg.Text.ToLower().Contains("shrek") && VerifyCharacterTier(15))
                                         {
                                             ServClient client = clients.FirstOrDefault(a => a.Connection == msg.SenderConnection);
                                             ServPlayer[] playersFromClient = players.Where(a => a.ClientGuid == client.Guid).ToArray();
                                             foreach (ServPlayer p in playersFromClient)
                                             {
+                                                p.CharacterId = 15;
                                                 SendToAll(new CharacterChangedMessage(p.ClientGuid, p.CtrlType, 15));
                                             }
                                         }
@@ -956,7 +1157,7 @@ namespace SanicballCore.Server
 
                                             if (clients.Count(a => a.WantsToReturnToLobby) >= clientsRequiredToReturn)
                                             {
-                                                Broadcast("All clients have voted to return to the lobby.");
+                                                Broadcast("Returning to lobby by user vote.");
                                                 ReturnToLobby();
                                             }
                                             else
@@ -1054,27 +1255,89 @@ namespace SanicballCore.Server
                 });
                 clients.ForEach(a => a.WantsToReturnToLobby = false);
 
+                bool matchSettingsChanged = false;
+
                 //Stage rotation
                 switch (matchSettings.StageRotationMode)
                 {
                     case StageRotationMode.Random:
-                        Log("Picking random stage");
+                        Log("Picking random stage", LogType.Debug);
                         int newStage = matchSettings.StageId;
 
                         while (newStage == matchSettings.StageId)
                             newStage = random.Next(STAGE_COUNT);
 
                         matchSettings.StageId = newStage;
-                        SendToAll(new SettingsChangedMessage(matchSettings));
+                        matchSettingsChanged = true;
                         break;
 
                     case StageRotationMode.Sequenced:
-                        Log("Picking next stage");
+                        Log("Picking next stage", LogType.Debug);
                         int nextStage = matchSettings.StageId + 1;
                         if (nextStage >= STAGE_COUNT) nextStage = 0;
                         matchSettings.StageId = nextStage;
-                        SendToAll(new SettingsChangedMessage(matchSettings));
+                        matchSettingsChanged = true;
                         break;
+                }
+
+                //Tier rotation
+                AllowedTiers newTiers = matchSettings.AllowedTiers;
+                switch(matchSettings.TierRotationMode)
+                {
+                    case TierRotationMode.Cycle:
+                        switch (matchSettings.AllowedTiers)
+                        {
+                            case AllowedTiers.NormalOnly:
+                                newTiers = AllowedTiers.OddOnly;
+                                break;
+                            case AllowedTiers.OddOnly:
+                                newTiers = AllowedTiers.HyperspeedOnly;
+                                break;
+                            default:
+                                newTiers = AllowedTiers.NormalOnly;
+                                break;
+                        }
+                        break;
+                    case TierRotationMode.Random:
+                        int rand = random.Next() % 3;
+                        switch (rand) {
+                            case 0:
+                                newTiers = AllowedTiers.NormalOnly;
+                                break;
+                            case 1:
+                                newTiers = AllowedTiers.OddOnly;
+                                break;
+                            case 2:
+                                newTiers = AllowedTiers.HyperspeedOnly;
+                                break;
+                        }
+                        break;
+                    case TierRotationMode.WeightedRandom:
+                        int[] choices = new[] {0,0,0,0,0,0,0,0,0,0,1,1,1,2};
+                        int choice = choices[random.Next() % choices.Length];
+                        switch (choice) {
+                            case 0:
+                                newTiers = AllowedTiers.NormalOnly;
+                                break;
+                            case 1:
+                                newTiers = AllowedTiers.OddOnly;
+                                break;
+                            case 2:
+                                newTiers = AllowedTiers.HyperspeedOnly;
+                                break;
+                        }
+                        break;
+                }
+                if (newTiers != matchSettings.AllowedTiers) {
+                    matchSettings.AllowedTiers = newTiers;
+                    matchSettingsChanged = true;
+                    CorrectPlayerTiers();
+                    Broadcast(GetAllowedTiersText());
+                }
+
+                if (matchSettingsChanged)
+                {
+                    SendToAll(new SettingsChangedMessage(matchSettings));
                 }
 
                 if (players.Count >= matchSettings.AutoStartMinPlayers && matchSettings.AutoStartTime > 0)
@@ -1106,6 +1369,7 @@ namespace SanicballCore.Server
         {
             p.CurrentlyRacing = false;
             p.RacingTimeout.Reset();
+            SendToAll(new RaceTimeoutMessage(p.ClientGuid, p.CtrlType, 0));
 
             int playersStillRacing = players.Count(a => a.CurrentlyRacing);
             if (playersStillRacing == 0)
@@ -1122,6 +1386,8 @@ namespace SanicballCore.Server
                 Log(playersStillRacing + " players(s) still racing");
             }
         }
+
+
 
         #endregion Gameplay methods
 
@@ -1140,6 +1406,17 @@ namespace SanicballCore.Server
             netServer.SendMessage(netMsg, netServer.Connections, NetDeliveryMethod.ReliableOrdered, 0);
         }
 
+        private void SendTo(MatchMessage matchMsg, ServClient reciever) {
+            Log("Sending message of type " + matchMsg.GetType() + " to client " + reciever.Name, LogType.Debug);
+            string matchMsgSerialized = JsonConvert.SerializeObject(matchMsg, new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
+
+            NetOutgoingMessage netMsg = netServer.CreateMessage();
+            netMsg.Write(MessageType.MatchMessage);
+            netMsg.WriteTime(false);
+            netMsg.Write(matchMsgSerialized);
+            netServer.SendMessage(netMsg, reciever.Connection, NetDeliveryMethod.ReliableOrdered, 0);
+        }
+
         /// <summary>
         /// Logs a string and sends it as a chat message to all clients.
         /// </summary>
@@ -1148,6 +1425,11 @@ namespace SanicballCore.Server
         {
             Log(text);
             SendToAll(new ChatMessage("Server", ChatMessageType.System, text));
+        }
+
+        private void Whisper(ServClient reciever, string text) {
+            Log("Sending whisper to client " + reciever.Name + "(Text: " + text + ")", LogType.Debug);
+            SendTo(new ChatMessage("Server", ChatMessageType.System, text), reciever);
         }
 
         /// <summary>
@@ -1172,9 +1454,10 @@ namespace SanicballCore.Server
             return clients.Where(a => a.Name.Contains(name)).ToList();
         }
 
-        public void AddCommandHandler(string commandName, CommandHandler handler)
+        public void AddCommandHandler(string commandName, string help, CommandHandler handler)
         {
             commandHandlers.Add(commandName, handler);
+            commandHelp.Add(commandName, help);
         }
 
         public void Kick(ServClient client, string reason)
@@ -1182,21 +1465,74 @@ namespace SanicballCore.Server
             client.Connection.Disconnect(reason);
         }
 
+        private void CorrectPlayerTiers() {
+            foreach(ServPlayer player in players)
+            {
+                if (!VerifyCharacterTier(player.CharacterId))
+                {
+                    ServClient client = clients.FirstOrDefault(a => a.Guid == player.ClientGuid);
+                    if (client != null)
+                    {
+                        for (int i=0; i < characterTiers.Length; i++)
+                        {
+                            if (VerifyCharacterTier(i))
+                            {
+                                player.CharacterId = i;
+                                SendToAll(new CharacterChangedMessage(player.ClientGuid, player.CtrlType, i));
+                                Whisper(client, "Your character is not allowed and has been automatically changed.");
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private bool VerifyCharacterTier(int id) {
+            CharacterTier t = characterTiers[id];
+            switch (matchSettings.AllowedTiers) {
+                case AllowedTiers.All:
+                    return true;
+                case AllowedTiers.NormalOnly:
+                    return t == CharacterTier.Normal;
+                case AllowedTiers.OddOnly:
+                    return t == CharacterTier.Odd;
+                case AllowedTiers.HyperspeedOnly:
+                    return t == CharacterTier.Hyperspeed;
+                case AllowedTiers.NoHyperspeed:
+                    return t != CharacterTier.Hyperspeed;
+                default:
+                    return true;
+            }
+        }
+
+        private string GetAllowedTiersText() {
+            switch(matchSettings.AllowedTiers){
+                case AllowedTiers.NormalOnly:
+                    return "Only characters from the Normal tier are allowed.";
+                case AllowedTiers.OddOnly:
+                    return "Only characters from the Odd tier are allowed.";
+                case AllowedTiers.HyperspeedOnly:
+                    return "Only characters from the Hyperspeed tier are allowed.";
+                case AllowedTiers.NoHyperspeed:
+                    return "Any character NOT from the Hyperspeed tier is allowed.";
+                default:
+                    return "All characters are allowed.";
+            }
+        }
         #endregion Utility methods
 
-        public void Dispose()
-        {
-            Log("Saving server config...");
-            using (StreamWriter sw = new StreamWriter(CONFIG_FILENAME))
-            {
-                sw.Write(JsonConvert.SerializeObject(config));
-            }
-
-            Log("Saving match settings...");
+        private void SaveMatchSettings() {
             using (StreamWriter sw = new StreamWriter(SETTINGS_FILENAME))
             {
                 sw.Write(JsonConvert.SerializeObject(matchSettings));
             }
+        }
+
+        public void Dispose()
+        {
+            Log("Saving match settings...");
+            SaveMatchSettings();
 
             if (netServer != null)
                 netServer.Shutdown("Server was closed.");

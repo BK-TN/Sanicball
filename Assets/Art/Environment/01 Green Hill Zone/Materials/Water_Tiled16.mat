@@ -8,7 +8,7 @@ Material:
   m_PrefabInternal: {fileID: 0}
   m_Name: Water_Tiled16
   m_Shader: {fileID: 46, guid: 0000000000000000f000000000000000, type: 0}
-  m_ShaderKeywords: _METALLICGLOSSMAP
+  m_ShaderKeywords: 
   m_LightmapFlags: 5
   m_CustomRenderQueue: -1
   stringTagMap: {}
@@ -90,15 +90,15 @@ Material:
       data:
         first:
           name: _Cutoff
-        second: .5
+        second: 0.5
       data:
         first:
           name: _Shininess
-        second: .222331807
+        second: 0.2223318
       data:
         first:
           name: _Parallax
-        second: .0199999996
+        second: 0.02
       data:
         first:
           name: _ZWrite
@@ -106,7 +106,7 @@ Material:
       data:
         first:
           name: _Glossiness
-        second: .5
+        second: 0.5
       data:
         first:
           name: _BumpScale
@@ -143,11 +143,11 @@ Material:
       data:
         first:
           name: _Color
-        second: {r: .519306958, g: .650385678, b: .830884814, a: 1}
+        second: {r: 0.51930696, g: 0.6503857, b: 0.8308848, a: 1}
       data:
         first:
           name: _SpecColor
-        second: {r: .478431374, g: .478431374, b: .478431374, a: 1}
+        second: {r: 0.47843137, g: 0.47843137, b: 0.47843137, a: 1}
       data:
         first:
           name: _EmissionColorUI

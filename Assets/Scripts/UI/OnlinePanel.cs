@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using Lidgren.Network;
+using Sanicball.Data;
 using Sanicball.Logic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -34,9 +35,9 @@ namespace Sanicball.UI
             discoveryClient.DiscoverLocalPeers(25000);
             latestLocalRefreshTime = DateTime.Now;
 
-            serverBrowserRequester = new WWW("http://www.sanicball.com/servers/");
+			serverBrowserRequester = new WWW(ActiveData.GameSettings.serverListURL);
 
-            serverCountField.text = "0 servers";
+            serverCountField.text = "Refreshing servers, hang on...";
             errorField.enabled = false;
 
             //Clear old servers
@@ -89,10 +90,12 @@ namespace Sanicball.UI
                             serverBrowserIPs.Add(ip);
                         }
                     }
+					serverCountField.text = "0 servers";
                 }
                 else
                 {
                     Debug.LogError("Failed to receive servers - " + serverBrowserRequester.error);
+					serverCountField.text = "Cannot access server list URL!";
                 }
 
                 serverBrowserRequester = null;

@@ -319,7 +319,18 @@ namespace Sanicball.Logic
 
         private void Start()
         {
-            CurrentState = RaceState.Waiting;
+            if (joinedWhileRaceInProgress)
+            {
+                CurrentState = RaceState.Racing;
+
+                var specView = Instantiate(spectatorViewPrefab);
+                specView.TargetManager = this;
+                specView.Target = players[0];
+            }
+            else
+            {
+                CurrentState = RaceState.Waiting;
+            }
 
             //In online mode, send a RaceStartMessage as soon as the track is loaded (which is now)
             if (matchManager.OnlineMode)

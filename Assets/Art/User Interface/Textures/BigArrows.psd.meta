@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: 6baa23ed57aa0394085817db56ba2a63
-timeCreated: 1439329727
+timeCreated: 1478528397
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -8,6 +8,8 @@ TextureImporter:
     21300002: UiArrowRightBig
     21300004: UiArrowDropdown
     21300006: UiArrowDropdownRetract
+    21300008: UiArrowUpBig
+    21300010: UiArrowDownBig
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -21,7 +23,7 @@ TextureImporter:
   bumpmap:
     convertToNormalMap: 0
     externalNormalMap: 0
-    heightScale: .25
+    heightScale: 0.25
     normalMapFilter: 0
   isReadable: 0
   grayScaleToAlpha: 0
@@ -41,11 +43,12 @@ TextureImporter:
   lightmap: 0
   rGBM: 0
   compressionQuality: 50
+  allowsAlphaSplitting: 0
   spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
-  spritePivot: {x: .5, y: .5}
+  spritePivot: {x: 0.5, y: 0.5}
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spritePixelsToUnits: 100
   alphaIsTransparency: 1
@@ -57,13 +60,54 @@ TextureImporter:
       rect:
         serializedVersion: 2
         x: 0
+        y: 64
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -6, y: 1}
+        - {x: -6, y: -1}
+        - {x: 15, y: -22}
+        - {x: 18, y: -21}
+        - {x: 18, y: 21}
+        - {x: 15, y: 22}
+    - name: UiArrowRightBig
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 64
+        width: 64
+        height: 64
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -18, y: 22}
+        - {x: -18, y: -22}
+        - {x: -13, y: -22}
+        - {x: 6, y: -1}
+        - {x: 6, y: 1}
+        - {x: -15, y: 22}
+    - name: UiArrowUpBig
+      rect:
+        serializedVersion: 2
+        x: 0
         y: 0
         width: 64
         height: 64
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: UiArrowRightBig
+      outline:
+      - - {x: -22, y: -15}
+        - {x: -21, y: -18}
+        - {x: 21, y: -18}
+        - {x: 22, y: -15}
+        - {x: 1, y: 6}
+        - {x: -1, y: 6}
+    - name: UiArrowDownBig
       rect:
         serializedVersion: 2
         x: 64
@@ -71,8 +115,16 @@ TextureImporter:
         width: 64
         height: 64
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -21, y: 18}
+        - {x: -22, y: 15}
+        - {x: -1, y: -6}
+        - {x: 1, y: -6}
+        - {x: 22, y: 15}
+        - {x: 21, y: 18}
+    outline: []
   spritePackingTag: 
   userData: 
   assetBundleName: 

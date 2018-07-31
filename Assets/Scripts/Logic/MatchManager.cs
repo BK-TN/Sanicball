@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using Sanicball.Data;
+using Sanicball.UI;
 using SanicballCore;
 using SanicballCore.MatchMessages;
 using UnityEngine;
@@ -30,9 +31,9 @@ namespace Sanicball.Logic
 
         //Prefabs
         [SerializeField]
-        private UI.PauseMenu pauseMenuPrefab;
+        private PauseMenu pauseMenuPrefab;
         [SerializeField]
-        private UI.Chat chatPrefab;
+        private Chat chatPrefab;
         [SerializeField]
         private RaceManager raceManagerPrefab;
         [SerializeField]
@@ -116,6 +117,7 @@ namespace Sanicball.Logic
 
         public bool AutoStartTimerOn { get { return autoStartTimerOn; } }
         public float AutoStartTimer { get { return autoStartTimer; } }
+        public bool InLobby {get{return inLobby;}}
 
         #endregion Properties
 

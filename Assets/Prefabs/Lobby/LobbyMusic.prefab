@@ -42,6 +42,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children:
   - {fileID: 400002}
   m_Father: {fileID: 0}
@@ -55,6 +56,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 447.20428, y: -39.893127, z: -75.831726}
   m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_Children: []
   m_Father: {fileID: 400000}
   m_RootOrder: 0
@@ -115,7 +117,7 @@ AudioSource:
       tangentMode: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
-    m_RotationOrder: 4
+    m_RotationOrder: 0
   reverbZoneMixCustomCurve:
     serializedVersion: 2
     m_Curve:
@@ -212,7 +214,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52fb0f49a8aba084b8297d67cd65862f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  skin: {fileID: 11400000, guid: dce55b2f656d8ee46a04e87e5dff5ae9, type: 2}
+  playerCanvasPrefab: {fileID: 11496758, guid: 8cee92b7e27d99042b0a050e833b027a, type: 2}
+  playerCanvasLobbyOffset: 1
   startPlaying: 1
   fadeIn: 1
   playlist:
@@ -236,7 +239,6 @@ MonoBehaviour:
     clip: {fileID: 8300000, guid: cb4f570cf0c413445891e50c1a179f98, type: 3}
   - name: Sonic the Hedgehog 3 - Ice Cap Zone
     clip: {fileID: 8300000, guid: 7f2770e7ea82ef14693d78b061015501, type: 3}
-  mlgSong: {fileID: 8300000, guid: 65eed12773deb844185037ac6ee1ebff, type: 3}
   fastSource: {fileID: 8200002}
 --- !u!1001 &100100000
 Prefab:

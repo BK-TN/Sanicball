@@ -1,19 +1,26 @@
 using Sanicball;
 using Sanicball.Data;
 using UnityEngine;
+using UnityEngine.UI;
+using System.Collections.Generic;
+using System.Linq;
+using Sanicball.UI;
 
 namespace Sanicball
 {
     [RequireComponent(typeof(AudioSource))]
     public class MusicPlayer : MonoBehaviour
     {
-        public GUISkin skin;
+        //public GUISkin skin;
+
+        public MusicPlayerCanvas playerCanvasPrefab;
+        public bool playerCanvasLobbyOffset = false;
+        private MusicPlayerCanvas playerCanvas;
 
         public bool startPlaying = false;
         public bool fadeIn = false;
 
         public Song[] playlist;
-        public AudioClip mlgSong;
         public AudioSource fastSource;
 
         [System.NonSerialized]
@@ -39,18 +46,8 @@ namespace Sanicball
         public void Play(string credits)
         {
             if (!ActiveData.GameSettings.music) return;
-            currentSongCredits = "Now playing: " + credits;
-            if (FindObjectOfType<MlgMode>() != null)
-            {//IS MLG MODE
-                aSource.clip = mlgSong;
-                currentSongCredits = "Now playing: old memes";
-                FindObjectOfType<MlgMode>().StartTheShit();//Start the wubs
-            }
+            playerCanvas.Show(credits);
             isPlaying = true;
-            if (!aSource.mute)
-            {
-                timer = 8;
-            }
             aSource.Play();
         }
 
@@ -62,10 +59,31 @@ namespace Sanicball
 
         private void Start()
         {
+            playerCanvas = Instantiate(playerCanvasPrefab);
+            if (playerCanvasLobbyOffset) 
+            {
+                playerCanvas.lobbyOffset = true;
+            }
+
             aSource = GetComponent<AudioSource>();
 
             slidePosition = slidePositionMax;
             ShuffleSongs();
+
+            if (ActiveData.ESportsFullyReady)
+            {
+                Sanicball.Logic.MatchManager m = FindObjectOfType<Sanicball.Logic.MatchManager>();
+                if (!m.InLobby) {
+                    List<Song> p = playlist.ToList();
+                    Song s = new Song();
+                    s.name = "Skrollex - Bungee Ride";
+                    s.clip = ActiveData.ESportsMusic;
+                    p.Insert(0,s);
+                    playlist = p.ToArray();
+                }
+            }
+            
+
             aSource.clip = playlist[0].clip;
             currentSongID = 0;
             isPlaying = aSource.isPlaying;
@@ -127,27 +145,6 @@ namespace Sanicball
             else
             {
                 slidePosition = Mathf.Lerp(slidePosition, slidePositionMax, Time.deltaTime * 2);
-            }
-        }
-
-        private void OnGUI()
-        {
-            if (slidePosition < slidePositionMax - 0.1f)
-            {
-                GUI.skin = skin;
-                GUIStyle style = new GUIStyle(GUI.skin.label);
-                style.fontSize = 16;
-                style.alignment = TextAnchor.MiddleRight;
-                Rect rect = new Rect(0, Screen.height - 30 + slidePosition, Screen.width, 30);
-
-                //GUIX.ShadowLabel(rect,currentSongCredits,style,1);
-                GUILayout.BeginArea(rect);
-                GUILayout.FlexibleSpace(); //Push down
-                GUILayout.BeginHorizontal();
-                GUILayout.FlexibleSpace(); //Push to the right
-                GUILayout.Label(currentSongCredits, GUI.skin.GetStyle("SoundCredits"), GUILayout.ExpandWidth(false));
-                GUILayout.EndHorizontal();
-                GUILayout.EndArea();
             }
         }
 

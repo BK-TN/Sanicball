@@ -2,43 +2,46 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-[RequireComponent(typeof(Image))]
-public class ImageColorToggle : MonoBehaviour
+namespace Sanicball.UI
 {
-    private Image image;
-
-    [SerializeField]
-    private Color targetColor;
-    [SerializeField]
-    private float fadeTime;
-
-    private Color baseColor;
-    private float fade;
-
-    public bool On { get; set; }
-
-    private void Start()
+    [RequireComponent(typeof(Image))]
+    public class ImageColorToggle : MonoBehaviour
     {
-        image = GetComponent<Image>();
-        baseColor = image.color;
-    }
+        private Image image;
 
-    private void Update()
-    {
-        if (On)
+        [SerializeField]
+        private Color targetColor;
+        [SerializeField]
+        private float fadeTime;
+
+        private Color baseColor;
+        private float fade;
+
+        public bool On { get; set; }
+
+        private void Start()
         {
-            if (fade < 1)
-            {
-                fade += Time.deltaTime / fadeTime;
-                image.color = Color.Lerp(baseColor, targetColor, fade);
-            }
+            image = GetComponent<Image>();
+            baseColor = image.color;
         }
-        else
+
+        private void Update()
         {
-            if (fade > 0)
+            if (On)
             {
-                fade -= Time.deltaTime / fadeTime;
-                image.color = Color.Lerp(baseColor, targetColor, fade);
+                if (fade < 1)
+                {
+                    fade += Time.deltaTime / fadeTime;
+                    image.color = Color.Lerp(baseColor, targetColor, fade);
+                }
+            }
+            else
+            {
+                if (fade > 0)
+                {
+                    fade -= Time.deltaTime / fadeTime;
+                    image.color = Color.Lerp(baseColor, targetColor, fade);
+                }
             }
         }
     }

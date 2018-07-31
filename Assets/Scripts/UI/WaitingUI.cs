@@ -1,27 +1,49 @@
 ﻿using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
+using Sanicball.Data;
 
-public class WaitingUI : MonoBehaviour
+namespace Sanicball.UI
 {
-    [SerializeField]
-    private UnityEngine.UI.Text stageNameField;
-
-    [SerializeField]
-    private UnityEngine.UI.Text infoField;
-
-    public string StageNameToShow
+    public class WaitingUI : MonoBehaviour
     {
-        set
+        [SerializeField]
+        private Text stageNameField;
+
+        [SerializeField]
+        private Text infoField;
+        [SerializeField]
+        private CanvasGroup controlsPanel;
+
+        private void Start()
         {
-            stageNameField.text = value;
+            controlsPanel.alpha = ActiveData.GameSettings.showControlsWhileWaiting ? 1 : 0;
         }
-    }
 
-    public string InfoToShow
-    {
-        set
+        private void Update()
         {
-            infoField.text = value;
+            if (Input.GetKeyDown(KeyCode.F1) || Input.GetKeyDown(KeyCode.JoystickButton6))
+            {
+                ActiveData.GameSettings.showControlsWhileWaiting = !ActiveData.GameSettings.showControlsWhileWaiting;
+            }
+
+            controlsPanel.alpha = Mathf.Lerp(controlsPanel.alpha, ActiveData.GameSettings.showControlsWhileWaiting ? 1 : 0, Time.deltaTime * 20);
+        }
+
+        public string StageNameToShow
+        {
+            set
+            {
+                stageNameField.text = value;
+            }
+        }
+
+        public string InfoToShow
+        {
+            set
+            {
+                infoField.text = value;
+            }
         }
     }
 }

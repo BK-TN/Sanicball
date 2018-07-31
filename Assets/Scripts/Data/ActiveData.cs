@@ -32,6 +32,17 @@ namespace Sanicball.Data
         [SerializeField]
         private GameJoltInfo gameJoltInfo;
 
+        [SerializeField]
+        private GameObject christmasHat;
+        [SerializeField]
+        private Material eSportsTrail;
+        [SerializeField]
+        private GameObject eSportsHat;
+        [SerializeField]
+        private AudioClip eSportsMusic;
+        [SerializeField]
+        private ESportMode eSportsPrefab;
+
         #endregion Fields
 
         #region Properties
@@ -44,6 +55,38 @@ namespace Sanicball.Data
         public static StageInfo[] Stages { get { return instance.stages; } }
         public static CharacterInfo[] Characters { get { return instance.characters; } }
         public static GameJoltInfo GameJoltInfo { get { return instance.gameJoltInfo; } }
+        public static GameObject ChristmasHat { get { return instance.christmasHat; } }
+        public static Material ESportsTrail {get{return instance.eSportsTrail;}}
+        public static GameObject ESportsHat {get{return instance.eSportsHat;}}
+        public static AudioClip ESportsMusic {get{return instance.eSportsMusic;}}
+        public static ESportMode ESportsPrefab {get{return instance.eSportsPrefab;}}
+
+        public static bool ESportsFullyReady {
+            get {
+                bool possible = false;
+                if (GameSettings.eSportsReady)
+                {
+                    Sanicball.Logic.MatchManager m = FindObjectOfType<Sanicball.Logic.MatchManager>();
+                    if (m)
+                    {
+                        var players = m.Players;
+                        foreach (var p in players) {
+                            if (p.CtrlType != SanicballCore.ControlType.None) {
+                                if (p.CharacterId == 13) 
+                                {
+                                    possible = true;
+                                }
+                                else
+                                {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                }
+                return possible;
+            }
+        }
 
         #endregion Properties
 

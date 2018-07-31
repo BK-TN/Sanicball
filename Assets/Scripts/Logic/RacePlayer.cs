@@ -71,6 +71,7 @@ namespace Sanicball.Logic
 
         //Events
         public event EventHandler<NextCheckpointPassArgs> NextCheckpointPassed;
+        public event EventHandler Respawned;
         public event EventHandler FinishLinePassed;
         public event EventHandler Destroyed;
 
@@ -230,12 +231,12 @@ namespace Sanicball.Logic
 
                 if (LapRecordsEnabled)
                 {
-                    bool hyperspeed = ActiveData.Characters[Character].hyperspeed;
+					CharacterTier tier = ActiveData.Characters[Character].tier;
                     string sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
                     int stage = ActiveData.Stages.Where(a => a.sceneName == sceneName).First().id;
 
                     ActiveData.RaceRecords.Add(new RaceRecord(
-                        hyperspeed ? RecordType.HyperspeedLap : RecordType.Lap,
+						tier,
                         lapTime,
                         DateTime.Now,
                         stage,
@@ -261,6 +262,11 @@ namespace Sanicball.Logic
 
         private void Ball_RespawnRequested(object sender, EventArgs e)
         {
+            if (Respawned != null)
+            {
+                Respawned(this, EventArgs.Empty);
+            }
+
             ball.transform.position = sr.checkpoints[currentCheckpointIndex].GetRespawnPoint() + Vector3.up * ball.transform.localScale.x * 0.5f;
             ball.GetComponent<Rigidbody>().velocity = Vector3.zero;
             ball.GetComponent<Rigidbody>().angularVelocity = Vector3.zero;
@@ -268,6 +274,9 @@ namespace Sanicball.Logic
             {
                 ballCamera.SetDirection(sr.checkpoints[currentCheckpointIndex].transform.rotation);
             }
+
+            //Time penalty
+            lapTime += 5;
 
             //Set next target node if this is an AI ball
             TrySetAITarget();

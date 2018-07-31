@@ -19,6 +19,23 @@ namespace SanicballCore
         Random,
     }
 
+	public enum AllowedTiers
+	{
+		All,
+		NormalOnly,
+		OddOnly,
+		HyperspeedOnly,
+		NoHyperspeed,
+	}
+
+    public enum TierRotationMode
+    {
+        None,
+        Cycle, // Cycle normal -> odd -> hyperspeed
+        Random,  // 33% chance for normal, odd, hyper
+        WeightedRandom // Most chance for normal, small chance for odd, smaller chance for hyper
+    }
+
     public struct MatchSettings
     {
         [Newtonsoft.Json.JsonProperty]
@@ -34,6 +51,9 @@ namespace SanicballCore
         public int AutoReturnTime { get; set; }
         public float VoteRatio { get; set; }
         public StageRotationMode StageRotationMode { get; set; }
+		public AllowedTiers AllowedTiers { get; set; }
+        public TierRotationMode TierRotationMode { get; set; }
+        public int DisqualificationTime { get; set; }
 
         /// <summary>
         /// Creates a MatchSettings object with the game's default settings.
@@ -53,7 +73,10 @@ namespace SanicballCore
                 AutoStartMinPlayers = 2,
                 AutoReturnTime = 15,
                 VoteRatio = 1f,
-                StageRotationMode = StageRotationMode.None
+                StageRotationMode = StageRotationMode.None,
+				AllowedTiers = AllowedTiers.All,
+                TierRotationMode = TierRotationMode.None,
+                DisqualificationTime = 120
             };
         }
 
