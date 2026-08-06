@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?> 
+    <paramsfo> 
+        <param key="APP_VER">01.00</param>
+        <param key="CATEGORY">HG</param> 
+
+        <param key="TITLE_ID">UNTY31337</param> 
+        <param key="TITLE">Sanicball</param> 
+        <param key="VERSION">01.00</param> 
+
+        <param key="PARENTAL_LEVEL">1</param> 
+        <param key="RESOLUTION" fmt="int32-enum">720/576/576(16:9)/480/480(16:9)</param> 
+        <param key="SOUND_FORMAT" fmt="int32-enum">7.1LPCM/5.1LPCM/2LPCM/5.1Dolby/5.1DTS</param> 
+    </paramsfo> 
+
+
