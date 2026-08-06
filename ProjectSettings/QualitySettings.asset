@@ -4,7 +4,7 @@
 QualitySettings:
   m_ObjectHideFlags: 0
   serializedVersion: 5
-  m_CurrentQuality: 0
+  m_CurrentQuality: 1
   m_QualitySettings:
   - serializedVersion: 2
     name: 2fast
@@ -31,7 +31,37 @@ QualitySettings:
     particleRaycastBudget: 4096
     asyncUploadTimeSlice: 2
     asyncUploadBufferSize: 4
-    excludedTargetPlatforms: []
+    excludedTargetPlatforms:
+    - PS3
+  - serializedVersion: 2
+    name: 2fastConsole
+    pixelLightCount: 1
+    shadows: 1
+    shadowResolution: 0
+    shadowProjection: 0
+    shadowCascades: 1
+    shadowDistance: 100
+    shadowNearPlaneOffset: 2
+    shadowCascade2Split: 0.33333334
+    shadowCascade4Split: {x: 0.06666667, y: 0.19999999, z: 0.46666664}
+    blendWeights: 1
+    textureQuality: 0
+    anisotropicTextures: 0
+    antiAliasing: 0
+    softParticles: 0
+    softVegetation: 1
+    realtimeReflectionProbes: 0
+    billboardsFaceCameraPosition: 0
+    vSyncCount: 1
+    lodBias: 2
+    maximumLODLevel: 0
+    particleRaycastBudget: 4096
+    asyncUploadTimeSlice: 2
+    asyncUploadBufferSize: 4
+    excludedTargetPlatforms:
+    - Standalone
+    - Web
   m_PerPlatformDefaultQuality:
+    PS3: 1
     Standalone: 0
     Web: 0
