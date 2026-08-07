@@ -123,23 +123,24 @@ namespace Sanicball.Data
 
         public void LoadAll()
         {
-            Load("GameSettings.json", ref gameSettings);
-            Load("GameKeybinds.json", ref keybinds);
-            Load("MatchSettings.json", ref matchSettings);
-            Load("Records.json", ref raceRecords);
+            Load("GameSettings.JSON", ref gameSettings);
+            Load("GameKeybinds.JSON", ref keybinds);
+            Load("MatchSettings.JSON", ref matchSettings);
+            Load("Records.JSON", ref raceRecords);
         }
 
         public void SaveAll()
         {
-            Save("GameSettings.json", gameSettings);
-            Save("GameKeybinds.json", keybinds);
-            Save("MatchSettings.json", matchSettings);
-            Save("Records.json", raceRecords);
+            Save("GameSettings.JSON", gameSettings);
+            Save("GameKeybinds.JSON", keybinds);
+            Save("MatchSettings.JSON", matchSettings);
+            Save("Records.JSON", raceRecords);
         }
 
         private void Load<T>(string filename, ref T output)
         {
-            string dataString = GameSystemMessenger.ReadSaveData(filename);
+            string dataString = string.Empty;
+            if (!GameSystemMessenger.TryReadSaveData(filename, out dataString)) return;
 
             //Deserialize from JSON into a data object
             try
