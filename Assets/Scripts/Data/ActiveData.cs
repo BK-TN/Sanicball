@@ -123,64 +123,50 @@ namespace Sanicball.Data
 
         public void LoadAll()
         {
-            Load("GameSettings.json", ref gameSettings);
-            Load("GameKeybinds.json", ref keybinds);
-            Load("MatchSettings.json", ref matchSettings);
-            Load("Records.json", ref raceRecords);
+            Load("GameSettings.JSON", ref gameSettings);
+            Load("GameKeybinds.JSON", ref keybinds);
+            Load("MatchSettings.JSON", ref matchSettings);
+            Load("Records.JSON", ref raceRecords);
         }
 
         public void SaveAll()
         {
-            Save("GameSettings.json", gameSettings);
-            Save("GameKeybinds.json", keybinds);
-            Save("MatchSettings.json", matchSettings);
-            Save("Records.json", raceRecords);
+            Save("GameSettings.JSON", gameSettings);
+            Save("GameKeybinds.JSON", keybinds);
+            Save("MatchSettings.JSON", matchSettings);
+            Save("Records.JSON", raceRecords);
         }
 
         private void Load<T>(string filename, ref T output)
         {
-            string fullPath = Application.persistentDataPath + "/" + filename;
-            if (File.Exists(fullPath))
+            string dataString = string.Empty;
+            if (!GameSystemMessenger.TryReadSaveData(filename, out dataString)) return;
+
+            //Deserialize from JSON into a data object
+            try
             {
-                //Load file contents
-                string dataString;
-                using (StreamReader sr = new StreamReader(fullPath))
+                var dataObj = JsonConvert.DeserializeObject<T>(dataString);
+                //Make sure an object was created, this would't end well with a null value
+                if (dataObj != null)
                 {
-                    dataString = sr.ReadToEnd();
+                    output = dataObj;
+                    Debug.Log(filename + " loaded successfully.");
                 }
-                //Deserialize from JSON into a data object
-                try
+                else
                 {
-                    var dataObj = JsonConvert.DeserializeObject<T>(dataString);
-                    //Make sure an object was created, this would't end well with a null value
-                    if (dataObj != null)
-                    {
-                        output = dataObj;
-                        Debug.Log(filename + " loaded successfully.");
-                    }
-                    else
-                    {
-                        Debug.LogError("Failed to load " + filename + ": file is empty.");
-                    }
-                }
-                catch (JsonException ex)
-                {
-                    Debug.LogError("Failed to parse " + filename + "! JSON converter info: " + ex.Message);
+                    Debug.LogError("Failed to load " + filename + ": file is empty.");
                 }
             }
-            else
+            catch (JsonException ex)
             {
-                Debug.Log(filename + " has not been loaded - file not found.");
+                Debug.LogError("Failed to parse " + filename + "! JSON converter info: " + ex.Message);
             }
         }
 
         private void Save(string filename, object objToSave)
         {
             var data = JsonConvert.SerializeObject(objToSave);
-            using (StreamWriter sw = new StreamWriter(Application.persistentDataPath + "/" + filename))
-            {
-                sw.Write(data);
-            }
+            GameSystemMessenger.WriteSaveData(filename, data);         
             Debug.Log(filename + " saved successfully.");
         }
 
