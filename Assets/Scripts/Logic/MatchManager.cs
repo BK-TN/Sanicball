@@ -351,7 +351,7 @@ namespace Sanicball.Logic
         private void Start()
         {
             DontDestroyOnLoad(gameObject);
-
+            GameRefs.MatchManager = this;
             //A messenger should be created by now! Time to create some message listeners
             messenger.CreateListener<SettingsChangedMessage>(SettingsChangedCallback);
             messenger.CreateListener<ClientJoinedMessage>(ClientJoinedCallback);

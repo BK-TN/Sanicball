@@ -319,6 +319,7 @@ namespace Sanicball.Logic
 
         private void Start()
         {
+            GameRefs.RaceManager = this;
             if (joinedWhileRaceInProgress)
             {
                 CurrentState = RaceState.Racing;
